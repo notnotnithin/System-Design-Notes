@@ -65,6 +65,26 @@ A **firewall** is a rule-based gatekeeper. It inspects the **packet headers** (I
 They **differ in the direction of communication**: **Forward** and **Reverse**.
 
 ### ① Forward proxy (the "simple proxy")
+
+<!-- diagram:17-0 -->
+**Diagram – Forward proxy: hides the clients**
+
+```mermaid
+graph LR
+  subgraph NET["Closed client network"]
+    C1["C1 172.1.0.1"]
+    C2["C2 172.2.0.1"]
+    C3["C3 172.3.0.1"]
+  end
+  C1 --> FP["Forward proxy<br/>uses its own IP 192.30.0.1"]
+  C2 --> FP
+  C3 --> FP
+  FP --> S["Internet server: sees only the proxy"]
+  FP --- CA[("Cache")]
+```
+<!-- /diagram:17-0 -->
+
+
 - Sits in front of a **group of clients in a closed network** (clients C1 `172.1.01`, C2 `172.2.01`, C3 `172.3.01`) and connects them to the Internet.
 - **What does a forward proxy do?** It **hides the client networks** – the outside server **doesn't know the internal client.**
 - **How?** Say client 1 (IP `172.1.01`) makes a request (e.g. `google.com`). The proxy forwards it using **its own IP address** (e.g. `192.30.1`) – "*the proxy is making a request on behalf of C1*". The server only sees the proxy's IP when it gets the request.
@@ -79,6 +99,20 @@ They **differ in the direction of communication**: **Forward** and **Reverse**.
 **Disadvantage:** it **works at the application level.**
 
 ### ② Reverse proxy
+
+<!-- diagram:17-1 -->
+**Diagram – Reverse proxy: hides the servers**
+
+```mermaid
+graph LR
+  I["Internet"] --> RP["Reverse proxy"]
+  RP --> S1["Server 1"]
+  RP --> S2["Server 2"]
+  RP --> SN["Server n"]
+```
+<!-- /diagram:17-1 -->
+
+
 ```
  Internet → [ Reverse Proxy ] → Server 1 / Server 2 / … / Server n
 ```
@@ -96,6 +130,22 @@ They **differ in the direction of communication**: **Forward** and **Reverse**.
 ---
 
 ## 3. Proxy vs VPN
+
+<!-- diagram:17-2 -->
+**Diagram – Proxy versus VPN path**
+
+```mermaid
+graph LR
+  subgraph PX["Proxy"]
+    C1["Client"] --> P["Proxy"] --> S1["Server"]
+  end
+  subgraph VP["VPN"]
+    C2["Client + VPN client"] ==>|"encrypted tunnel"| V["VPN server"] --> S2["Server"]
+  end
+```
+<!-- /diagram:17-2 -->
+
+
 | | **Proxy** | **VPN** |
 |---|---|---|
 | Path | `Client → Proxy → Server` | `Client → VPN client (on the home computer) → encrypted VPN tunnel across the Internet → VPN server → Server` |
@@ -110,6 +160,19 @@ They **differ in the direction of communication**: **Forward** and **Reverse**.
 ---
 
 ## 5. Proxy vs Firewall
+
+<!-- diagram:17-3 -->
+**Diagram – Firewall filters packets by rules**
+
+```mermaid
+graph LR
+  I["Internet"] --> F{"Firewall<br/>checks IP, port, source, destination"}
+  F -->|"allowed by rule"| N["Your network"]
+  F -->|"blocked"| X["Dropped"]
+```
+<!-- /diagram:17-3 -->
+
+
 - A **firewall** is like a wall with **holes that decide what data may pass** between the Internet and your network – it follows **rules**.
 - It does **packet scanning** – looks at the packet **header: port number, IP address, source / destination** – and allows or blocks accordingly.
 

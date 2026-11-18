@@ -68,6 +68,20 @@ Why only one primary? Databases like **Oracle, MySQL and PostgreSQL are not mult
 ---
 
 ## 2. Single node
+
+<!-- diagram:15-0 -->
+**Diagram – A single database is a single point of failure**
+
+```mermaid
+graph TD
+  C["Client"] --> LB["Load balancer"]
+  LB --> A["Applications X, Y, Z"]
+  A -->|"read and write"| DB[("Primary DB: FAILED")]:::bad
+  classDef bad fill:#fecaca,stroke:#b91c1c,color:#000
+```
+<!-- /diagram:15-0 -->
+
+
 ```
  Client (mobile / PC)
       │
@@ -86,6 +100,27 @@ Why only one primary? Databases like **Oracle, MySQL and PostgreSQL are not mult
 **① Active-Passive** · **② Active-Active**
 
 ### ① Active-Passive
+
+<!-- diagram:15-1 -->
+**Diagram – Active-passive: one live primary, one replica**
+
+```mermaid
+graph LR
+  C["Client"] --> LB["Load balancer"]
+  subgraph DC1["DC1 Mumbai: live"]
+    A1["Apps"] --> P[("Primary DB: read and write")]
+  end
+  subgraph DC2["DC2 Pune: disaster recovery"]
+    A2["Apps"] --> R[("Replica DB: read only")]
+  end
+  LB --> A1
+  LB --> A2
+  P -->|"one-directional sync"| R
+  A2 -. "writes go to the primary" .-> P
+```
+<!-- /diagram:15-1 -->
+
+
 - **Every company has at least two data centres** (e.g. **DC1 – Mumbai**, **DC2 – Pune**).
 - Flow: Client → Load Balancer → DC1 apps (and DC2 apps).
   - **Write (POST)** and **Read (GET)** requests go to apps in DC1; apps in DC2 only **read**.
@@ -107,6 +142,26 @@ Why only one primary? Databases like **Oracle, MySQL and PostgreSQL are not mult
 2. If DB failure happens, we must **route the traffic to the DR data centre** (a manual/automated failover step).
 
 ### ② Active-Active
+
+<!-- diagram:15-2 -->
+**Diagram – Active-active: both data centres read and write**
+
+```mermaid
+graph LR
+  C["Client"] --> LB["Load balancer"]
+  subgraph DC1["DC1 Mumbai"]
+    A1["Apps"] --> P1[("Live DB")]
+  end
+  subgraph DC2["DC2 Pune"]
+    A2["Apps"] --> P2[("Live DB")]
+  end
+  LB --> A1
+  LB --> A2
+  P1 <-->|"bidirectional sync"| P2
+```
+<!-- /diagram:15-2 -->
+
+
 - **Cassandra (or other NoSQL) supports multi-master.**
 - Diagram: Client → Load Balancer → **DC1 (Mumbai)** and **DC2 (Pune)**; each DC has its own app microservices and its own **Primary / Live DB**; **Sync-up is bidirectional**; **read or write** can go to either DC.
 

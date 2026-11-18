@@ -1,6 +1,6 @@
 # Internet Protocols – notes from Protocol Explorer
 
-Source: https://protocol-explorer-alpha.vercel.app/ – interactive lessons with every packet decoded byte by byte. Each note has an overview, a step-by-step walkthrough with screenshots, the full packet flow, a sequence diagram and the decoded packets.
+Source: https://protocol-explorer-alpha.vercel.app/ – interactive lessons with every packet decoded byte by byte. Each note has an overview, a step-by-step walkthrough with screenshots, the full packet flow, a generated diagram of the layers, a sequence diagram, and decoder screenshots of key packets.
 
 | # | Protocol | Full name | Note |
 |---|---|---|---|

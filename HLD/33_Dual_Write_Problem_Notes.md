@@ -55,6 +55,27 @@ Don't write to two systems at once. Write to **one** (the database, atomically),
 
 
 ## 1. The Dual Write Problem
+
+<!-- diagram:33-0 -->
+**Diagram – Two ways the dual write goes wrong**
+
+```mermaid
+sequenceDiagram
+  participant S as Service
+  participant DB as Database
+  participant K as Message broker (Kafka)
+  Note over S,K: Failure 1
+  S->>K: publish event OK
+  S->>DB: write FAILS
+  Note over S,K: event published but data not saved
+  Note over S,K: Failure 2
+  S->>DB: write OK
+  S->>K: publish FAILS
+  Note over S,K: data saved but nobody is told
+```
+<!-- /diagram:33-0 -->
+
+
 It occurs **when a component needs to persist a change in two different systems** – e.g. **a DB and a message broker like Kafka.**
 
 We must make sure **both are in a consistent state** – there should **never be a case where the DB write succeeds but event publishing fails, or vice-versa.**
@@ -84,6 +105,21 @@ Two failure sequences (service → DB / message broker):
 3. **Transactional Log Tailing Pattern** *(named in the notes; the PDF doesn't detail it)*
 
 ### ① Transactional Outbox Pattern
+
+<!-- diagram:33-1 -->
+**Diagram – Transactional outbox**
+
+```mermaid
+graph LR
+  subgraph TX["One local DB transaction"]
+    U["Insert User"] --- E["Insert User Event (outbox table)"]
+  end
+  TX --> PO["Poller service reads the outbox table"] --> PB["Publisher"] --> MB[["Message broker"]]
+  MB --> C["Consumers (must be idempotent)"]
+```
+<!-- /diagram:33-1 -->
+
+
 - Instead of writing to both the DB **and** publishing an event, **write the event into a separate table called the OUTBOX table** – **in the same local DB transaction** as the business data.
 - **Later, a separate process (poller) reads the Outbox table and publishes the event to the message broker asynchronously.**
 
@@ -122,6 +158,20 @@ Table design options: **one common event table** (UE, OE, IE – user/order/inve
    2. **A batch job.**
 
 ### ② Listen-to-Yourself Pattern
+
+<!-- diagram:33-2 -->
+**Diagram – Listen-to-yourself**
+
+```mermaid
+graph LR
+  A["User service: write only the event"] --> EV[("Event table")]
+  EV --> PO["Poller"] --> MB[["Message broker"]]
+  MB --> C["Other consumers"]
+  MB --> D["User service daemon: consumes its own event"] --> UT[("User table")]
+```
+<!-- /diagram:33-2 -->
+
+
 - **A variation of the Transactional Outbox pattern.**
 - The **application writes only the event** in the Outbox/event table (single write).
 - The **poller fetches the event** from the table and **publishes it** to the message broker.

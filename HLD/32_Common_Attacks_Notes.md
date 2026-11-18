@@ -87,6 +87,43 @@ public class UserController {
 ```
 
 ### Attack steps
+
+<!-- diagram:32-1 -->
+**Diagram – XSS attack and cookie theft**
+
+```mermaid
+sequenceDiagram
+  participant A as Attacker
+  participant S as Site (stores comments)
+  participant V as Victim browser
+  A->>S: POST comment containing a script
+  V->>S: GET comments page
+  S-->>V: page with the stored script (not escaped)
+  V->>A: script runs and sends document.cookie (JSESSIONID)
+  A->>S: uses the stolen session
+```
+<!-- /diagram:32-1 -->
+
+
+<!-- diagram:32-0 -->
+**Diagram – CSRF attack**
+
+```mermaid
+sequenceDiagram
+  participant U as Victim (logged in)
+  participant B as Bank site
+  participant A as Attacker page
+  U->>B: logs in, browser keeps the session cookie
+  U->>A: opens the page with Claim My Money
+  A->>U: link to bank /transfer?amount=1000&to=attacker
+  U->>B: browser sends the request WITH the session cookie
+  B-->>U: transferred (it looks like a normal user request)
+```
+<!-- /diagram:32-0 -->
+
+
+
+
 1. Make the user **authenticated** on the server.
 2. Send some **malicious link/page** to this authenticated user:
 ```html
@@ -180,6 +217,18 @@ public class TestXSS {
 
 ## 3. CORS – Cross-Origin Resource Sharing
 
+<!-- diagram:32-2 -->
+**Diagram – CORS: same origin versus different origin**
+
+```mermaid
+graph LR
+  F["Frontend: https://sub.localhost:9090"] -->|"request to a different origin"| S["Server: https://localhost:8080"]
+  S -->|"allowed only if Access-Control-Allow-Origin lists the frontend"| F
+  S -. "otherwise the browser blocks the call" .- F
+```
+<!-- /diagram:32-2 -->
+
+
 - **Not an attack** – a **security feature** that restricts web pages from making requests to a **different origin** unless the server allows it.
 - **Origin = protocol + domain + port.**
 
@@ -219,6 +268,20 @@ public class SecurityConfig {
 ---
 
 ## 4. SQL Injection
+
+<!-- diagram:32-3 -->
+**Diagram – SQL injection**
+
+```mermaid
+graph LR
+  I["Input: ' OR '1' = '1"] --> Q["Unsafe query: WHERE user_name = '' OR '1' = '1'"]
+  Q --> R["Always true: all rows returned"]:::bad
+  I --> P["Parameterized query: WHERE user_name = :name"] --> S["Input treated as data: empty list"]:::good
+  classDef bad fill:#fecaca,stroke:#b91c1c,color:#000
+  classDef good fill:#bbf7d0,stroke:#15803d,color:#000
+```
+<!-- /diagram:32-3 -->
+
 
 The attacker **manipulates the SQL query by inserting malicious input into a user field**.
 

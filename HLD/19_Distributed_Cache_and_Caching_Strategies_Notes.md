@@ -65,6 +65,17 @@ Write to the cache, put the DB write on a **queue**, and return immediately. A w
 
 
 ## 1. What is caching?
+
+<!-- diagram:19-0 -->
+**Diagram – Caching in the request path**
+
+```mermaid
+graph LR
+  C["Client (browser cache)"] --> CDN["CDN"] --> LB["Load balancer"] --> A["App servers"] --> R[("Cache: Redis")] --> D[("DB")]
+```
+<!-- /diagram:19-0 -->
+
+
 - **A technique to store frequently used data in a fast-access memory rather than accessing data every time from slow-access memory.**
 - Makes the system **very fast**, **reduces latency**, and also helps to achieve **fault tolerance**.
 
@@ -79,6 +90,23 @@ Basic picture: `Client → LB → App servers → Cache (Redis) → DB`.
 ---
 
 ## 2. What is distributed caching?
+
+<!-- diagram:19-1 -->
+**Diagram – Distributed cache pool with a cache client**
+
+```mermaid
+graph LR
+  A1["App server 1<br/>+ cache client"] --> H{"consistent hashing picks a cache server"}
+  A2["App server 2<br/>+ cache client"] --> H
+  H --> C1[("Cache 1")]
+  H --> C2[("Cache 2")]
+  H --> C3[("Cache 3")]
+  H --> C4[("Cache 4")]
+  H --> C5[("Cache 5")]
+```
+<!-- /diagram:19-1 -->
+
+
 **Single cache service problem:** all app servers (1, 2, 3) hit one cache service – **limited space/resources**.
 Limitations: ① **scalability**, ② **single point of failure.**
 
@@ -94,6 +122,30 @@ Limitations: ① **scalability**, ② **single point of failure.**
 ## 3. Caching strategies
 
 ### ① Cache-Aside (lazy loading)
+
+<!-- diagram:19-2 -->
+**Diagram – Cache-aside**
+
+```mermaid
+sequenceDiagram
+  participant C as Client
+  participant S as Server
+  participant K as Cache
+  participant D as DB
+  C->>S: GET
+  S->>K: read
+  alt cache hit
+    K-->>S: data
+  else cache miss
+    S->>D: read from DB
+    D-->>S: data
+    S->>K: write into cache
+  end
+  S-->>C: response
+```
+<!-- /diagram:19-2 -->
+
+
 Flow (`Client → Server → Cache → DB`):
 1. Client sends **read request (GET)** to the server.
 2. Server **reads from cache**.
@@ -109,6 +161,28 @@ Flow (`Client → Server → Cache → DB`):
 - If the cache is not handled properly **during write operations**, there is a chance of **inconsistency between cache and DB** (e.g. cache holds a stale value of id 10 while the DB has the latest value after an update).
 
 ### ② Read-Through
+
+<!-- diagram:19-3 -->
+**Diagram – Read-through**
+
+```mermaid
+sequenceDiagram
+  participant A as Application
+  participant K as Cache library
+  participant D as DB
+  A->>K: read
+  alt cache hit
+    K-->>A: data
+  else cache miss
+    K->>D: cache fetches from DB
+    D-->>K: data
+    K->>K: store
+    K-->>A: data
+  end
+```
+<!-- /diagram:19-3 -->
+
+
 - Application first checks the cache.
 - **Cache hit** → return data.
 - **Cache miss** → **the cache library itself fetches the data from the DB, stores it back in the cache and returns it to the application.**
@@ -123,6 +197,24 @@ Flow (`Client → Server → Cache → DB`):
 - **Cache document structure should be the same as the DB table.**
 
 ### ③ Write-Around
+
+<!-- diagram:19-4 -->
+**Diagram – Write-around**
+
+```mermaid
+sequenceDiagram
+  participant C as Client
+  participant S as Server
+  participant D as DB
+  participant K as Cache
+  C->>S: write (PUT / PATCH)
+  S->>D: write directly to DB
+  S->>K: invalidate the cached entry
+  S-->>C: done
+```
+<!-- /diagram:19-4 -->
+
+
 - **Directly writes data into the DB; doesn't touch the cache.**
 - It does **not update the cache data**; it **invalidates the cached entry (marks it dirty).**
 - Flow: Client → **write (PUT / PATCH)** → Server → **directly write to DB** → **invalidate the data in cache.**
@@ -136,6 +228,24 @@ Flow (`Client → Server → Cache → DB`):
 - **If the DB is down, the write operation fails.**
 
 ### ④ Write-Through
+
+<!-- diagram:19-5 -->
+**Diagram – Write-through**
+
+```mermaid
+sequenceDiagram
+  participant C as Client
+  participant S as Server
+  participant K as Cache
+  participant D as DB
+  C->>S: write (POST)
+  S->>K: 1 write into cache
+  S->>D: 2 write into DB (synchronous)
+  S-->>C: done (exception if any write fails)
+```
+<!-- /diagram:19-5 -->
+
+
 - **First writes data into the cache, then synchronously writes data into the DB.**
 - Flow: Client → write request (**POST**) → Server → first write into cache → then write into DB.
 - **If any of the insertions fails, throw an exception.**
@@ -150,6 +260,26 @@ Flow (`Client → Server → Cache → DB`):
 - **If the DB is down, the write fails** – *it's still not fully fault tolerant.*
 
 ### ⑤ Write-Back (Write-Behind)
+
+<!-- diagram:19-6 -->
+**Diagram – Write-back**
+
+```mermaid
+sequenceDiagram
+  participant C as Client
+  participant S as Server
+  participant K as Cache
+  participant Q as Queue
+  participant D as DB
+  C->>S: write (POST)
+  S->>K: write into cache
+  S->>Q: push message
+  S-->>C: done (fast)
+  Q->>D: later: write into DB (retries if DB is down)
+```
+<!-- /diagram:19-6 -->
+
+
 - **First writes data into the cache, then asynchronously writes data into the DB.**
 - Flow: Client → write (POST) → Server → first write into cache → **push the message to a Queue** → (later) **write into DB**.
 - Example: if the DB is down, the **cache (turn-around/TTL ≈ 24 h)** keeps the data and the **queue holds the writes for e.g. 2 h**; **when the DB comes back the queue writes into the DB** → **brings fault tolerance.**

@@ -55,6 +55,20 @@ Many real systems use **both**: SQL for orders and payments, NoSQL for caches, a
 3. **We plan the schema before the insert/update operations.**
 
 ## 2. Nature – *concentrated / centralized*
+
+<!-- diagram:10-0 -->
+**Diagram – SQL: all data of an employee sits on one server**
+
+```mermaid
+graph LR
+  subgraph SRV["One server: DB Employee"]
+    E["Table 1: Employee<br/>id, name, dept"] --- S["Table 2: Salary"]
+    E --- AD["Table 3: Address"]
+  end
+```
+<!-- /diagram:10-0 -->
+
+
 - Example: DB **Employee** with Table 1 (employee id, name, dept e.g. `1, IT`), Table 2 (**Salary**), Table 3 (**Address**) – related to each other.
 - For a particular user/employee (e.g. "Himanshu") **the whole data is present in one server.**
 - ⇒ Nature: **concentrated / centralized.**
@@ -73,6 +87,20 @@ We want to scale a `User` table with e.g. **10 million users**:
 **NoSQL = "Non-relational", "Not only SQL".**
 
 ## 1. Structure
+
+<!-- diagram:10-1 -->
+**Diagram – The four NoSQL types**
+
+```mermaid
+graph TD
+  N["NoSQL"] --> KV["Key-value: DynamoDB<br/>Key | opaque value"]
+  N --> DOC["Document: MongoDB<br/>Key | JSON, queryable"]
+  N --> COL["Column-wise<br/>key: column to value pairs"]
+  N --> GR["Graph<br/>nodes and relationships"]
+```
+<!-- /diagram:10-1 -->
+
+
 NoSQL **works on unstructured data.** Four types:
 
 ### ① Key–Value DB (e.g. **DynamoDB**)
@@ -90,12 +118,37 @@ NoSQL **works on unstructured data.** Four types:
   - key `1002` → `first-name: Raj`, `department: Sales`
 
 ### ④ Graph DB
+
+<!-- diagram:10-2 -->
+**Diagram – Graph database example**
+
+```mermaid
+graph LR
+  H["Himanshu"] -->|"friend"| X["XYZ"] -->|"friend"| Y["..."]
+```
+<!-- /diagram:10-2 -->
+
+
 - Stores data as **Nodes and Edges (relationships)**.
 - Example: `Himanshu —friend→ XYZ —friend→ …`.
 - Used by **social networking, recommendation engines.**
 - It is **very, very fast.** SQL also has relationships (joins) but they are costly (**SQL has to scan fully**), while a **Graph DB has the relationship directly.**
 
 ## 2. Nature – *distributed*
+
+<!-- diagram:10-3 -->
+**Diagram – NoSQL: data spread across nodes**
+
+```mermaid
+graph LR
+  U["10 M users"] --> N1["Node 1: 2 M"]
+  U --> N2["Node 2: 2 M"]
+  U --> N3["Node 3: 2 M"]
+  U --> N4["Node 4 ... add nodes any time"]
+```
+<!-- /diagram:10-3 -->
+
+
 - Data is **distributed across nodes** – e.g. 10 M users spread as **Node 1 = 2 M, Node 2 = 2 M, Node 3 = 2 M, …**
 
 ## 3. Scalability – *horizontal*

@@ -53,6 +53,17 @@ It stops an **asynchronous** call from waiting forever by cancelling it after a 
 
 ## 1. Rate Limiter vs Bulkhead
 
+<!-- diagram:37-0 -->
+**Diagram – Rate limiter protects from clients, bulkhead from downstream**
+
+```mermaid
+graph LR
+  C["Clients"] -->|"rate limiter: requests per time window"| O["Order service"]
+  O -->|"bulkhead: concurrent calls and threads"| P["Product / Payment services"]
+```
+<!-- /diagram:37-0 -->
+
+
 | | Rate Limiter | Bulkhead |
 |---|---|---|
 | Protects | **our application from our clients** | **our application from our downstream services** |
@@ -71,6 +82,20 @@ It stops an **asynchronous** call from waiting forever by cancelling it after a 
 ---
 
 ## 2. Semaphore Bulkhead
+
+<!-- diagram:37-1 -->
+**Diagram – Semaphore bulkhead: maxConcurrentCalls = 2**
+
+```mermaid
+graph LR
+  R1["Call 1"] --> S{"Semaphore: 2 permits"}
+  R2["Call 2"] --> S
+  R3["Call 3"] --> S
+  S -->|"permit available"| P["Product service"]
+  S -->|"no permit, maxWaitDuration 0"| F["Rejected immediately: fallback"]
+```
+<!-- /diagram:37-1 -->
+
 
 - Limits the **number of concurrent calls using a counter** (a Semaphore lock).
 - If the limit is reached, further calls are **rejected immediately or blocked for a specific wait time**.
@@ -151,6 +176,22 @@ resilience4j.bulkhead.instances.productService.maxWaitDuration=1m     # Wait 1 m
 ---
 
 ## 3. Thread Pool Bulkhead
+
+<!-- diagram:37-2 -->
+**Diagram – Thread-pool bulkhead: 3 threads + queue of 2**
+
+```mermaid
+graph LR
+  R["6 concurrent requests"] --> TP
+  subgraph TP["Dedicated pool for productService"]
+    T["3 threads running"]
+    Q["Queue: 2 waiting"]
+  end
+  TP --> P["Product service"]
+  R -->|"6th request: pool and queue full"| F["Rejected: fallback"]
+```
+<!-- /diagram:37-2 -->
+
 
 - Assign a **dedicated thread pool for each downstream service**; **only that pool** is used to call the downstream.
 - (Thread pools / ThreadPoolExecutor are covered in the Java Multithreading notes.)

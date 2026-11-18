@@ -49,6 +49,26 @@ Think of a **phone book**. Instead of remembering numbers, services look people 
 
 ## 1. Why Service Discovery?
 
+<!-- diagram:34-0 -->
+**Diagram – Hardcoded URL versus service discovery**
+
+```mermaid
+graph LR
+  subgraph HC["Hardcoded URL"]
+    O1["Order service"] -->|"http://localhost:8082"| P1["Product instance 1 only"]
+  end
+  subgraph SD["With Eureka"]
+    O2["Order service"] -->|"where is product-service?"| E["Eureka server: the phone book"]
+    E -->|"instance list"| O2
+    O2 --> PA["Product instance 1"]
+    O2 --> PB["Product instance 2"]
+    PA -->|"register + heartbeat"| E
+    PB -->|"register + heartbeat"| E
+  end
+```
+<!-- /diagram:34-0 -->
+
+
 In microservices, service/component **instances are created and deleted dynamically**. You **cannot hardcode the URL** of an instance – it is not scalable or feasible.
 
 Example: *Order service* hardcodes the URL of *Product service*. This is fine only while Product service has a single instance. With multiple instances (or an instance being removed):
@@ -216,6 +236,23 @@ public interface ProductClient {
 
 ### Q1. How does Eureka know a client is UP or DOWN?
 
+<!-- diagram:34-1 -->
+**Diagram – Registration, heartbeat and eviction**
+
+```mermaid
+sequenceDiagram
+  participant C as Eureka client (Product service)
+  participant S as Eureka server
+  C->>S: register (name, IP, port, status)
+  loop every 30 s (default)
+    C->>S: heartbeat (lease renewal)
+  end
+  Note over S: no heartbeat for 90 s (default): instance removed
+  C->>S: de-register on graceful shutdown: marked DOWN
+```
+<!-- /diagram:34-1 -->
+
+
 **a) Client de-registration request** – on graceful shutdown, the Eureka client sends a de-registration request; the server marks the client **DOWN**. (Visible in both client and server logs.)
 
 **b) Client heartbeat** – the client periodically sends a heartbeat to the server.
@@ -259,6 +296,22 @@ With the above test config: client sends a heartbeat after 60 s, but server wait
 - Value: `InstanceInfo` object containing: instance id, app name, IP address, host name, port, status (UP/DOWN), last renewed timestamp, lease duration, etc.
 
 ### Q3. What if Eureka Server goes down?
+
+<!-- diagram:34-2 -->
+**Diagram – Three-node Eureka cluster**
+
+```mermaid
+graph LR
+  E1["eureka-1 :8761"] <--> E2["eureka-2 :8762"]
+  E2 <--> E3["eureka-3 :8763"]
+  E3 <--> E1
+  C["Clients list all three URLs"] --> E1
+  C --> E2
+  C --> E3
+```
+<!-- /diagram:34-2 -->
+
+
 Yes – a **single Eureka server is a single point of failure.** Usually a **3-node cluster** is used.
 
 Example: eureka-1 (8761), eureka-2 (8762), eureka-3 (8763) on different machines/containers. **Each server is also a client** – they register themselves, fetch the registry and replicate changes.
@@ -282,6 +335,24 @@ eureka.client.service-url.defaultZone=http://eureka-1:8761/eureka,http://eureka-
 Now even if one server is down, client availability is not impacted.
 
 ### Q4. Latency – 2 hops per call?
+
+<!-- diagram:34-3 -->
+**Diagram – The client caches the registry locally**
+
+```mermaid
+sequenceDiagram
+  participant O as Order service
+  participant E as Eureka server
+  participant P as Product service
+  O->>E: at startup: fetch registry (cached locally)
+  loop every 30 s
+    O->>E: refresh the local copy
+  end
+  O->>P: normal calls use the local copy (no extra hop)
+```
+<!-- /diagram:34-3 -->
+
+
 Eureka Server is **not called for every request.** At startup the client (e.g. order-service) **fetches the registry** (`eureka.client.fetch-registry=true`) and **caches it locally**; future requests use the local copy to find the instance. Cache refresh is configurable:
 ```properties
 # refresh local cache copy every 30 seconds

@@ -61,6 +61,20 @@ You can write your own: create an annotation like `@CustomRateLimiter(limit = 5,
 A service that **continues to work even when a downstream system fails**. Instead of crashing or causing cascading failures, it **handles the failure gracefully**.
 
 ### Why is it required?
+
+<!-- diagram:12_36-0 -->
+**Diagram – Cascading failure: one slow service blocks the others**
+
+```mermaid
+graph LR
+  C["Clients"] --> O["Order service<br/>all threads busy"]:::bad
+  O -->|"each call waits 60 s"| P["Product service<br/>slow: 60 s per response"]:::bad
+  C -. "clients of Order are blocked too" .-> O
+  classDef bad fill:#fecaca,stroke:#b91c1c,color:#000
+```
+<!-- /diagram:12_36-0 -->
+
+
 Microservices communicate over the network, and **one service's unavailability can bring down the whole system.**
 
 **Scenario:** because of buggy code or an infrastructure issue, *Product* service becomes very slow (60 s per response).
@@ -73,6 +87,17 @@ Microservices communicate over the network, and **one service's unavailability c
 To avoid it we build **fault-tolerant microservices**.
 
 ### Recommended logical ordering of patterns
+
+<!-- diagram:12_36-1 -->
+**Diagram – Recommended order of the patterns**
+
+```mermaid
+graph LR
+  RL["Rate limiter"] --> BH["Bulkhead"] --> TL["Time limiter"] --> CB["Circuit breaker"] --> RT["Retry"]
+```
+<!-- /diagram:12_36-1 -->
+
+
 ```
 RateLimiter → Bulkhead → TimeLimiter → CircuitBreaker → Retry
 ```
@@ -85,11 +110,39 @@ RateLimiter → Bulkhead → TimeLimiter → CircuitBreaker → Retry
 Controls **the number of requests allowed to a microservice in a given time window**. It protects the system from **sudden traffic spikes (e.g. DDoS attack)**.
 
 ### Algorithm 1 – Fixed Window Counter
+
+<!-- diagram:12_36-2 -->
+**Diagram – Fixed window: the edge-of-window spike**
+
+```mermaid
+graph LR
+  W1["Window 1 (0-10 s)<br/>5 requests at 9-10 s"] --> W2["Window 2 (10-20 s)<br/>5 requests at 10-11 s"]
+  W2 --> X["10 requests within about 2 seconds<br/>although the limit is 5 per 10 s"]:::bad
+  classDef bad fill:#fecaca,stroke:#b91c1c,color:#000
+```
+<!-- /diagram:12_36-2 -->
+
+
 - Counts requests in a **fixed window**; if the count crosses the limit → reject.
 - Example: Limit = 5, Fixed Window Size = 10 s.
 - **Disadvantage:** traffic at the **edge** (end of window 1 + start of window 2) can cause a sudden spike – e.g. limit is 5 per 10 s but **10 requests arrive within 1 second**.
 
 ### Algorithm 2 – Sliding Log
+
+<!-- diagram:12_36-3 -->
+**Diagram – Sliding log: count timestamps inside the window**
+
+```mermaid
+graph LR
+  R["New request at time t"] --> L["Log of accepted timestamps"]
+  L --> D["Drop timestamps older than t minus 10 s"]
+  D --> Q{"count in window is less than limit 5?"}
+  Q -->|"yes"| A["Accept and add timestamp"]
+  Q -->|"no"| X["Reject"]
+```
+<!-- /diagram:12_36-3 -->
+
+
 - For each **accepted** request, store its **exact timestamp**.
 - For each incoming request, check **how many requests happened in the last X seconds (window size)**.
 - If count reaches the LIMIT → reject.
@@ -101,6 +154,18 @@ Controls **the number of requests allowed to a microservice in a given time wind
   - Extra overhead of **cleaning up expired timestamps**.
 
 ### Algorithm 3 – Sliding Window Counter (with Sub-Windows)
+
+<!-- diagram:12_36-4 -->
+**Diagram – Sliding window with sub-windows (10 s window, 2 s slices)**
+
+```mermaid
+graph LR
+  S1["SW1 0-2 s: 1"] --- S2["SW2 2-4 s: 1"] --- S3["SW3 4-6 s: 1"] --- S4["SW4 6-8 s: 1"] --- S5["SW5 8-10 s: 0"]
+  S5 --> T["Request at 9 s: 1+1+1+1+0 = 4, less than 5, allowed"]
+```
+<!-- /diagram:12_36-4 -->
+
+
 - Main window is divided into **equal-sized sub-windows**; track the **number of requests per sub-window**.
 - To decide, consider **only active sub-windows**; the main window **slides by sub-window size** over time.
 - Example: Window = 10 s, Sub-window = 2 s, Limit = 5.
@@ -109,6 +174,19 @@ Controls **the number of requests allowed to a microservice in a given time wind
 - **Disadvantages:** more complex than fixed window; must maintain sub-window info + count per sub-window → more memory.
 
 ### Algorithm 4 – Sliding Window Counter (Weighted Window)
+
+<!-- diagram:12_36-5 -->
+**Diagram – Weighted sliding window**
+
+```mermaid
+graph LR
+  P["Previous window: 5 requests"] -->|"x 90% still inside the slider"| E["4.5"]
+  C["Current window: 0 requests"] --> SUM["0 + 4.5 is about 5<br/>limit reached, reject"]
+  E --> SUM
+```
+<!-- /diagram:12_36-5 -->
+
+
 - Simplifies by **removing sub-window granularity** and using **approximation**. Combines **Fixed Window + Sliding Log** concepts.
 - A slider window (equal to the fixed window size, e.g. 10 s) can lie **between two fixed windows**, and uses **percentages** to decide how much of it is in the previous vs. current window.
 - Formula: **Total requests in current fixed window + X% of total requests in previous window**.
@@ -121,11 +199,38 @@ Controls **the number of requests allowed to a microservice in a given time wind
 - **Disadvantage:** assumes **uniform distribution** of traffic, which may not be true.
 
 ### Algorithm 5 – Token Bucket
+
+<!-- diagram:12_36-6 -->
+**Diagram – Token bucket**
+
+```mermaid
+graph LR
+  RF["Re-filler adds tokens at a fixed interval"] --> B(("Bucket of tokens<br/>full: extra tokens overflow"))
+  R["Request"] --> B
+  B -->|"token available: take one"| A["Allowed"]
+  B -->|"no token"| X["Denied"]
+```
+<!-- /diagram:12_36-6 -->
+
+
 - A limited number of **tokens** sit in a bucket; **each request consumes one token**; no token left → request **denied**.
 - A **re-filler** adds tokens at a regular interval. If the bucket is full, **extra tokens overflow and are discarded**.
 - **Disadvantage:** a **quick burst** is possible if capacity isn't set properly – if the system is idle, tokens accumulate; a sudden burst is then **allowed** since tokens are present.
 
 ### Algorithm 6 – Leaky Bucket
+
+<!-- diagram:12_36-7 -->
+**Diagram – Leaky bucket**
+
+```mermaid
+graph LR
+  R["Requests"] --> Q[["Queue (bucket)"]]
+  Q -->|"processed at a fixed rate"| S["Service"]
+  Q -->|"queue full: overflow"| X["Rejected"]
+```
+<!-- /diagram:12_36-7 -->
+
+
 - Requests are **queued** and processed at a **fixed rate**. If the queue is full, incoming requests **overflow** (rejected).
 - **Disadvantages:** latency increases (requests wait in queue); the **queue size is a bottleneck** and must be set properly.
 

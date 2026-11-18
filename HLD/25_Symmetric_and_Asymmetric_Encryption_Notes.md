@@ -72,6 +72,17 @@ Encryption is of two types: **① Symmetric** and **② Asymmetric.**
 ---
 
 ## 2. Symmetric encryption
+
+<!-- diagram:25-0 -->
+**Diagram – Symmetric encryption: one shared key**
+
+```mermaid
+graph LR
+  PT1["Plain text"] --> E["Encrypt with key K = 5"] --> CT["Cipher text"] --> D["Decrypt with the same key K = 5"] --> PT2["Plain text"]
+```
+<!-- /diagram:25-0 -->
+
+
 - **The same key is used for both encryption and decryption.**
   `Sender: PT → [EM, K=5] → Cipher text → Receiver: [DM, K=5] → PT`
 
@@ -96,6 +107,19 @@ Encryption is of two types: **① Symmetric** and **② Asymmetric.**
 ---
 
 ## 3. Asymmetric encryption
+
+<!-- diagram:25-1 -->
+**Diagram – Asymmetric encryption: public key locks, private key unlocks**
+
+```mermaid
+graph LR
+  S["Sender: plain text"] -->|"encrypt with the receiver's PUBLIC key"| CT["Cipher text"]
+  CT -->|"decrypt with the receiver's PRIVATE key"| R["Receiver: plain text"]
+  H["Hacker in the middle"] -. "cannot decrypt" .-> CT
+```
+<!-- /diagram:25-1 -->
+
+
 - Uses **2 different keys – a Public key and a Private key**:
   - **Public key is used by the Sender to Encrypt.**
   - **Private key is used by the Receiver to Decrypt.**
@@ -139,6 +163,23 @@ Encryption is of two types: **① Symmetric** and **② Asymmetric.**
 - …and so on **till W43** (so the **128-bit key is expanded into 44 words** = 11 round keys). Every 4th word uses `function(previous word)` (rotate/substitute/round-constant), the others are plain XORs.
 
 ### Normal text → cipher text (AES-128 encryption flow)
+
+<!-- diagram:25-2 -->
+**Diagram – AES-128 encryption flow**
+
+```mermaid
+graph TD
+  K["128-bit key"] --> KE["Key expansion: 44 words = 11 round keys"]
+  PT["128-bit plain-text block"] --> ARK0["Add round key (W0 - W3)"]
+  KE --> ARK0
+  ARK0 --> R1["Round 1: SubBytes, ShiftRows, MixColumns, AddRoundKey"]
+  R1 --> R2["Rounds 2 to 9: same four steps"]
+  R2 --> R10["Round 10: SubBytes, ShiftRows, AddRoundKey"]
+  R10 --> CT["128-bit cipher-text block"]
+```
+<!-- /diagram:25-2 -->
+
+
 1. **Generate a 128-bit key** (random key-generation method).
 2. Call **AES-128 Encrypt Algo (data, key)**.
 3. **Key expansion process** (128-bit key → **44 words**).
@@ -159,6 +200,24 @@ Do the opposite: 128-bit cipher block → **Add Round Key** → Round 1 → … 
 ---
 
 ## 5. Diffie-Hellman (key-exchange algorithm, asymmetric)
+
+<!-- diagram:25-3 -->
+**Diagram – Diffie-Hellman with the example numbers**
+
+```mermaid
+sequenceDiagram
+  participant S as Sender (private 4)
+  participant R as Receiver (private 5)
+  Note over S,R: public and agreed by both: prime P = 7, primitive root = 3
+  S->>R: public key = 3^4 mod 7 = 4
+  R->>S: public key = 3^5 mod 7 = 5
+  Note over S: secret = 5^4 mod 7 = 2
+  Note over R: secret = 4^5 mod 7 = 2
+  Note over S,R: both hold the same secret 2, used as the AES key
+```
+<!-- /diagram:25-3 -->
+
+
 **Purpose:** a way to **share a secret key between SENDER and RECEIVER over an insecure network.**
 
 **Step 1 – agree on public parameters.** Both decide **Prime number P = 7** and **Primitive root = 3** (visible to everyone, even a hacker).
@@ -182,6 +241,30 @@ Do the opposite: 128-bit cipher block → **Add Round Key** → Round 1 → … 
 ---
 
 ## 6. How a Digital Signature works
+
+<!-- diagram:25-4 -->
+**Diagram – Digital signature: sign and verify**
+
+```mermaid
+graph LR
+  subgraph SND["Sender"]
+    D["Plain data"] --> H1["Hash function"] --> HV["Hash"]
+    HV --> SG["Sign with the sender's PRIVATE key"] --> SIG["Signature"]
+  end
+  D --> OUT["Send data + signature"]
+  SIG --> OUT
+  subgraph RCV["Receiver"]
+    OUT --> VF["Verify signature with the sender's PUBLIC key, gives hash"]
+    OUT --> H2["Hash of the received data"]
+    VF --> EQ{"hashes equal?"}
+    H2 --> EQ
+    EQ -->|"yes"| OK["Authentic and unchanged"]
+    EQ -->|"no"| BAD["Reject"]
+  end
+```
+<!-- /diagram:25-4 -->
+
+
 A digital signature has **two purposes:** ① **Authentication** ② **Integrity of data** (data has not changed).
 
 **Sender side**

@@ -73,6 +73,24 @@ Related: [OAuth 2.0](24_OAuth_2.0_Notes.md), [Encryption & Digital Signature](25
 3. **SSO – Single Sign-On** (authenticate once, access multiple applications).
 
 ### Stateless flow
+
+<!-- diagram:26-0 -->
+**Diagram – JWT login and request flow**
+
+```mermaid
+sequenceDiagram
+  participant C as Client
+  participant A as Authentication server
+  participant R as Resource server
+  C->>A: 1 login with username and password
+  A-->>C: 2 generates and returns a JWT
+  C->>R: 3 GET /details with Authorization: Bearer JWT
+  R->>A: verify(token) / public key (JWKS)
+  R-->>C: 4 response after validating the token
+```
+<!-- /diagram:26-0 -->
+
+
 ```
  1. Client ── login with username & password ──► Authentication Server (a third-party app that supports token generation and validation)
  2. Auth Server ── generates JWT and returns it ──► Client
@@ -84,6 +102,26 @@ Related: [OAuth 2.0](24_OAuth_2.0_Notes.md), [Encryption & Digital Signature](25
 ---
 
 ## 3. What was used before JWT? – Session ID (JSESSIONID)
+
+<!-- diagram:26-1 -->
+**Diagram – Session ID flow (stateful)**
+
+```mermaid
+sequenceDiagram
+  participant C as Client
+  participant A as Authorization server
+  participant DB as DB
+  participant R as Resource server
+  C->>A: 1 login with username and password
+  A->>DB: 2 create session id and save user info
+  A-->>C: 3 session id in a cookie
+  C->>R: 4 request with the cookie
+  R->>DB: 5 look up the session id and validate (extra latency)
+  R-->>C: 6 response
+```
+<!-- /diagram:26-1 -->
+
+
 *The Authorization server gives back to the client a unique random key (Session ID); the server keeps the session data – expiry time, user ID, roles, user details – i.e. it is **stateful**.*
 
 Flow:
@@ -102,6 +140,24 @@ Flow:
 ---
 
 ## 4. JWT structure  *(JWT / JWS / JWE)*
+
+<!-- diagram:26-2 -->
+**Diagram – JWT = header . payload . signature**
+
+```mermaid
+graph LR
+  H["Header<br/>alg, type, kid"] --> B1["Base64"]
+  P["Payload<br/>iss, sub, aud, exp, email, roles"] --> B2["Base64"]
+  B1 --> M["header.payload (the message)"]
+  B2 --> M
+  M --> SG["Sign with RSA private key or HMAC secret"] --> B3["Base64 signature"]
+  B1 --> T["JWT = header . payload . signature"]
+  B2 --> T
+  B3 --> T
+```
+<!-- /diagram:26-2 -->
+
+
 `aaaaaa.bbbbbbbbb.ccccccc` = **① Header . ② Payload . ③ Signature**
 
 ### ① Header – metadata about the token
@@ -152,6 +208,21 @@ curl --location --request GET "https://localhost:80/api/resource" \
 ---
 
 ## 5. SSO (Single Sign-On) with JWT
+
+<!-- diagram:26-3 -->
+**Diagram – Single sign-on**
+
+```mermaid
+graph LR
+  U["User logs in once"] --> A["Authentication server"]
+  A -->|"JWT"| U
+  U -->|"same JWT"| A1["App 1 www.app1.com"]
+  U -->|"same JWT"| A2["App 2"]
+  U -->|"same JWT"| A3["App 3"]
+```
+<!-- /diagram:26-3 -->
+
+
 User logs in **once** at the **Authentication Server** → gets a **JWT token** → presents the same JWT to **App1 (www.app1.com), App2, App3** (each app validates it against the auth server / its public key). **Login happens only in one place; the user can sign in to multiple apps.**
 
 ---

@@ -14,6 +14,29 @@ Source (handwritten, pages 20–23 of the 36-page PDF): https://drive.google.com
 **Goal:** turn a long link into a tiny one (like `tiny.url/aB3xK9Q`) and redirect visitors to the original.
 **Basic flow:** `POST long URL` → service creates a short key → saves `short → long` in a database. `GET short URL` → look it up → redirect to the long URL.
 
+<!-- diagram:07-1 -->
+**Diagram – Create and open a short URL**
+
+```mermaid
+sequenceDiagram
+  participant U as User
+  participant S as Shortener service
+  participant Z as ZooKeeper
+  participant D as Database
+  U->>S: POST long URL
+  S->>Z: get unique ID from my range
+  Z-->>S: id
+  S->>S: convert id to Base-62 (7 characters)
+  S->>D: save short to long
+  S-->>U: short URL
+  U->>S: GET short URL
+  S->>D: look up long URL
+  D-->>S: long URL
+  S-->>U: redirect to long URL
+```
+<!-- /diagram:07-1 -->
+
+
 **How short should it be? (the maths)**
 - Traffic: 10 million new URLs a day ≈ 3.65 billion a year; keep each for 100 years ≈ **365 billion URLs**.
 - Allowed characters: 0–9, a–z, A–Z = **62**. With 6 characters: 62⁶ ≈ 56 billion (not enough). With **7 characters: 62⁷ ≈ 3.5 trillion (plenty)**. So **7 characters**.
@@ -46,6 +69,24 @@ Source (handwritten, pages 20–23 of the 36-page PDF): https://drive.google.com
   3. **ZooKeeper** ⭐ *(best solution)* – distributed applications coordinate reliably; **hands out ranges of values** (e.g. Range 1 → 1 to 1 M) to each app server, which then converts the numeric id to Base-62.
 
 **Architecture:** `User → Load Balancer → TinyURL service instances (many) → ID generator (ZooKeeper) · Cache · Relational DB table (id | short | long)`.
+
+<!-- diagram:07-0 -->
+**Diagram – URL shortener architecture**
+
+```mermaid
+graph LR
+  U["User"] --> LB["Load balancer"]
+  LB --> T1["TinyURL service instance"]
+  LB --> T2["TinyURL service instance"]
+  T1 --> ZK["ID generator: ZooKeeper (ranges)"]
+  T1 --> CA[("Cache")]
+  T1 --> DB[("Relational DB: id | short | long")]
+  T2 --> ZK
+  T2 --> CA
+  T2 --> DB
+```
+<!-- /diagram:07-0 -->
+
 
 ---
 

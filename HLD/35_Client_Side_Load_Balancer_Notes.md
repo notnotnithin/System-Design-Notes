@@ -48,6 +48,24 @@ Feign already balances the load automatically, so **nothing changes**: the same 
 
 ## 1. Load Balancer basics
 
+<!-- diagram:35-0 -->
+**Diagram – Server-side versus client-side load balancer**
+
+```mermaid
+graph LR
+  subgraph SS["Server-side: Nginx / ELB"]
+    C1["Clients"] --> LB["Central load balancer"] --> A1["Instance 1"]
+    LB --> A2["Instance 2"]
+  end
+  subgraph CS["Client-side: inside the caller"]
+    O["Order service<br/>with load-balancer library"] --> P1["Product instance 1"]
+    O --> P2["Product instance 2"]
+    O -.->|"instance list"| D["Service discovery"]
+  end
+```
+<!-- /diagram:35-0 -->
+
+
 - Distributes traffic to multiple instances of a server.
 - Prevents a single server from being overloaded with huge traffic.
 
@@ -90,6 +108,25 @@ public class Config {
 ---
 
 ## 3. With Spring Cloud LoadBalancer
+
+<!-- diagram:35-1 -->
+**Diagram – What @LoadBalanced does on a call**
+
+```mermaid
+sequenceDiagram
+  participant O as Order service (RestTemplate @LoadBalanced)
+  participant L as Spring Cloud LoadBalancer
+  participant D as Service discovery
+  participant P as Product instance
+  O->>L: GET http://product-service/products/1
+  L->>D: instances of product-service
+  D-->>L: instance list
+  L->>L: apply algorithm (round robin by default)
+  L->>P: call the chosen instance
+  P-->>O: response
+```
+<!-- /diagram:35-1 -->
+
 
 **1. Dependency**
 ```xml
@@ -184,6 +221,17 @@ public class LoadBalancerProductClientConfig {
 ---
 
 ## 6. Algorithm A for product-service, Algorithm B for all others
+
+<!-- diagram:35-2 -->
+**Diagram – Per-service algorithm and a default**
+
+```mermaid
+graph LR
+  O["Order service"] -->|"product-service"| R["RandomLoadBalancer"]
+  O -->|"all other services"| RR["RoundRobinLoadBalancer (default config)"]
+```
+<!-- /diagram:35-2 -->
+
 
 ```java
 @SpringBootApplication

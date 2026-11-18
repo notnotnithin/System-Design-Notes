@@ -46,6 +46,22 @@ Put an **API gateway with a rate limiter** (e.g. the *token bucket* algorithm) i
 
 ## 1. Problem: "Why does a ticket-booking app go down during peak traffic?"
 
+<!-- diagram:27-0 -->
+**Diagram – Thundering herd at the 12:00 PM sale**
+
+```mermaid
+graph TD
+  N["New requests"] --> LB["Load balancer"]
+  RT["Retried requests (denied earlier)"] --> LB
+  LB --> T1["TS 1 + full queue"]:::bad
+  LB --> T2["TS 2 + full queue"]:::bad
+  LB --> T3["TS 3 + full queue"]:::bad
+  T1 -. "denied: clients retry at once" .-> RT
+  classDef bad fill:#fecaca,stroke:#b91c1c,color:#000
+```
+<!-- /diagram:27-0 -->
+
+
 **Scenario:** the **12:00 PM sale has started** on a ticket-booking app.
 
 Diagram in notes:
@@ -68,6 +84,17 @@ Diagram in notes:
 ## 2. Solutions
 
 ### ① Exponential Backoff
+
+<!-- diagram:27-1 -->
+**Diagram – Backoff spreads the retries over time**
+
+```mermaid
+graph LR
+  F["Request fails"] --> W1["wait 200 ms"] --> R1["retry 1 fails"] --> W2["wait 400 ms"] --> R2["retry 2 fails"] --> W3["wait 800 ms"] --> R3["retry 3"]
+```
+<!-- /diagram:27-1 -->
+
+
 Make each retry wait longer than the previous one:
 
 `delay = Base × 2ⁿ`   where **n = number of failures (retry attempt)**
@@ -84,6 +111,22 @@ Exponential backoff alone still makes all clients retry at the same moments (sam
 This **spreads the retries over time** so the herd doesn't arrive together.
 
 ### ③ Protect the entry with a Rate Limiter (Application / API Gateway)
+
+<!-- diagram:27-2 -->
+**Diagram – Rate limiter at the gateway**
+
+```mermaid
+graph TD
+  C["Clients"] --> AG["Application gateway + rate limiter (token bucket)"]
+  AG -->|"allowed rate only"| LB["Load balancer"]
+  AG -->|"excess"| X["Rejected quickly: try again later"]
+  LB --> T1["TS1"]
+  LB --> T2["TS2"]
+  LB --> T3["TS3"]
+```
+<!-- /diagram:27-2 -->
+
+
 ```
  Application Gateway ─ [Rate Limiter]  (Token Bucket algo)
           │

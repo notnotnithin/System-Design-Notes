@@ -56,6 +56,18 @@ Breaker = **stop hammering a failing service and probe it carefully later.** It 
 
 ## 1. What & why
 
+<!-- diagram:39-0 -->
+**Diagram – Without and with a circuit breaker**
+
+```mermaid
+graph LR
+  O["Order service"] --> CB{"Circuit breaker"}
+  CB -->|"closed: calls pass"| P["Product service"]
+  CB -->|"open: fail immediately"| F["Fallback"]
+```
+<!-- /diagram:39-0 -->
+
+
 **Circuit Breaker prevents an application from making repeated calls to a downstream service that is likely to fail.**
 
 Without it (e.g. Order → Product while Product is failing):
@@ -69,6 +81,20 @@ Flow in the diagram: calls to Product fail → **failure threshold reached → s
 ---
 
 ## 2. States of Circuit Breaker
+
+<!-- diagram:39-1 -->
+**Diagram – Circuit breaker states**
+
+```mermaid
+stateDiagram-v2
+  [*] --> CLOSED
+  CLOSED --> OPEN: failure rate crosses the threshold
+  OPEN --> HALF_OPEN: wait duration completed
+  HALF_OPEN --> CLOSED: test calls 100% successful
+  HALF_OPEN --> OPEN: test calls not 100% successful
+```
+<!-- /diagram:39-1 -->
+
 
 ```
  Initial ──► CLOSED ──(failure rate crosses threshold)──► OPEN
@@ -179,6 +205,19 @@ resilience4j.circuitbreaker.instances.productService.ignore-exceptions=java.lang
 ---
 
 ## 4. How it works internally
+
+<!-- diagram:39-2 -->
+**Diagram – Inside the framework**
+
+```mermaid
+graph LR
+  C["Call to the method"] --> AOP["AOP proxy"] --> SM["CircuitBreakerStateMachine"]
+  SM -->|"threshold exceeded while CLOSED"| OP["transitionToOpenState"]
+  OP --> SC["ScheduledThreadPoolExecutor (delay queue): toHalfOpenState after the wait duration"]
+  SC --> HO["HALF_OPEN"]
+```
+<!-- /diagram:39-2 -->
+
 
 - AOP intercepts the call and passes it to **`CircuitBreakerStateMachine.java`**, which has the complete logic for changing from one state to another whenever there is a failure.
 - Sample framework method:

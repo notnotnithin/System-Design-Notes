@@ -24,17 +24,86 @@ Amazon uses DynamoDB for the shopping cart. Goals: **scalability, decentralizati
 **Steps:** 1. **Partition** · 2. **Replication** · 3. **Get & Put operations** · 4. **Data versioning** · 5. **Gossip protocol.**
 
 ### 1. Partition
+
+<!-- diagram:09-0 -->
+**Diagram – Partitioning with a ring and virtual nodes**
+
+```mermaid
+graph LR
+  K["Key"] --> H["hash(key)"] --> R(("Ring"))
+  R --> S1["S1: keys 1-50"]
+  R --> S2["S2: keys 51-100"]
+  R --> S3["S3: next range"]
+  R --> S4["S4: next range"]
+  R -.- V["each server appears at several ring points: virtual nodes"]
+```
+<!-- /diagram:09-0 -->
+
+
 A plain mapping (person → cart list) doesn't scale: when users grow we can't hold all users' data in one place, and the mapping itself would have to be stored on multiple systems. **Solution: partition requests with consistent hashing** – a **virtual ring** to handle **ranges** (S1 → keys 1–50, S2 → 51–100, S3, S4 …). To **prevent bombarding only one server → virtual nodes** (each server appears at several ring points).
 
 ### 2. Replication (avoid single point of failure)
+
+<!-- diagram:09-1 -->
+**Diagram – Replication: coordinator and backups (preference list)**
+
+```mermaid
+graph LR
+  P["Put CAR-45"] --> S1["S1: coordinator"]
+  S1 -->|"async replicate"| S2["S2: backup"]
+  S1 -->|"async replicate"| S3["S3: backup"]
+```
+<!-- /diagram:09-1 -->
+
+
 Example: key **CAR-45** is served by **S1 (coordinator)**; to maintain availability replicate to **N−1** other servers (copies on **S2 and S3**) – kept on **different data centres.** The **preference list**: S1 = coordinator, S2/S3 = backups.
 
 ### 3. Get & Put operations
+
+<!-- diagram:09-2 -->
+**Diagram – Quorum: R + W > N**
+
+```mermaid
+sequenceDiagram
+  participant C as Client
+  participant LB as Load balancer
+  participant S1 as S1 coordinator
+  participant S2 as S2
+  participant S3 as S3
+  C->>LB: Put(CAR-45)
+  LB->>S1: route to coordinator
+  S1->>S2: replicate
+  S1->>S3: replicate
+  S2-->>S1: ack
+  S3-->>S1: ack
+  Note over S1: success once W replicas acknowledge
+  S1-->>C: done
+  Note over C,S3: Get is successful once R replicas respond. R + W > N
+```
+<!-- /diagram:09-2 -->
+
+
 - **Put(CAR) → find key (45)** → stored in **S1**, which keeps it and **replicates asynchronously** to S2, S3 (`45-car` placed in S1, S2, S3). **Quorum rule: R + W > N** – wait for the required number of success responses (**W** for writes, **R** for reads, **N** = number of replica nodes).
 - **Get:** a request reaches a **load balancer** that must route it – **① Generic LB** (simple to implement but **high latency** – may hit any server; then the **preference list** works and the **coordinator** serves; if the coordinator is down, the next nodes on the preference list take over) or **② Partition-aware LB** (**low latency**, routes straight to the right node).
 - **R + W > N → Get returns a successful response only if R nodes respond; a Put is successful only if W nodes acknowledge.**
 
 ### 4. Data versioning
+
+<!-- diagram:09-3 -->
+**Diagram – Versions with vector clocks**
+
+```mermaid
+graph TD
+  V1["v1: 45-CAR (1) on S1, S2, S3"] --> V2["v2: 45-CART (2) on S1, S2, S3"]
+  V2 --> V3["v3: 45-CARM (3) on S2, S3 while S1 is down"]
+  V2 --> V4["v4: 45-CARR (4) written concurrently on S3"]
+  V3 --> G["Get: coordinator sees conflicting versions"]
+  V4 --> G
+  G --> R["client or app resolves using the vector clocks"]
+```
+<!-- /diagram:09-3 -->
+
+
 Why: (1) `Put(CAR-45)` → S1 `[45-CAR]`, replicated to S2, S3. (2) `Put(CART-45)` → S1 is **down now**, so it goes to the next on the preference list, S2. (3) Server S1 comes back and a Get arrives: S1 still has `[45-CAR]` (**not updated**) – it must **talk with all** (S2, S3) to reconcile. **To implement it: Vector Clock (server, counter)** per version – example: v1 `[45-CAR]-1` on all; v2 `[45-CART]-2` on all; v3 `[45-CARM]-3` on S2 & S3 while S1 is down; v4 `[45-CARR]-4` concurrently on S3; on Get the coordinator sees CART(2), CARM(3), CARR(4) – **conflicting concurrent versions** – and **"eventual consistency – because here we can't compromise availability & partition tolerance, so we compromise consistency" (AP)**; the conflicts are resolved by the client/app via vector clocks.
 
 ### 5. Gossip protocol

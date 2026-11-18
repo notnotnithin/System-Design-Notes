@@ -57,12 +57,51 @@ Load balancer → many app servers → cache → replicated, sharded databases, 
 
 
 ## 1. Single server
+
+<!-- diagram:05-0 -->
+**Diagram – Step 1: single server**
+
+```mermaid
+graph LR
+  C["Client: web, mobile"] <--> S["Server: application + database on one machine"]
+```
+<!-- /diagram:05-0 -->
+
+
 `Client (web, mobile) ⇄ Server (Application + DB on the same machine)`.
 
 ## 2. Application & DB server separation
+
+<!-- diagram:05-1 -->
+**Diagram – Step 2: separate application and database servers**
+
+```mermaid
+graph LR
+  C["Client"] <--> A["Application server (mid tier)"] <--> D[("DB server (data tier)")]
+```
+<!-- /diagram:05-1 -->
+
+
 `Client ⇄ Application server (mid tier) ⇄ DB server (data / DB tier)` – the app and the database now run on separate machines so each can be scaled/managed independently.
 
 ## 3. Load balancer + multiple app servers
+
+<!-- diagram:05-2 -->
+**Diagram – Step 3: load balancer and several app servers**
+
+```mermaid
+graph LR
+  C["Client"] <--> LB["Load balancer"]
+  LB --> A1["App S1"]
+  LB --> A2["App S2"]
+  LB --> A3["App S3"]
+  A1 --> D[("DB server")]
+  A2 --> D
+  A3 --> D
+```
+<!-- /diagram:05-2 -->
+
+
 ```
  Client ⇄ LOAD BALANCER ──► App S1 | App S2 | App S3   (mid tier, private IPs)
                                    ⇅
@@ -73,18 +112,60 @@ Load balancer → many app servers → cache → replicated, sharded databases, 
 - The LB can **equally divide the traffic/requests.**
 
 ## 4. Database replication (to handle the failure issue)
+
+<!-- diagram:05-3 -->
+**Diagram – Step 4: master–slave replication**
+
+```mermaid
+graph LR
+  A["App servers"] -->|"writes"| M[("Master DB")]
+  M -->|"replication"| S1[("Slave DB 1")]
+  M -->|"replication"| S2[("Slave DB 2")]
+  A -->|"reads"| S1
+  A -->|"reads"| S2
+```
+<!-- /diagram:05-3 -->
+
+
 `App servers → Master DB (writes) ⇄ replication ⇄ Slave DB(s) (reads)`
 - **Write requests go to the master; read requests go to the slave(s).**
 - If one slave is down (damaged), **another DB node is up and should handle the request.**
 - If the **master DB fails, any slave DB can get promoted to master.**
 
 ## 5. Cache (performance improvement)
+
+<!-- diagram:05-4 -->
+**Diagram – Step 5: cache in front of the database**
+
+```mermaid
+graph LR
+  A["App server"] -->|"1 check cache"| C[("Cache: Redis")]
+  C -->|"hit: return data"| A
+  C -->|"miss"| A
+  A -->|"2 read DB, then fill cache"| D[("Database")]
+```
+<!-- /diagram:05-4 -->
+
+
 - Every time the application server talks to the DB it is a **network call – it takes a lot of time; an expensive call.**
 - Add a cache (e.g. **Redis**) next to the app servers.
 - **Always check the cache before going to the DB:** data present in cache = **cache hit**; not present = **cache miss** (then read from DB and populate the cache).
 - **TTL (Time To Live)** – how long an entry stays in cache; chosen **depending upon the application requirement.**
 
 ## 6. CDN (Content Delivery Network)
+
+<!-- diagram:05-5 -->
+**Diagram – Step 6: CDN serves static content near the user**
+
+```mermaid
+graph LR
+  U["User in USA"] --> CU["CDN node USA"]
+  CU -->|"not found: try nearest other CDN"| CI["CDN node India"]
+  CI -->|"not found"| O["Origin server (static data cached afterwards)"]
+```
+<!-- /diagram:05-5 -->
+
+
 - **CDN does caching – but not everything that does caching is a CDN.**
 - Problem: an origin **data centre in India** is far from users: India user ≈ **1 ms**, SA ≈ **2 ms**, USA ≈ **3 ms**, Japan ≈ **4 ms** (latency grows with distance → **latency issue**) – a **CDN solves this.**
 - **CDN does caching of static data** (HTML / video / CSS / images). CDN nodes sit near users (USA, India, France, Japan…).
@@ -92,6 +173,30 @@ Load balancer → many app servers → cache → replicated, sharded databases, 
 - Benefits: **performance increases, security enhanced, cost cutting.**
 
 ## 7. Data centre
+
+<!-- diagram:05-6 -->
+**Diagram – Step 7: two data centres with replication**
+
+```mermaid
+graph TD
+  C["Client"] --> CDN["CDN"] --> LB["Load balancer"]
+  subgraph IN["India data centre"]
+    IA["App S1 - S3"] --> IC[("Cache")]
+    IA --> IM[["MQ"]]
+    IA --> ID[("Master DB with Slave DB")]
+  end
+  subgraph US["USA data centre"]
+    UA["App S1 - S3"] --> UC[("Cache")]
+    UA --> UM[["MQ"]]
+    UA --> UD[("Master DB with Slave DB")]
+  end
+  LB --> IA
+  LB --> UA
+  ID <-->|"replication between data centres"| UD
+```
+<!-- /diagram:05-6 -->
+
+
 ```
  Client ⇄ CDN
    │
@@ -105,6 +210,21 @@ Load balancer → many app servers → cache → replicated, sharded databases, 
 - Brings **asynchronous nature** in the codebase: **Producer → Messaging Queue (queue/topic) → Subscriber (consumer)**; failed messages can go to a **requeue**.
 
 ### Terminology (RabbitMQ)
+
+<!-- diagram:05-7 -->
+**Diagram – Producer, exchange, queues, subscribers**
+
+```mermaid
+graph LR
+  P["Producer"] -->|"routing key"| E{"Exchange"}
+  E -->|"binding"| Q1["Queue Q1"] --> S1["Subscriber 1"]
+  E -->|"binding"| Q2["Queue Q2"] --> S2["Subscriber 2"]
+  E -->|"binding"| Q3["Queue Q3"] --> S3["Subscriber 3"]
+  E -.- T["Direct: routing key = binding key. Fan-out: copy to all queues. Topic: wildcard match"]
+```
+<!-- /diagram:05-7 -->
+
+
 `Producer ──(routing key)──► Exchange ──(binding)──► Queue Q1 / Q2 / … ──► Subscriber Su1 / Su2 / Su3`
 
 Exchange types:
@@ -120,6 +240,26 @@ Increase the capacity of the existing DB server – **more CPU and RAM**, becaus
 **Disadvantage:** **there is always a limit** – you cannot increase CPU/RAM beyond a point.
 
 ### ② Horizontal scaling
+
+<!-- diagram:05-8 -->
+**Diagram – Sharding by rows and by columns**
+
+```mermaid
+graph LR
+  subgraph H["Horizontal sharding: split by rows"]
+    direction TB
+    T1["Table T1: rows 1-200"] --> HS1["Shard 1: A to P"]
+    T1 --> HS2["Shard 2: Q to Z"]
+  end
+  subgraph V["Vertical sharding: split by columns"]
+    direction TB
+    T2["Table: columns C1-C10"] --> VS1["Table with C1-C5"]
+    T2 --> VS2["Table with C6-C10"]
+  end
+```
+<!-- /diagram:05-8 -->
+
+
 **Add more nodes.** Implemented through **SHARDING**, which is of two kinds:
 
 **Horizontal sharding** – a table is **divided into multiple tables based on rows**: e.g. table T1 with rows 1–100 → Shard T1 (R1–R100 …) and Shard T2 (R101–…); another example by name: A–P → ST1, Q–Z → ST2.

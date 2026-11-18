@@ -75,6 +75,21 @@ Close-Transaction
 (e.g. A: 100 → 0, B: 100 → 200.)
 
 ## 2. The problem in a distributed system
+
+<!-- diagram:20-0 -->
+**Diagram – ACID is local to each database**
+
+```mermaid
+graph LR
+  A["Operation: place order"] --> O["Order service"] --> OD[("Order DB: its own ACID transaction")]
+  A --> I["Inventory service"] --> ID[("Inventory DB: its own ACID transaction")]
+  OD -.- X["no single transaction covers both databases"]:::bad
+  ID -.- X
+  classDef bad fill:#fecaca,stroke:#b91c1c,color:#000
+```
+<!-- /diagram:20-0 -->
+
+
 ```
 Begin-Transaction
    - update Order DB
@@ -98,6 +113,33 @@ In the synchronous ones **the customer is waiting for the transaction to complet
 ---
 
 ## 3. Two-Phase Commit (2PC)
+
+<!-- diagram:20-1 -->
+**Diagram – Two-phase commit**
+
+```mermaid
+sequenceDiagram
+  participant A as Application
+  participant TC as Transaction coordinator
+  participant P1 as Participant 1 (Order)
+  participant P2 as Participant 2 (Inventory)
+  A->>TC: perform operation
+  TC->>P1: update query (lock)
+  TC->>P2: update query (lock)
+  Note over TC,P2: Phase 1: prepare (vote)
+  TC->>P1: PREPARE
+  TC->>P2: PREPARE
+  P1-->>TC: OK
+  P2-->>TC: OK
+  Note over TC,P2: Phase 2: decision
+  TC->>P1: COMMIT (or ABORT if any NO or timeout)
+  TC->>P2: COMMIT
+  P1-->>TC: done
+  P2-->>TC: done
+```
+<!-- /diagram:20-1 -->
+
+
 Two phases: **1. Voting / Prepare phase** and **2. Decision / Commit phase.**
 
 **Actors:** Application · **Transaction Coordinator** (supports both participants) · **Participant 1** (Order microservice) · **Participant 2** (Inventory microservice).
@@ -121,6 +163,25 @@ Two phases: **1. Voting / Prepare phase** and **2. Decision / Commit phase.**
 ---
 
 ## 4. Three-Phase Commit (3PC) – a **non-blocking** protocol
+
+<!-- diagram:20-2 -->
+**Diagram – Three-phase commit adds a pre-commit step**
+
+```mermaid
+sequenceDiagram
+  participant TC as Coordinator
+  participant P as Participants
+  TC->>P: Phase 1: PREPARE
+  P-->>TC: OK
+  TC->>P: Phase 2: PRE-COMMIT (decision shared)
+  P-->>TC: acknowledge
+  TC->>P: Phase 3: COMMIT
+  P-->>TC: DONE
+  Note over TC,P: if the coordinator fails after pre-commit, participants already know the decision
+```
+<!-- /diagram:20-2 -->
+
+
 Three phases: **1. Prepare phase** [same as 2PC] · **2. Pre-Commit phase** · **3. Commit phase.**
 
 **Flow**
@@ -134,6 +195,22 @@ Why it helps: because every participant **already knows the decision (from the p
 ---
 
 ## 5. SAGA pattern (asynchronous)
+
+<!-- diagram:20-3 -->
+**Diagram – SAGA: chain of local transactions and compensations**
+
+```mermaid
+graph LR
+  P1["P1 update + commit"] --> P2["P2"] --> P3["P3"] --> P4["P4"] --> P5["P5 fails"]:::bad
+  P5 -. "compensate" .-> P4
+  P4 -. "compensate" .-> P3
+  P3 -. "compensate" .-> P2
+  P2 -. "compensate" .-> P1
+  classDef bad fill:#fecaca,stroke:#b91c1c,color:#000
+```
+<!-- /diagram:20-3 -->
+
+
 - A chain of **local transactions** P1 → P2 → P3 → P4 → P5 → P6; each service performs its own **update + commit** in its own DB, then triggers the next one (e.g. by **publishing an event to a queue / message broker**).
 - **It's kind of sequential in nature.**
 - **Failure handling:** if a later step fails (e.g. **P5 fails**), the previous services run **compensating transactions – Rollback** in reverse order: P4 → P3 → P2 → P1 (each undoing its committed work).

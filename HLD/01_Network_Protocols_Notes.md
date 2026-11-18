@@ -38,6 +38,24 @@ Network communication is organised in **layers** (the OSI model). Two matter mos
   - **Security** – SSL/TLS encrypt data during transmission.
 
 ## OSI layers
+
+<!-- diagram:01-0 -->
+**Diagram – OSI layers and where the protocols live**
+
+```mermaid
+graph TD
+  L7["7 Application: HTTP, FTP, SMTP, IMAP/POP, WebSocket, WebRTC"] --> L6["6 Presentation"]
+  L6 --> L5["5 Session"]
+  L5 --> L4["4 Transport: TCP, UDP"]
+  L4 --> L3["3 Network: IP"]
+  L3 --> L2["2 Data link: Ethernet, Wi-Fi"]
+  L2 --> L1["1 Physical: cables, radio"]
+  classDef hi fill:#fde68a,stroke:#b45309,color:#000
+  class L7,L4 hi
+```
+<!-- /diagram:01-0 -->
+
+
 Application · Presentation · Session · **Transport** · Network · Data Link · Physical. The two that matter here: **Application (L7)** and **Transport (L4).**
 
 ### Transport layer – TCP/IP vs UDP
@@ -45,12 +63,49 @@ Application · Presentation · Session · **Transport** · Network · Data Link 
 - **UDP** – connectionless, **fast, unordered, no guarantee.**
 
 ### Application layer – communication models
+
+<!-- diagram:01-1 -->
+**Diagram – Three communication models**
+
+```mermaid
+graph LR
+  subgraph CS["Client-server: HTTP, FTP, SMTP"]
+    B["Browser"] <-->|"Request / Response"| W["Web server"]
+  end
+  subgraph WS["WebSocket: chat apps"]
+    C1["Client"] <-->|"one persistent two-way connection"| S1["Server"]
+  end
+  subgraph P2P["Peer-to-peer: WebRTC"]
+    PA["Peer A"] <-->|"direct"| PB["Peer B"]
+  end
+```
+<!-- /diagram:01-1 -->
+
+
 1. **Client–server** (connection-oriented): **HTTP, FTP, SMTP** (sending: 2 connections – control connection + data connection (temp)), **IMAP + POP** (receiving mail).
 2. **Peer-to-peer** → **WebRTC** (clients communicate directly with each other).
 - Web browser ⇄ web server: `Req / Res` over HTTP / FTP / SMTP.
 - **WebSocket (messaging apps):** a persistent two-way connection between client and server (client ⇄ server, bi-directional `Req/Res`) – peer-to-peer is not used.
 
 ## 1. TCP – Transmission Control Protocol
+
+<!-- diagram:01-2 -->
+**Diagram – TCP three-way handshake**
+
+```mermaid
+sequenceDiagram
+  participant C as Client
+  participant S as Server
+  C->>S: SYN
+  S->>C: SYN + ACK
+  C->>S: ACK
+  Note over C,S: connection established
+  C->>S: Data segment
+  S-->>C: ACK (resend if no ACK arrives)
+```
+<!-- /diagram:01-2 -->
+
+
 - **Role:** one of the **core protocols of the Internet protocol suite**; provides **reliable, connection-oriented communication between devices on a network**; operates at the **transport layer of OSI**.
 - **Functionality:** **establishes a connection earlier than data transfer** – the **3-way handshake**: client sends **SYN segment** → server replies **SYN + ACK segment** → client sends **ACK segment**; then it **ensures the receipt of packets** and **retransmits if there is any loss of data.**
 - **Use cases:** widely used where **data integrity and sequencing are critical** along with data transfer – **email delivery, web browsing, file transfer.**
@@ -74,6 +129,20 @@ Application · Presentation · Session · **Transport** · Network · Data Link 
 - **SMTP (Simple Mail Transfer Protocol):** used for **sending email**; **IMAP and POP3** are used for **receiving** email.
 
 ## 6. Proxy servers
+
+<!-- diagram:01-3 -->
+**Diagram – A proxy sits between clients and servers**
+
+```mermaid
+graph LR
+  C1["Client 1"] --> P["Proxy server"]
+  C2["Client 2"] --> P
+  P --> S["Server"]
+  P -.- F["filtering, caching, load balancing, privacy"]
+```
+<!-- /diagram:01-3 -->
+
+
 A **proxy server acts as an intermediary between client devices and servers.**
 - **Purposes:** content filtering · privacy/anonymity · security and access protocol · load balancing · caching.
 - **Types:** forward · reverse · web proxy · public proxy.

@@ -52,15 +52,60 @@ When Service A calls Service B, A needs several capabilities:
 7. **Telemetry** – record latency, error rate and traffic per API for monitoring and debugging.
 
 ### The problem and the way out
+
+<!-- diagram:28-7 -->
+**Diagram – Service mesh: sidecar proxies take over the common work**
+
+```mermaid
+graph LR
+  subgraph PA["Microservice A pod"]
+    A["Service A"] --- SA["Sidecar proxy"]
+  end
+  subgraph PB["Microservice B pod"]
+    SB["Sidecar proxy"] --- B["Service B"]
+  end
+  SA <-->|"discovery, load balancing, retry, circuit breaking, security, telemetry"| SB
+```
+<!-- /diagram:28-7 -->
+
+
 If every microservice embeds all seven things, the same code is **duplicated everywhere**. The better answer is a **service mesh**: a layer of small proxies running next to each service that handles discovery, load balancing, retries, circuit breaking, security and telemetry, so the services themselves stay simple. (The service mesh topic itself is only in the unreadable Zoho notes.)
 <!-- simple-explanation -->
 
 
 ## 1. What is an API Gateway?
+
+<!-- diagram:28-0 -->
+**Diagram – API gateway routes by endpoint**
+
+```mermaid
+graph LR
+  C["Client"] --> G["API gateway"]
+  G -->|"/api/invoice"| I["Invoice microservice"]
+  G -->|"/api/order"| O["Order microservice"]
+  G -->|"/api/sales"| S["Sales microservice"]
+```
+<!-- /diagram:28-0 -->
+
+
 It **accepts the client's API request and routes it to the correct backend service based on the API endpoint.**
 `Client → API GATEWAY → /api/invoice → Invoice MS · /api/order → Order MS · /api/sales → Sales MS`
 
 ### Isn't that what a load balancer does too?
+
+<!-- diagram:28-1 -->
+**Diagram – Load balancer: instances of one service only**
+
+```mermaid
+graph LR
+  R["/api/invoice"] --> LB["Load balancer"]
+  LB --> I1["Invoice instance 1"]
+  LB --> I2["Invoice instance 2"]
+  LB --> I3["Invoice instance 3"]
+```
+<!-- /diagram:28-1 -->
+
+
 **No.** Generally a **load balancer simply distributes the traffic to the multiple instances of one microservice** based on factors like **health, traffic load**, etc. But **usually it has no capability to understand an API and then take the decision where to route it.**
 (`/api/invoice → Load Balancer → Invoice MS instance 1 / 2 / 3`.)
 
@@ -69,6 +114,22 @@ It **accepts the client's API request and routes it to the correct backend servi
 ## 2. Other capabilities of an API Gateway
 
 ### ① API Composition *(very rarely used – e.g. in Netflix)*
+
+<!-- diagram:28-2 -->
+**Diagram – API composition: one call, many services**
+
+```mermaid
+graph LR
+  C["Client: /api/myorder"] --> G["API gateway"]
+  G --> P["Product service"]
+  G --> I["Invoice service"]
+  G --> R["Rating and review"]
+  G --> RC["Recommendation"]
+  G -->|"one joined response"| C
+```
+<!-- /diagram:28-2 -->
+
+
 **Problem:** visiting the **"My Orders" page**:
 - **Mobile client** → REST APIs: fetch product details, fetch invoice details.
 - **PC client** → REST APIs: fetch product details, invoice details, **ratings & reviews, recommendations** (bigger screen, more data).
@@ -76,6 +137,25 @@ The client would have to call many APIs and merge.
 **API Gateway makes the client's life easier through API composition:** the client calls **`/api/myorder`**; **based on the client type, the gateway calls multiple services (Product, Invoice, Rating & Review, Recommendation systems), joins the responses, and returns one response to the client.**
 
 ### ② Authentication (like the OAuth 2.0 flow)
+
+<!-- diagram:28-3 -->
+**Diagram – Authentication at the gateway**
+
+```mermaid
+sequenceDiagram
+  participant C as Client
+  participant A as Authorization server
+  participant G as API gateway
+  participant S as Microservices
+  C->>A: get access token
+  A-->>C: token
+  C->>G: API request + token
+  G->>G: validate token
+  G->>S: forward only if valid
+```
+<!-- /diagram:28-3 -->
+
+
 1. Client gets an **access token** from the **Authorization Server.**
 2. Client **passes the token with the API request** to the API Gateway.
 3. Gateway validates the token.
@@ -88,6 +168,24 @@ The client would have to call many APIs and merge.
 - **API queues** – **hold requests to an API which can't be processed immediately**; helps to handle the **thundering herd** issue. (See [Thundering Herd](27_Thundering_Herd_Notes.md).)
 
 ### ④ Service discovery
+
+<!-- diagram:28-4 -->
+**Diagram – Service discovery behind the gateway**
+
+```mermaid
+sequenceDiagram
+  participant C as Client
+  participant G as API gateway
+  participant D as Service discovery (Eureka)
+  participant S as Order / Invoice / Sales
+  C->>G: 1 /api/order
+  G->>D: 2 where is the order service?
+  D-->>G: 3 locations (healthy instances only)
+  G->>S: 4 call the instance
+```
+<!-- /diagram:28-4 -->
+
+
 As microservices **scale up and down**, it's necessary to **know the location (IP address and port)** – service discovery keeps track.
 - **Approach 1:** each microservice **registers or de-registers itself.**
 - **Approach 2:** service discovery **health-checks all registered microservices and keeps only the active microservices' locations.**
@@ -99,6 +197,25 @@ As microservices **scale up and down**, it's necessary to **know the location (I
 ---
 
 ## 3. "If the API Gateway is a single entry point, how does it handle millions of requests per second?"
+
+<!-- diagram:28-5 -->
+**Diagram – Scaling the gateway across zones and regions**
+
+```mermaid
+graph TD
+  C["Client"] --> DNS["DNS: Route 53 / Traffic Manager, routes by region"]
+  DNS --> R1
+  DNS --> R2
+  subgraph R1["Region 1: Mumbai"]
+    G1["API gateway + service discovery"] --> LB1["Load balancers in AZ1, AZ2, AZ3"] --> M1["Invoice / Order instances"]
+  end
+  subgraph R2["Region 2: Bangalore"]
+    G2["API gateway + service discovery"] --> LB2["Load balancers in AZ1, AZ2"] --> M2["Invoice / Order instances"]
+  end
+```
+<!-- /diagram:28-5 -->
+
+
 Answer = **horizontal scaling + multi-AZ + multi-region + DNS routing:**
 - `Client → API Gateway (many instances) → Load Balancer → N instances of Invoice MS / Order MS`, with **Service Discovery** next to the gateway.
 - **Region** (e.g. **Mumbai**) contains **Availability Zones (AZ1, AZ2, AZ3)** = **dedicated data centres** in different areas (e.g. Bandra, Santacruz, Andheri). Region 2 (e.g. **Bangalore**) has its own AZ1, AZ2.
@@ -111,6 +228,19 @@ So the "single" entry point is really a **fleet of gateways, replicated per AZ/r
 ---
 
 ## 4. How do two microservices communicate with each other?
+
+<!-- diagram:28-6 -->
+**Diagram – What Microservice A needs to call Microservice B**
+
+```mermaid
+graph LR
+  A["Microservice A<br/>needs: service discovery, client-side LB, circuit breaker, retry, telemetry"] --> B["Microservice B instances"]
+  A -.->|"locations"| SD["Service discovery"]
+  B -.->|"authorization: is A allowed?"| A
+```
+<!-- /diagram:28-6 -->
+
+
 Need: **Microservice A must communicate with Microservice B.** (Diagram: API Gateway + Service Discovery + Application Load Balancers in front of Microservice A and Microservice B instances; a **Service Mesh** is hinted as the better solution.)
 
 ### ① Service discovery capability

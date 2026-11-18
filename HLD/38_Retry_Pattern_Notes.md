@@ -59,6 +59,26 @@ RateLimiter → Bulkhead → TimeLimiter → CircuitBreaker → **Retry**. Retry
 
 ## 1. Why Retry?
 
+<!-- diagram:38-0 -->
+**Diagram – Retry only the failed downstream call**
+
+```mermaid
+sequenceDiagram
+  participant C as Client
+  participant O as Order service
+  participant P as Product service
+  C->>O: request
+  O->>O: 90% of the work done
+  O->>P: call
+  P-->>O: transient failure (5xx / timeout)
+  Note over O: wait, then retry (no need to redo the 90%)
+  O->>P: retry
+  P-->>O: success
+  O-->>C: response
+```
+<!-- /diagram:38-0 -->
+
+
 In a distributed system, a call to a downstream service might fail because of **transient issues** – short, temporary problems like network glitches or timeouts. **Retrying the same request after a short delay can succeed.**
 
 **"Why should *we* retry? Why can't the client just call our API again?"**
@@ -79,6 +99,24 @@ Two questions: **When to retry?** and **How to retry?**
 - **Retry network errors and timeouts only if the endpoint ensures idempotency.**
 
 ### Retry decision table
+
+<!-- diagram:38-1 -->
+**Diagram – Should I retry?**
+
+```mermaid
+graph TD
+  E["Call failed"] --> Q1{"4xx client error?"}
+  Q1 -->|"yes"| N["Do not retry"]
+  Q1 -->|"no"| Q2{"5xx or 429?"}
+  Q2 -->|"yes"| Y["Retry (429: with a delay)"]
+  Q2 -->|"no"| Q3{"network error or timeout?"}
+  Q3 -->|"yes"| Q4{"endpoint idempotent?"}
+  Q4 -->|"yes"| Y
+  Q4 -->|"no"| N
+```
+<!-- /diagram:38-1 -->
+
+
 | HTTP status / event | Meaning | Retry? |
 |---|---|---|
 | 200 OK | Success | No |
@@ -98,6 +136,17 @@ Two questions: **When to retry?** and **How to retry?**
 ## 3. How to retry? Types of retry
 
 ### 3.1 Fixed Interval
+
+<!-- diagram:38-2 -->
+**Diagram – Fixed interval: 2 s every time**
+
+```mermaid
+graph LR
+  A["original call"] --> W1["wait 2 s"] --> R1["retry 1"] --> W2["wait 2 s"] --> R2["retry 2"] --> W3["wait 2 s"] --> R3["retry 3"]
+```
+<!-- /diagram:38-2 -->
+
+
 Retry after a **constant delay**.
 Example: total attempts = 4 (original + 3 retries), fixed delay 2 s → original call at t=2, 1st retry at 4, 2nd retry at 6, 3rd retry at 8.
 
@@ -168,6 +217,17 @@ public Retry fixedRetry() {
 ```
 
 ### 3.2 Exponential Backoff
+
+<!-- diagram:38-3 -->
+**Diagram – Exponential backoff: base x 2^n**
+
+```mermaid
+graph LR
+  A["original call"] --> W1["wait 100 ms"] --> R1["retry 1"] --> W2["wait 200 ms"] --> R2["retry 2"] --> W3["wait 400 ms"] --> R3["retry 3"]
+```
+<!-- /diagram:38-3 -->
+
+
 **Delay increases exponentially:** `delay = Base × 2^(no. of failed retry attempts)`
 
 Example: total attempts = 4 (original + 3 retries), Base = 100 ms
@@ -202,6 +262,17 @@ try {
 **Output:** max attempts 4 → 1 original + 3 retries.
 
 ### 3.3 Exponential Backoff + Jitter
+
+<!-- diagram:38-4 -->
+**Diagram – Backoff with jitter: random wait up to the limit**
+
+```mermaid
+graph LR
+  A["original call"] --> W1["wait random(0, 100 ms)"] --> R1["retry 1"] --> W2["wait random(0, 200 ms)"] --> R2["retry 2"] --> W3["wait random(0, 400 ms)"] --> R3["retry 3"]
+```
+<!-- /diagram:38-4 -->
+
+
 Like exponential backoff but adds **jitter / randomness** to the delay to avoid retry storms.
 
 `delay = random_between(0, min(maxDelay, baseDelay × 2^failed_retry_attempt))`

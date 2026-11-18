@@ -60,6 +60,26 @@ See also [Distributed Transactions](20_Distributed_Transactions_Notes.md) and [D
 
 ## 1. Monolithic vs Microservices (p1–p2)
 
+<!-- diagram:03_04-0 -->
+**Diagram – Monolith versus microservices**
+
+```mermaid
+graph LR
+  subgraph M["Monolith: one deployable unit"]
+    direction TB
+    MA["Order, Inventory, Payment, Login ... all in one application"] --> MD[("One database")]
+  end
+  subgraph MS["Microservices: small independent services"]
+    direction TB
+    P["Product"] --> PD[("DB")]
+    O["Order"] --> OD[("DB")]
+    B["Billing"] --> BD[("DB")]
+    L["Login"] --> LD[("DB")]
+  end
+```
+<!-- /diagram:03_04-0 -->
+
+
 ### Monolithic (legacy) application
 One big application containing everything (Order, Inventory, Payment, … – e.g. an online store), deployed as a single unit (GB-sized).
 
@@ -86,6 +106,19 @@ Break the monolith into small services – Product, Order, Billing, Login, Accou
 **Micro + Services** – services should be small, but **there is no definition of how much "micro" is.**
 
 ### Phases of microservices
+
+<!-- diagram:03_04-1 -->
+**Diagram – The four phases**
+
+```mermaid
+graph LR
+  P1["1 Decomposition<br/>by business capability<br/>by subdomain"] --> P2["2 Database<br/>database per service<br/>shared database"]
+  P2 --> P3["3 Communication<br/>API (sync)<br/>Event (async)"]
+  P3 --> P4["4 Integration<br/>API Gateway<br/>observability, monitoring"]
+```
+<!-- /diagram:03_04-1 -->
+
+
 | # | Phase | Contents |
 |---|---|---|
 | 1 | **Decomposition** | decompose by **business capability**; decompose by **subdomain** |
@@ -99,10 +132,39 @@ Break the monolith into small services – Product, Order, Billing, Login, Accou
 Question: *how much small?* Two approaches:
 
 ### ① By business capability / functionality
+
+<!-- diagram:03_04-2 -->
+**Diagram – Decompose by business capability**
+
+```mermaid
+graph TD
+  APP["Online order application"] --> O["Order management"]
+  APP --> P["Product management"]
+  APP --> A["Account management"]
+  APP --> L["Login"]
+```
+<!-- /diagram:03_04-2 -->
+
+
 Decompose by what the business does. Example – **Online Order Application** → **Order management, Product management, Account management, Login** …
 **Challenge:** you need **knowledge of which functions exist in your business**; and **there is no definition of how much micro.**
 
 ### ② By subdomain – DDD (Domain-Driven Design)
+
+<!-- diagram:03_04-3 -->
+**Diagram – Decompose by subdomain (DDD)**
+
+```mermaid
+graph TD
+  OM["Order Management domain"] --> OT["Order tracking"]
+  OM --> OP["Order placing"]
+  OM --> OR["Order returning"]
+  PD["Payment domain"] --> FP["Forward payment"]
+  PD --> RP["Reverse payment"]
+```
+<!-- /diagram:03_04-3 -->
+
+
 Use **Domain-Driven Design**: split the application into **domains**, and each domain into sub-domains/services – e.g. **Order Management domain → several services**, **Payment domain → a few services.**
 
 ---
@@ -110,6 +172,20 @@ Use **Domain-Driven Design**: split the application into **domains**, and each d
 # PART 2
 
 ## 4. Strangler Pattern (refactoring a monolith into microservices) (p6)
+
+<!-- diagram:03_04-4 -->
+**Diagram – Strangler pattern: traffic moves gradually to the new services**
+
+```mermaid
+graph LR
+  C["Clients"] --> R["Router / facade"]
+  R -->|"100% at the start, then 80%, 40%, 0%"| M["Legacy monolith"]
+  R -->|"0% at the start, then 20%, 60%, 100%"| S1["New microservice S1"]
+  R --> S2["New microservice S2"]
+```
+<!-- /diagram:03_04-4 -->
+
+
 - Put a **controller / routing layer (a facade)** in front of the **monolith** and the **new microservices** (S1, S2, …).
 - Initially **all traffic (100 %) goes to the monolith.** As each module is rebuilt as a microservice, the controller **gradually shifts traffic** – e.g. **0 % → 20 % → 60 % → 100 %** to the microservices while the monolith traffic **goes down** – until the monolith can be retired. (The diagram shows an API count example: ~1000 APIs, 900 still in the monolith.)
 
@@ -117,6 +193,20 @@ Use **Domain-Driven Design**: split the application into **domains**, and each d
 Two options: **Database for each individual service** · **Shared database.** (SAGA / CQRS are needed with the database-per-service approach.)
 
 ### Why a shared database is not a success
+
+<!-- diagram:03_04-5 -->
+**Diagram – Shared database: services are tied together**
+
+```mermaid
+graph TD
+  S1["S1 Order"] --> DB[("One shared DB")]
+  S2["S2 Inventory"] --> DB
+  S3["S3 Payment"] --> DB
+  DB -.- N["Scaling or changing one service affects all"]
+```
+<!-- /diagram:03_04-5 -->
+
+
 **Case 1 – can't scale independently.** S1 (Order), S2 (Inventory), S3 (Payment) share one DB. If **Order** has lots of traffic and we want to scale only the Order service, **we have to scale the whole database** → **we can't scale independently.**
 
 **Case 2 – schema changes are risky.** One team has a common database with 10 tables; S3 wants to modify table 10 / delete a column. S3 **cannot just delete it – it must first check dependencies** on every other service.
@@ -128,6 +218,20 @@ Two options: **Database for each individual service** · **Shared database.** (S
 > **Note:** these "easy" things become **difficult in a distributed database.** If a request spans S1, S2, S3 DBs, each only has a **local transaction (ACID)** – *"my transaction is now spanning over the distributed database"* → this challenge is **solved by the SAGA design pattern.**
 
 ### Database-per-service
+
+<!-- diagram:03_04-6 -->
+**Diagram – Database per service**
+
+```mermaid
+graph TD
+  S1["S1"] --> D1[("D1: relational SQL")]
+  S2["S2"] --> D2[("D2: NoSQL / MongoDB")]
+  S3["S3"] --> D3[("D3: PostgreSQL")]
+  S2 -. "needs D3 data: calls the API of S3, never the DB" .-> S3
+```
+<!-- /diagram:03_04-6 -->
+
+
 - S1 → D1 (relational DB / SQL), S2 → D2 (NoSQL / MongoDB), S3 → D3 (PostgreSQL) – **each service can choose its own DB type.**
 - **S2 will not query DB3 directly**; if S2 wants D3's data it must **request S3 through an API** and S3 gives the data.
 - **Easy to maintain a particular DB**, and **we can scale independently.**
@@ -135,6 +239,28 @@ Two options: **Database for each individual service** · **Shared database.** (S
 ---
 
 ## 6. SAGA pattern (p9–p10)
+
+<!-- diagram:03_04-7 -->
+**Diagram – SAGA: local transactions with compensation**
+
+```mermaid
+sequenceDiagram
+  participant O as Order service
+  participant I as Inventory service
+  participant P as Payment service
+  O->>O: save order in ORDER DB
+  O->>I: event: order created
+  I->>I: update INVENTORY DB
+  I->>P: event: stock reserved
+  P->>P: payment fails
+  P-->>I: failure event
+  I-->>I: roll back (compensate)
+  I-->>O: failure event
+  O-->>O: roll back (compensate)
+```
+<!-- /diagram:03_04-7 -->
+
+
 **Why do we need Saga?** Transaction: *Place an order → payment.* Three DBs: **ORDER** (T1, T2), **INVENTORY** (T3, T4), **PAYMENT** (T5, T6). Order row inserted successfully, inventory updated successfully, **payment fails** ✗.
 - ACID tells that success is **all or none** – but it is only **local** ("Local ACID? Local Txn?"). We need to undo the earlier steps.
 
@@ -143,6 +269,29 @@ Two options: **Database for each individual service** · **Shared database.** (S
 Walk-through: *an order request arrives → Order service updates its DB and publishes an event → Inventory listens to the Order event, updates its own DB and publishes an event → Payment listens; suppose Payment fails → it generates a **failure** event → Inventory and Order roll back.*
 
 ### Two types of Saga
+
+<!-- diagram:03_04-8 -->
+**Diagram – Choreography versus orchestration**
+
+```mermaid
+graph LR
+  subgraph CH["Choreography: no central brain"]
+    direction LR
+    A1["S1"] -->|"event"| BR(("Message broker"))
+    BR -->|"event"| A2["S2"]
+    A2 -->|"event"| BR
+    BR -->|"event"| A3["S3"]
+  end
+  subgraph OR["Orchestration: central coordinator"]
+    direction TB
+    O["Orchestrator"] -->|"1 call"| B1["S1"]
+    O -->|"2 call after S1 replies"| B2["S2"]
+    O -->|"3 call after S2 replies"| B3["S3"]
+  end
+```
+<!-- /diagram:03_04-8 -->
+
+
 **① Choreography** (event-based, no central brain)
 - Services communicate through a **message broker / queues** (Q1 = success events, Q2 = failure events).
 - S1 processes and sends an event; **S2 listens, does its work and publishes an event**; S3 works based on the event and, if it succeeds, publishes the next event; **if it fails it publishes a failure event** and the previous ones roll back.
@@ -153,6 +302,19 @@ Walk-through: *an order request arrives → Order service updates its DB and pub
 - (Single place that knows the whole flow; easier to follow, but the orchestrator is a central component.)
 
 ### CQRS
+
+<!-- diagram:03_04-9 -->
+**Diagram – CQRS: separate write side and read side**
+
+```mermaid
+graph LR
+  CL["Client"] -->|"command: create, update, delete"| W[("Write DBs: DB1, DB2")]
+  W -->|"events"| V[("Read view DB<br/>already joined")]
+  CL -->|"query: read"| V
+```
+<!-- /diagram:03_04-9 -->
+
+
 Mentioned at the page edge as the companion pattern for **querying across per-service databases** (Command Query Responsibility Segregation) – see "CQRS" in the data-management section above.
 
 ---

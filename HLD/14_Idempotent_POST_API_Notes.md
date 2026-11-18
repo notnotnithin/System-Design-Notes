@@ -71,6 +71,26 @@ Example operation: **adding an item into a cart** – `POST` followed by a dupli
 ---
 
 ## 3. How can duplicate POSTs come? (two types of side effect)
+
+<!-- diagram:14-0 -->
+**Diagram – Sequential and parallel duplicates**
+
+```mermaid
+sequenceDiagram
+  participant C as Client
+  participant S as Server
+  Note over C,S: Sequential: timeout then retry
+  C->>S: POST add item
+  S-->>C: no response (timeout)
+  C->>S: POST add item (duplicate)
+  Note over C,S: Parallel: both arrive together
+  C->>S: POST add item (original)
+  C->>S: POST add item (duplicate)
+  Note over S: only one of them may be processed
+```
+<!-- /diagram:14-0 -->
+
+
 1. **Sequential** – client sends `POST` (e.g. "add item to cart"), the call **times out**, client sends a **duplicate/retry POST**. Server may already have processed the first one → *how do we handle this?*
 2. **Parallel** – the **original POST** and a **duplicate POST** arrive at (almost) the same time → *how to handle? Only **one** request should be processed.*
 
@@ -86,6 +106,24 @@ Use an **Idempotency Key** – a **unique UUID**, appended/associated with the o
 **IK life-cycle:** `Created / Acquired` → `Consumed / Claimed`
 
 ### Flow – sequential duplicates
+
+<!-- diagram:14-1 -->
+**Diagram – Idempotency key flow**
+
+```mermaid
+graph TD
+  C["Client generates idempotency key IK1 and sets it in the request header"] --> V{"IK present in request?"}
+  V -->|"no"| E400["HTTP 400 validation error"]
+  V -->|"yes"| DB{"IK present in DB?"}
+  DB -->|"no"| INS["Insert IK1 with status Created, do the operation"]
+  INS --> OK["Mark IK1 Consumed, return HTTP 201"]
+  DB -->|"yes"| ST{"Status?"}
+  ST -->|"Created: still processing"| E409["HTTP 409 conflict"]
+  ST -->|"Consumed: already done"| E200["HTTP 200 with earlier result"]
+```
+<!-- /diagram:14-1 -->
+
+
 `POST /addItem` (header `IK: IK1`)
 
 1. **Client generates** an Idempotency Key (the original and its duplicate/retry use the same key).
@@ -102,6 +140,26 @@ Use an **Idempotency Key** – a **unique UUID**, appended/associated with the o
 DB table: `| Key | Status |` e.g. `| IK1 | Created → Consumed |`.
 
 ### Flow – parallel duplicates
+
+<!-- diagram:14-2 -->
+**Diagram – Parallel duplicates: only one request wins**
+
+```mermaid
+sequenceDiagram
+  participant C as Client
+  participant S as Server
+  participant D as DB
+  C->>S: POST with IK1 (request 1)
+  C->>S: POST with IK1 (request 2)
+  S->>D: check and insert IK1 atomically (mutex or unique key)
+  D-->>S: request 1 wins: inserted as Created
+  D-->>S: request 2: key already present
+  S-->>C: request 1 processed, HTTP 201
+  S-->>C: request 2 gets 409 or 200, never processed twice
+```
+<!-- /diagram:14-2 -->
+
+
 Two requests `POST /addItem` with **the same IK (IK1)** arrive simultaneously.
 
 1. Client generates IK and sets it in the request header.

@@ -40,15 +40,71 @@ Source (handwritten, pages 33–36 of the 36-page PDF): https://drive.google.com
 - 10 years ⇒ ~2 TB × 365 ⇒ **~730 TB.**
 
 ### 2. Why not direct peer-to-peer?
+
+<!-- diagram:11-0 -->
+**Diagram – Peer-to-peer versus a chat server**
+
+```mermaid
+graph LR
+  subgraph P["Peer-to-peer: no history, no groups, not scalable"]
+    A["User A"] <--> B["User B"]
+  end
+  subgraph S["With a chat server"]
+    A2["User A"] <--> CS["Chat server<br/>history, groups, availability"] <--> B2["User B"]
+  end
+```
+<!-- /diagram:11-0 -->
+
+
 User A and User B (each with an IP address) could talk directly peer-to-peer, **but: no chat history, not scalable, no group, not fully available.** → we need a **common place (chat server)** to hold the details and take care of everything.
 
 ### 3. Protocol – HTTP fails for receiving
+
+<!-- diagram:11-1 -->
+**Diagram – Polling versus WebSocket**
+
+```mermaid
+sequenceDiagram
+  participant C as Client
+  participant S as Server
+  Note over C,S: Polling: keep asking
+  C->>S: any new message?
+  S-->>C: no
+  C->>S: any new message?
+  S-->>C: yes, message
+  Note over C,S: WebSocket: one persistent two-way connection
+  C->>S: handshake (upgrade)
+  S-->>C: connection open
+  S->>C: message pushed any time
+  C->>S: message sent any time
+```
+<!-- /diagram:11-1 -->
+
+
 Normally HTTP = send a request, get a response, terminate. User A → Chat Server → User B: **receiving is not possible without asking (a request).** Improved protocols to **receive** messages:
 1. **Polling** – the client keeps sending requests (e.g. every 1 s); most return "no" – wasteful (1 sec → lots of calls).
 2. **Long polling / pushing** – the request stays open until the server has data (then the client re-requests) – REST-based, fewer wasted calls.
 3. **WebSocket (bi-directional)** ⭐ – **connection-oriented** (SYN/ACK handshake) then a **bi-directional persistent connection** – used for chat.
 
 ### 4. Architecture
+
+<!-- diagram:11-2 -->
+**Diagram – Chat architecture**
+
+```mermaid
+graph TD
+  L["Login"] --> M["User-server mapping service<br/>ZooKeeper: user to server"]
+  UA["User A"] <-->|"WebSocket"| C1["Chat server 1"]
+  UB["User B"] <-->|"WebSocket"| C2["Chat server 2"]
+  C1 -.->|"which server holds B?"| M
+  C1 --> C2
+  C1 --> DB[("NoSQL DB: Cassandra")]
+  C2 --> DB
+  C1 --> P["Presence service: online / last seen"]
+```
+<!-- /diagram:11-2 -->
+
+
 ```
  Login ─► User–Server mapping service (ZooKeeper: user → server table)
  User-n ◄── WebSocket ──► Chat Server 1 | Chat Server 2 | Chat Server 3 … ──► NoSQL DB

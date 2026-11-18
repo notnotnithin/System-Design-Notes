@@ -66,6 +66,20 @@ Routes decide **where** a request goes; filters decide **what happens on the way
 # PART 1
 
 ## 1. What is an API Gateway?
+
+<!-- diagram:40_41-0 -->
+**Diagram – Gateway as the single entry point**
+
+```mermaid
+graph LR
+  C["Client"] --> G["API gateway: routing, load balancing, auth, rate limit, resilience, transformation, monitoring"]
+  G -->|"/api/invoice"| I["Invoice MS"]
+  G -->|"/api/order"| O["Order MS"]
+  G -->|"/api/sales"| S["Sales MS"]
+```
+<!-- /diagram:40_41-0 -->
+
+
 A **single entry point to access all microservices** (Client → API Gateway → `/api/invoice` → Invoice MS, `/api/order` → Order MS, `/api/sales` → Sales MS …).
 
 Benefits of this single entry point:
@@ -142,6 +156,22 @@ spring.cloud.gateway.routes[1].predicates[0]=Path=/orders/**
 Start all 3 servers: Product, Order and API Gateway.
 
 ## 3. API Gateway + Load Balancer
+
+<!-- diagram:40_41-1 -->
+**Diagram – Gateway with Eureka and lb:// URIs**
+
+```mermaid
+graph LR
+  C["Client"] --> G["API gateway :8083"]
+  G -->|"lb://product-service"| P["Product service instances"]
+  G -->|"lb://order-service"| O["Order service instances"]
+  G -.->|"fetch instances"| E["Eureka server :8761"]
+  P -.->|"register"| E
+  O -.->|"register"| E
+```
+<!-- /diagram:40_41-1 -->
+
+
 (Prerequisites: *Service Discovery* and *Client Side Load Balancer* notes – HLD #34, #35.)
 
 **Product service** – add `spring-cloud-starter-netflix-eureka-client`, and:
@@ -209,6 +239,20 @@ eureka.client.service-url.defaultZone=http://localhost:8761/eureka
 (Recap of the benefits list above.) To apply **Authentication, Rate Limiting, Resilience** etc. in the API Gateway we must understand **FILTERS**.
 
 ## 4. Filters in API Gateway
+
+<!-- diagram:40_41-2 -->
+**Diagram – Request path through the gateway filters**
+
+```mermaid
+graph LR
+  C["Client"] --> DH["DispatcherHandler"] --> RM["RouteMappingHandler: finds route by predicate"]
+  RM --> GF["Global filters: pre logic"] --> RF["Route-specific filters: pre logic"]
+  RF --> RU["RouteToRequestUrlFilter (order 10000)"] --> NR["NettyRoutingFilter (last)"] --> MS["Microservice"]
+  MS -->|"response: post logic of each filter"| W["NettyWriteResponseFilter"] --> C
+```
+<!-- /diagram:40_41-2 -->
+
+
 A filter can **intercept and modify the HTTP request and response** as they pass through the gateway.
 
 | | Global Filters | Route-Specific Filters (GatewayFilters) |
@@ -234,6 +278,23 @@ public static final int ORDER = Ordered.LOWEST_PRECEDENCE;
 - Route-specific filters: with e.g. 3 filters on a route, their **index (0, 1, 2) is used as the Order value**.
 
 ## 5. Custom Global Filter – JWT Authentication
+
+<!-- diagram:40_41-3 -->
+**Diagram – JWT global filter logic**
+
+```mermaid
+graph TD
+  R["Request"] --> A{"path starts with /auth?"}
+  A -->|"yes"| P["pass through"]
+  A -->|"no"| H{"Authorization header present?"}
+  H -->|"no"| U["401 Unauthorized"]
+  H -->|"yes"| V{"token valid?"}
+  V -->|"no"| U
+  V -->|"yes"| N["chain.filter: continue, then post-filter logic"]
+```
+<!-- /diagram:40_41-3 -->
+
+
 ```java
 @Component
 public class JwtAuthGlobalFilter implements GlobalFilter, Ordered {

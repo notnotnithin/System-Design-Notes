@@ -59,6 +59,18 @@ Because network failures can't be avoided in a distributed system, **partition t
 
 ## 2. Running example used throughout
 
+<!-- diagram:02-0 -->
+**Diagram – Three nodes with replicated data**
+
+```mermaid
+graph TD
+  A["Application A"] -->|"write a = 5"| B["DB node B (India)<br/>a: 4 to 5"]
+  A -->|"read query"| C["DB node C (US)<br/>a = 5 after replication"]
+  B <-->|"replication"| C
+```
+<!-- /diagram:02-0 -->
+
+
 Three nodes holding the same data, replicated:
 
 ```
@@ -101,6 +113,19 @@ Three nodes holding the same data, replicated:
 
 ## 5. P – Partition Tolerance (p2)
 
+<!-- diagram:02-1 -->
+**Diagram – The system keeps working when the B–C link breaks**
+
+```mermaid
+graph TD
+  U["User / Application"] --> SYS
+  subgraph SYS["The system (hidden from the user)"]
+    B["Node B"] -. "link broken" .- C["Node C"]
+  end
+```
+<!-- /diagram:02-1 -->
+
+
 - **System is up** even though the network between nodes is broken.
 - The system is **hidden** from the user:
   - The user **doesn't know** data is replicated (or not).
@@ -112,6 +137,20 @@ Three nodes holding the same data, replicated:
 
 ## 6. Which combinations are possible? (p3)
 
+<!-- diagram:02-2 -->
+**Diagram – The CAP triangle: pick any two**
+
+```mermaid
+graph TD
+  C(("C<br/>Consistency")) ---|"CA"| A(("A<br/>Availability"))
+  A ---|"AP"| P(("P<br/>Partition tolerance"))
+  P ---|"CP"| C
+  X["All three together: not possible"]:::no
+  classDef no fill:#fecaca,stroke:#b91c1c,color:#000
+```
+<!-- /diagram:02-2 -->
+
+
 | Combination | Possible? | Note |
 |---|---|---|
 | **CA** | ✅ Possible | (system up – i.e. only when there is no partition) |
@@ -122,6 +161,21 @@ Three nodes holding the same data, replicated:
 ---
 
 ## 7. Why can't C, A and P co-exist? (p3)
+
+<!-- diagram:02-3 -->
+**Diagram – During a partition C must choose: stale answer or no answer**
+
+```mermaid
+graph TD
+  W["Application writes a = 6"] --> B["Node B: a = 6"]
+  B -. "partition: replication blocked" .- C["Node C: still a = 5"]
+  Q["Read query"] --> C
+  C -->|"answers a = 5"| S["Stale data: Consistency is broken"]:::bad
+  C -->|"refuses to answer"| N["No response: Availability is broken"]:::bad
+  classDef bad fill:#fecaca,stroke:#b91c1c,color:#000
+```
+<!-- /diagram:02-3 -->
+
 
 Setup: A writes `a = 6`; the link between B and C is **broken** (partition, drawn as `$$ / Break`).
 

@@ -47,11 +47,43 @@ Start simple with round robin; use weights when servers differ; use IP hash for 
 
 
 ## 1. Why a load balancer?
+
+<!-- diagram:18-0 -->
+**Diagram – Load balancer spreads the traffic**
+
+```mermaid
+graph LR
+  C1["Client"] --> LB["Load balancer"]
+  C2["Client"] --> LB
+  C3["Client"] --> LB
+  LB --> S1["Server S1"]
+  LB --> S2["Server S2"]
+  LB --> S3["Server S3"]
+```
+<!-- /diagram:18-0 -->
+
+
 Clients send requests; **not all requests should go to only one server** – one server must not get overloaded, so we **put a Load Balancer (LB)** between clients and servers (S1, S2, …).
 
 > **Main purpose of a load balancer:** it can do logging and many other things, but the main purpose is to **distribute the traffic appropriately across all the servers so that no single server is overburdened.**
 
 ## 2. Layers: L4 vs L7 (OSI model)
+
+<!-- diagram:18-1 -->
+**Diagram – L4 versus L7 load balancing**
+
+```mermaid
+graph LR
+  subgraph L4["L4 network LB: IP and TCP/UDP port, fast"]
+    R4["Request"] --> B4["LB looks at IP and port only"] --> S4["Server"]
+  end
+  subgraph L7["L7 application LB: header, cookie, data, caching"]
+    R7["Request"] --> B7["LB reads headers, session, cookies"] --> S7["Server chosen by content"]
+  end
+```
+<!-- /diagram:18-1 -->
+
+
 - **Application layer = Layer 7 (L7) balancer** – can read **headers, session, data, response**.
 - **Transport layer = Layer 4 (L4) balancer** – can see **TCP port** (UDP port, IP address, source and destination).
 
@@ -74,6 +106,19 @@ Clients send requests; **not all requests should go to only one server** – one
 # STATIC LOAD BALANCING
 
 ## ① Round Robin
+
+<!-- diagram:18-2 -->
+**Diagram – Round robin**
+
+```mermaid
+graph LR
+  R["Requests 1,2,3,4,5,6"] --> LB["Load balancer"]
+  LB -->|"1, 3, 5"| S1["Server 1"]
+  LB -->|"2, 4, 6"| S2["Server 2"]
+```
+<!-- /diagram:18-2 -->
+
+
 Requests are handed to servers **in turn**: with 4 clients and 2 servers → requests 1, 3, 5, 7 → **Server 1**; 2, 4, 6, 8 → **Server 2**.
 
 **Advantages**
@@ -85,6 +130,19 @@ Requests are handed to servers **in turn**: with 4 clients and 2 servers → req
 - Chance that the **low-capacity server will go down** because of request overload.
 
 ## ② Weighted Round Robin
+
+<!-- diagram:18-3 -->
+**Diagram – Weighted round robin: server 1 weight 3, server 2 weight 1**
+
+```mermaid
+graph LR
+  R["Requests 1 to 8"] --> LB["Load balancer"]
+  LB -->|"1,2,3 and 5,6,7"| S1["Server 1 (weight 3)"]
+  LB -->|"4 and 8"| S2["Server 2 (weight 1)"]
+```
+<!-- /diagram:18-3 -->
+
+
 Each server has a **weight = its capacity** – e.g. **Server 1 weight = 3×**, **Server 2 weight = 1×** → for every 4 requests, Server 1 gets 3 (requests 1,2,3,5,6,7…) and Server 2 gets 1 (4, 8…).
 
 **Advantages**
@@ -95,6 +153,21 @@ Each server has a **weight = its capacity** – e.g. **Server 1 weight = 3×**, 
 - If **requests have different processing times** (e.g. request 4 → 10 s, request 8 → 20 s while others take ~50 ms), the low-capacity server may get the heavy requests and **get overburdened.**
 
 ## ③ IP Hash
+
+<!-- diagram:18-4 -->
+**Diagram – IP hash: same client, same server**
+
+```mermaid
+graph LR
+  C1["192.178.10.4"] --> H{"hash(source IP)"}
+  C2["182.178.14.2"] --> H
+  C3["172.178.10.242"] --> H
+  H --> S1["Server 1"]
+  H --> S2["Server 2"]
+```
+<!-- /diagram:18-4 -->
+
+
 The LB computes **Hash(source IP address)** and, using that value, **assigns the request to a server** (e.g. clients `192.178.10.4`, `182.178.14.2`, `172.178.10.242`, `152.198.10.14` → hash → server 1 or 2).
 
 **Advantages**
@@ -110,6 +183,19 @@ The LB computes **Hash(source IP address)** and, using that value, **assigns the
 # DYNAMIC LOAD BALANCING
 
 ## ① Least Connection
+
+<!-- diagram:18-5 -->
+**Diagram – Least connection**
+
+```mermaid
+graph LR
+  C4["New request from Client 4"] --> LB["Load balancer"]
+  LB -->|"Server 2 has fewer active connections"| S2["Server 2: connection from Client 2"]
+  S1["Server 1: connections from Client 1 and 3"] -.- LB
+```
+<!-- /diagram:18-5 -->
+
+
 The LB **checks which server has fewer active connections** and sends the new request there (Server 1 has active connections from Client 1 & 3; Server 2 from Client 2 → new request from Client 4 goes to Server 2).
 
 **Advantages**
@@ -120,11 +206,36 @@ The LB **checks which server has fewer active connections** and sends the new re
 - **No difference between low-capacity and high-capacity servers** → the low-capacity server can get overburdened.
 
 ## ② Weighted Least Connection
+
+<!-- diagram:18-6 -->
+**Diagram – Weighted least connection**
+
+```mermaid
+graph LR
+  LB["Load balancer: ratio = active connections / weight"] --> S1["Server 1: weight 10, 2 connections<br/>ratio 0.2: chosen"]
+  LB --> S2["Server 2: weight 1, 1 connection<br/>ratio 1.0"]
+```
+<!-- /diagram:18-6 -->
+
+
 - **Calculate the ratio of number of active connections to the server's weight.**
 - **The server with the minimum ratio gets the request.**
 - Example: Server 1 weight = 10 with 2 active connections → ratio `2/10 = 0.2`; Server 2 weight = 1 with 1 active connection → ratio `1/1 = 1` → **Server 1 gets the request.**
 
 ## ③ Least Response Time
+
+<!-- diagram:18-7 -->
+**Diagram – Least response time**
+
+```mermaid
+graph LR
+  LB["Load balancer: score = TTFB x active connections, lowest wins, ties use round robin"] --> S1["S1: 3 x 2 = 6"]
+  LB --> S2["S2: 1 x 4 = 4"]
+  LB --> S3["S3: lowest score: chosen"]
+```
+<!-- /diagram:18-7 -->
+
+
 - Uses **TTFB (Time To First Byte)** = the **time interval between sending a request and receiving the first byte of the response from the server.**
 - **Picks the server which has fewer active connections and the least TTFB**; **if there is a clash, follow round robin.**
 - Example: S1 → TTFB 3 × 2 active connections = **6**; S2 → TTFB 1 × 4 active connections = **4**; S3 → TTFB 2 × (0–1 active connection) = **2**/lowest → choose the smallest score.

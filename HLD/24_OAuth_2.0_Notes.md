@@ -63,6 +63,20 @@ Why a code first and not the token directly? The code travels through the browse
 ---
 
 ## 2. 4 important roles / actors
+
+<!-- diagram:24-0 -->
+**Diagram – The four roles in "Sign in with Gmail"**
+
+```mermaid
+graph LR
+  RO["Resource owner<br/>the user (Himanshu)"] -->|"uses"| CL["Client<br/>Instagram / Facebook"]
+  CL <-->|"redirect, authorization code, access token"| AS["Authorization server<br/>Gmail login and consent"]
+  CL -->|"access token"| RS["Resource server<br/>Gmail data: name, DOB"]
+  RS -.->|"validates the token"| AS
+```
+<!-- /diagram:24-0 -->
+
+
 | Role | Example in the notes |
 |---|---|
 | **Resource Owner** | the user (e.g. *Himanshu*) who owns the data |
@@ -83,6 +97,33 @@ Why a code first and not the token directly? The code travels through the browse
 ---
 
 ## 4. End-to-end flow using Authorization Code Grant
+
+<!-- diagram:24-1 -->
+**Diagram – Authorization code flow**
+
+```mermaid
+sequenceDiagram
+  participant U as Resource owner (user)
+  participant C as Client (Instagram)
+  participant A as Authorization server (Gmail)
+  participant R as Resource server (Gmail data)
+  C->>A: 1 register the client
+  A-->>C: 2 client id and client secret
+  U->>C: 3 choose Sign in using Gmail
+  C->>U: 4 redirect to the authorization server
+  U->>A: 5 log in and give consent
+  A-->>C: 6 authorization code (via redirect URI)
+  C->>A: 7 exchange code (with client id and secret) for token
+  A-->>C: 8 access token (and refresh token)
+  C->>R: 9 request data with Bearer access token
+  R->>A: 10 validate the token
+  A-->>R: 11 valid or invalid
+  R-->>C: 12 data if valid, else 400 error
+  C-->>U: 13 sign-in successful or failed
+```
+<!-- /diagram:24-1 -->
+
+
 Actors in the diagram: **Resource Owner** (user), **Client** (e.g. Instagram – "Sign in using Gmail"), **Gmail Authorization Server**, **Gmail Resource Server** (user is already logged in to Gmail).
 
 1. **Registration** – client registers itself with the Authorization Server.
