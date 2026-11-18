@@ -8,54 +8,6 @@ Source (same PDF for both entries): https://drive.google.com/file/d/1EwfhhSiBNJw
 
 ---
 
-<!-- simple-explanation -->
-## In simple words – fault tolerance and the rate limiter
-
-### Why fault tolerance matters (the cascading failure story)
-Services call each other over the network. Imagine the **Product** service becomes very slow (60 seconds per reply) because of a bug.
-1. The **Order** service calls Product and each call **hangs for 60 s**, holding a thread.
-2. A burst of requests uses up **all of Order's threads**, all stuck waiting.
-3. Now Order can't serve *its* clients either, and **their** clients get stuck too.
-One slow service has spread the failure to many. That's a **cascading failure**. A **fault-tolerant** service keeps working or fails gracefully when something it depends on is failing.
-
-The standard toolbox (Resilience4j) is applied in this order: **Rate Limiter → Bulkhead → Time Limiter → Circuit Breaker → Retry**. The order matters: put the rate limiter *before* retry so retries don't flood the system with extra traffic that would be blocked anyway.
-
-### What is a rate limiter?
-It limits **how many requests a service accepts in a given time**, protecting it from sudden spikes or attacks (DDoS). Extra requests are rejected (or delayed). There are six common algorithms:
-
-**1. Fixed Window Counter** – count requests in fixed slices of time (e.g. 5 per 10 s). Simple and cheap. ❌ Edge problem: 5 requests at the end of one window plus 5 at the start of the next = **10 requests within 1 second**, even though each window obeyed the limit.
-
-**2. Sliding Log** – remember the **exact timestamp** of every accepted request. For each new request count how many fall in the last *N* seconds; if that's at the limit, reject. ✅ Very accurate. ❌ Uses a lot of memory and needs cleaning of old timestamps.
-
-**3. Sliding Window Counter (sub-windows)** – split the window into small slices (e.g. 10 s window of five 2 s slices) and keep a count per slice. The window moves forward slice by slice and only active slices are summed. ✅ Smoother than fixed window. ❌ More complex and more memory than fixed window.
-
-**4. Sliding Window Counter (weighted)** – a cheaper approximation: `requests in current window + (percentage of the previous window that still overlaps) × previous window's requests`. Example: 90 % of a previous window with 5 requests ≈ 4.5, so the effective count is already near the limit of 5 and the request is rejected. ❌ Assumes traffic was spread evenly.
-
-**5. Token Bucket** – imagine a bucket holding tokens. **Every request takes one token**; with no tokens, the request is denied. A refiller adds tokens regularly, up to the bucket's size (extra overflow is discarded). ✅ Simple and allows short bursts. ❌ After a quiet period the bucket is full, so a big burst is allowed all at once. **Resilience4j uses this by default.**
-
-**6. Leaky Bucket** – requests join a **queue** and are processed at a **constant rate**, like water dripping from a hole. If the queue is full, new requests are dropped. ✅ Very smooth output. ❌ Requests wait (more latency) and the queue size must be tuned.
-
-| Algorithm | Memory | Weakness |
-|---|---|---|
-| Fixed window | low | spike at window edges |
-| Sliding log | high | cleanup cost |
-| Sliding window (sub-windows) | medium | complexity |
-| Sliding window (weighted) | low | approximate |
-| Token bucket | low | burst after idle |
-| Leaky bucket | queue | added latency |
-
-### Using it in Spring Boot with Resilience4j
-Add the `resilience4j-spring-boot3` dependency and annotate the method that calls the other service with `@RateLimiter(name = "productRateLimiter", fallbackMethod = "rateLimitedFallback")`.
-- The method must be **public** and in a **Spring bean**, because it works through AOP (a proxy wraps the method).
-- The **fallback method** must have the same return type and parameters, plus a `Throwable`. It runs when the limit is exceeded and should return a friendly response.
-- Configuration (token bucket): `limitForPeriod=2` (2 tokens), `limitRefreshPeriod=10s` (refill every 10 s), `timeoutDuration=1s` (wait up to 1 s for a token before giving up). So only 2 calls per 10 seconds are allowed.
-- It works the same whether you call the other service via Feign, RestTemplate or RestClient.
-
-### Custom rate limiter with AOP
-You can write your own: create an annotation like `@CustomRateLimiter(limit = 5, windowInSeconds = 60)` and an `@Aspect` with `@Around` advice that checks your algorithm; if allowed it calls `pjp.proceed()` (run the real method), otherwise it rejects the call.
-<!-- simple-explanation -->
-
-
 ## 1. What is a Fault-Tolerant Microservice?
 
 A service that **continues to work even when a downstream system fails**. Instead of crashing or causing cascading failures, it **handles the failure gracefully**.
@@ -86,6 +38,19 @@ Microservices communicate over the network, and **one service's unavailability c
 
 To avoid it we build **fault-tolerant microservices**.
 
+<!-- isw:12_36-1 -->
+**In simple words**
+
+The notes explain with a scenario: because of buggy code or an infrastructure problem the **Product** service becomes very slow (**60 seconds per response**).
+- Without fault tolerance, a call from Order to Product **hangs for 60 s and blocks a thread.**
+- A sudden **burst** of calls from Order to Product **blocks all the threads**, all waiting for a response.
+- Because of this, **the clients of the Order service get blocked too.**
+- In the end the services **run out of threads and start rejecting requests.**
+
+This is a **cascading failure**: the problem is only in the Product service, but it spreads to other services. To avoid it, we build fault-tolerant microservices.
+<!-- /isw:12_36-1 -->
+
+
 ### Recommended logical ordering of patterns
 
 <!-- diagram:12_36-1 -->
@@ -102,6 +67,22 @@ graph LR
 RateLimiter → Bulkhead → TimeLimiter → CircuitBreaker → Retry
 ```
 **Why ordering matters:** always apply RateLimiter **before** Retry, so the retry logic doesn't overwhelm the system with traffic that RateLimiter would block later anyway (otherwise you end up retrying traffic that gets blocked).
+
+<!-- isw:12_36-0 -->
+**In simple words**
+
+A fault-tolerant microservice is one that **keeps working even when a downstream system fails.** Instead of crashing or causing a chain of failures, it **handles the failure gracefully.** It is needed because microservices talk to each other over the network, so **one service becoming unavailable can bring the whole system down.**
+<!-- /isw:12_36-0 -->
+
+<!-- isw:12_36-2 -->
+**In simple words**
+
+The recommended order is **RateLimiter → Bulkhead → TimeLimiter → CircuitBreaker → Retry.** The reason given: **always apply the RateLimiter before Retry**, so that the retry logic does not flood the system with traffic that the RateLimiter would block later anyway (otherwise you end up retrying traffic that gets blocked).
+<!-- /isw:12_36-2 -->
+
+
+
+
 
 ---
 
@@ -126,6 +107,13 @@ graph LR
 - Counts requests in a **fixed window**; if the count crosses the limit → reject.
 - Example: Limit = 5, Fixed Window Size = 10 s.
 - **Disadvantage:** traffic at the **edge** (end of window 1 + start of window 2) can cause a sudden spike – e.g. limit is 5 per 10 s but **10 requests arrive within 1 second**.
+
+<!-- isw:12_36-4 -->
+**In simple words**
+
+The requests are counted in a **fixed window**; when the count crosses the limit, further requests are rejected. Example: limit 5, window 10 s. The **disadvantage** is the edge of two windows: requests at the end of window 1 and the start of window 2 can create a sudden spike. For example, the limit is 5 per 10 s but **10 requests can arrive within 1 second.**
+<!-- /isw:12_36-4 -->
+
 
 ### Algorithm 2 – Sliding Log
 
@@ -153,6 +141,13 @@ graph LR
   - Must keep timestamp info for **each accepted request** → more memory.
   - Extra overhead of **cleaning up expired timestamps**.
 
+<!-- isw:12_36-5 -->
+**In simple words**
+
+For every **accepted** request, the **exact timestamp** is stored. For each new request the system checks **how many requests happened in the last X seconds (the window size)**; if that count has reached the LIMIT, the request is rejected. Example: window 10 s, limit 5. As time moves the window slides and only requests inside it are counted: a new request is **rejected when the window already has 5**, and **accepted when it has only 4.** The **disadvantages:** a timestamp must be kept for every accepted request (more memory) and expired timestamps have to be cleaned up.
+<!-- /isw:12_36-5 -->
+
+
 ### Algorithm 3 – Sliding Window Counter (with Sub-Windows)
 
 <!-- diagram:12_36-4 -->
@@ -172,6 +167,13 @@ graph LR
   - Request at **9th second**: SW1(0–2) + SW2(2–4) + SW3(4–6) + SW4(6–8) + SW5(8–10) = 1+1+1+1+0 = **4 < 5 → allowed**.
   - At the 10th second the window slides (jumps by sub-window size). Request at **11th second**: SW1(2–4) + SW2(4–6) + SW3(6–8) + SW4(8–10) + SW5(10–12) = 1+1+1+1+0 = **4 < 5 → allowed**.
 - **Disadvantages:** more complex than fixed window; must maintain sub-window info + count per sub-window → more memory.
+
+<!-- isw:12_36-6 -->
+**In simple words**
+
+The main window is divided into **equal sub-windows**, and the number of requests in each sub-window is tracked. Only the **active sub-windows** are counted, and the window **slides by the sub-window size.** Example: window 10 s, sub-window 2 s, limit 5. A request at the 9th second sums SW1 + SW2 + SW3 + SW4 + SW5 = 1+1+1+1+0 = **4, which is less than 5, so it is allowed.** At the 10th second the window moves; a request at the 11th second again gives 1+1+1+1+0 = 4, so it is allowed. The **disadvantages:** it is more complex than the fixed window and needs a count per sub-window (more memory).
+<!-- /isw:12_36-6 -->
+
 
 ### Algorithm 4 – Sliding Window Counter (Weighted Window)
 
@@ -198,6 +200,15 @@ graph LR
 - New request at **12th second**: current window 0 + **80 %** of previous (5) = 4 → 4 < 5 → **permitted**.
 - **Disadvantage:** assumes **uniform distribution** of traffic, which may not be true.
 
+<!-- isw:12_36-7 -->
+**In simple words**
+
+This simplifies the previous one by **removing the sub-windows and using an approximation.** It combines the fixed window and sliding log ideas. A slider window of the same size as the fixed window (10 s) lies **between two fixed windows**, and a **percentage** decides how much of it is in the previous window and how much in the current one.
+
+**Formula:** requests in the current fixed window **+ X % of the requests in the previous window.** Example (limit 5), request at the **11th second:** the current window (10–20 s) has 0; 90 % of the previous window's 5 requests = 4.5, roughly 5; so 0 + about 5 = 5, the **limit is reached and the request is rejected.** For a request at the 12th second: 0 + **80 %** of 5 = 4, which is below 5, so it is **permitted.** The **disadvantage:** it assumes the traffic is spread **uniformly**, which may not be true.
+<!-- /isw:12_36-7 -->
+
+
 ### Algorithm 5 – Token Bucket
 
 <!-- diagram:12_36-6 -->
@@ -216,6 +227,13 @@ graph LR
 - A limited number of **tokens** sit in a bucket; **each request consumes one token**; no token left → request **denied**.
 - A **re-filler** adds tokens at a regular interval. If the bucket is full, **extra tokens overflow and are discarded**.
 - **Disadvantage:** a **quick burst** is possible if capacity isn't set properly – if the system is idle, tokens accumulate; a sudden burst is then **allowed** since tokens are present.
+
+<!-- isw:12_36-8 -->
+**In simple words**
+
+A bucket holds a limited number of **tokens.** **Each request uses one token**, and when no token is left the request is **denied.** A **re-filler adds tokens at a regular interval**; if the bucket is full, the extra tokens **overflow and are discarded.** The **disadvantage:** a **quick burst** is possible if the capacity is not set properly. If the system is idle, tokens pile up, and a sudden burst is then **allowed** because tokens are available.
+<!-- /isw:12_36-8 -->
+
 
 ### Algorithm 6 – Leaky Bucket
 
@@ -242,6 +260,22 @@ graph LR
 | Sliding Window Counter (weighted) | low | approx. | assumes uniform traffic |
 | Token Bucket | low | ⚠️ burst after idle | Resilience4j default |
 | Leaky Bucket | queue | smooth output | adds latency |
+
+<!-- isw:12_36-3 -->
+**In simple words**
+
+A rate limiter **controls how many requests a microservice accepts in a given time window.** It protects the system from **sudden traffic spikes, for example a DDoS attack.** The notes then describe six algorithms for doing this.
+<!-- /isw:12_36-3 -->
+
+<!-- isw:12_36-9 -->
+**In simple words**
+
+Requests are put in a **queue** and processed at a **fixed rate.** If the queue is full, incoming requests **overflow** and are rejected. The **disadvantages:** latency increases (requests wait in the queue) and the **queue size is a bottleneck** and must be set properly.
+<!-- /isw:12_36-9 -->
+
+
+
+
 
 ---
 
@@ -321,6 +355,17 @@ resilience4j.ratelimiter.instances.productRateLimiter.timeoutDuration=1s
 
 `@RateLimiter` works the same if you use **RestTemplate or RestClient** – no change.
 
+<!-- isw:12_36-10 -->
+**In simple words**
+
+The notes say **Resilience4j applies the Token Bucket algorithm by default.** The pieces are: the `resilience4j-spring-boot3` dependency, a controller that calls `orderService.invokeProductAPI(id)`, a Feign client for the product service, and the service method annotated with `@RateLimiter(name = "productRateLimiter", fallbackMethod = "rateLimitedFallback")`.
+
+Two points from the code comments: the annotation works through **AOP, so the method must be public and the class must be a Spring-managed bean.** The **fallback method** must have the **same return type and parameters, plus a `Throwable`**; otherwise the framework's default fallback is invoked.
+
+The properties mean: **the bucket is filled with 2 tokens every 10 seconds** (`limitForPeriod=2`, `limitRefreshPeriod=10s`), and **if there is no token the request waits 1 second before it is rejected** (`timeoutDuration=1s`). **Output:** hit the API quickly, and after 2 calls the tokens are finished, so the next call gets the rate-limit message; after waiting 10 s the tokens are back. `@RateLimiter` works the same with **RestTemplate or RestClient.**
+<!-- /isw:12_36-10 -->
+
+
 ---
 
 ## 4. Custom rate limiting with AOP
@@ -352,6 +397,13 @@ public String getProducts() {
 ```
 
 **Next in series:** Bulkhead, TimeLimiter, Circuit Breaker and Retry.
+
+<!-- isw:12_36-11 -->
+**In simple words**
+
+You can write your own limiter: a custom annotation `@CustomRateLimiter(limit, windowInSeconds)` and an `@Aspect` with an `@Around` method that runs your own limiting logic; **if the request is accepted it calls the real method (`pjp.proceed()`).** The example applies it with `limit = 5, windowInSeconds = 60`. The next topics in the series are Bulkhead, TimeLimiter, Circuit Breaker and Retry.
+<!-- /isw:12_36-11 -->
+
 
 ---
 

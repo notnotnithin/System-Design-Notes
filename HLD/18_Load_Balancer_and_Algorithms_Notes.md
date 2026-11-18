@@ -8,44 +8,6 @@ Source (handwritten, 7 pages): https://drive.google.com/file/d/1dAg77qQ1t9mlHXc1
 
 ---
 
-<!-- simple-explanation -->
-## In simple words – load balancer and its algorithms
-
-### What is a load balancer and why do we need one?
-If all clients send their requests to one server, that server gets overloaded and slows down or crashes. So we run **several servers** and put a **load balancer (LB)** in front. It receives every request and **forwards it to one of the servers**, so the work is spread out and no single server is overburdened. (It can also log traffic and do other jobs, but sharing the load is its main purpose.)
-
-### Layer 4 vs Layer 7
-A load balancer can work at different levels of the network:
-- **L4 (transport layer) – network load balancer:** it only looks at **IP addresses and TCP/UDP ports**. It cannot read the content of the request. Because it does so little, it is **very fast**.
-- **L7 (application layer) – application load balancer:** it can read the **headers, cookies, session and even the response**. So it can make smarter choices (e.g. send `/images` to one group of servers and `/payments` to another) and can also cache. It is **more powerful but a bit slower**.
-
-### How does the LB pick a server? (algorithms)
-Two families: **static** (fixed rules, don't look at the server's current state) and **dynamic** (look at the live load).
-
-#### Static algorithms
-1. **Round Robin** – take turns: request 1 → Server 1, request 2 → Server 2, request 3 → Server 1…
-   - ✅ Very simple and shares requests equally.
-   - ❌ Treats a big powerful server and a small weak server the same, so the weak one may get overloaded.
-2. **Weighted Round Robin** – like round robin, but each server has a **weight based on its capacity**. A server with weight 3 gets 3 requests for every 1 that a weight-1 server gets.
-   - ✅ Protects weaker servers; still easy.
-   - ❌ Weights are fixed. If some requests are very heavy (taking 10–20 s) and happen to land on the small server, it still gets overloaded.
-3. **IP Hash** – compute a hash of the client's IP address and use it to choose the server. The same client always lands on the same server.
-   - ✅ Great when a user needs to stay on the same server (sticky sessions).
-   - ❌ If many users sit behind one proxy, they all share one IP and hit the same server. It also can't guarantee an even spread.
-
-#### Dynamic algorithms
-1. **Least Connection** – send the request to the server that currently has the **fewest active connections**.
-   - ✅ Adapts to the live situation.
-   - ❌ A connection can be open but idle, which misleads the count, and it ignores server size.
-2. **Weighted Least Connection** – compute `active connections ÷ weight` for each server and pick the lowest.
-   Example: Server 1 has weight 10 and 2 connections → 0.2; Server 2 has weight 1 and 1 connection → 1. Server 1 gets the request, because relative to its capacity it is much less busy.
-3. **Least Response Time** – uses **TTFB (Time To First Byte)**, the time between sending a request and receiving the first byte of the reply. It prefers the server with fewer connections and the quickest responses. If scores tie, it falls back to round robin.
-
-### Summary
-Start simple with round robin; use weights when servers differ; use IP hash for stickiness; use dynamic algorithms when request cost varies a lot.
-<!-- simple-explanation -->
-
-
 ## 1. Why a load balancer?
 
 <!-- diagram:18-0 -->
@@ -66,6 +28,13 @@ graph LR
 Clients send requests; **not all requests should go to only one server** – one server must not get overloaded, so we **put a Load Balancer (LB)** between clients and servers (S1, S2, …).
 
 > **Main purpose of a load balancer:** it can do logging and many other things, but the main purpose is to **distribute the traffic appropriately across all the servers so that no single server is overburdened.**
+
+<!-- isw:18-0 -->
+**In simple words**
+
+Clients send requests, and **not all requests should go to only one server**, because one server must not be overloaded. So a **load balancer (LB)** is placed between the clients and the servers (S1, S2, …). The notes say it can do logging and other things, but its **main purpose is to distribute the traffic properly across all the servers so that no single server is overburdened.**
+<!-- /isw:18-0 -->
+
 
 ## 2. Layers: L4 vs L7 (OSI model)
 
@@ -93,6 +62,16 @@ graph LR
 | Extras | – | Can also do **caching**, because it **can read the response** |
 | Speed | **Much faster** | **Much more advanced** |
 
+<!-- isw:18-1 -->
+**In simple words**
+
+- The **application layer = Layer 7 (L7) balancer:** it can read **headers, session, data and the response.**
+- The **transport layer = Layer 4 (L4) balancer:** it can see the **TCP port (also the UDP port, IP address, source and destination).**
+
+In the table: the **network LB (L4)** decides **only from the TCP / UDP port and IP address, source and destination** which server gets the traffic, and it is **much faster.** The **application LB (L7)** decides from **headers, session, cookies and data**, can also do **caching because it can read the response**, and is **much more advanced.**
+<!-- /isw:18-1 -->
+
+
 ## 3. Algorithms (for the network LB) – static vs dynamic
 ```
  Static algorithms                    Dynamic algorithms
@@ -100,6 +79,13 @@ graph LR
   • Weighted Round Robin               • Weighted Least Connection
   • IP Hash                            • Least Response Time
 ```
+
+<!-- isw:18-2 -->
+**In simple words**
+
+For the network LB the algorithms are **static** (Round Robin, Weighted Round Robin, IP Hash) or **dynamic** (Least Connection, Weighted Least Connection, Least Response Time).
+<!-- /isw:18-2 -->
+
 
 ---
 
@@ -129,6 +115,13 @@ Requests are handed to servers **in turn**: with 4 clients and 2 servers → req
 - One server with **high capacity** and another with **low** capacity are **treated the same.**
 - Chance that the **low-capacity server will go down** because of request overload.
 
+<!-- isw:18-3 -->
+**In simple words**
+
+Requests are handed to the servers **in turn:** with 4 clients and 2 servers, requests 1, 3, 5, 7 go to **Server 1** and 2, 4, 6, 8 go to **Server 2.** **Advantages:** very easy to implement; equal load distribution to all servers. **Disadvantages:** a server with **high capacity** and one with **low capacity** are **treated the same**, so the low-capacity server may go down because of request overload.
+<!-- /isw:18-3 -->
+
+
 ## ② Weighted Round Robin
 
 <!-- diagram:18-3 -->
@@ -151,6 +144,13 @@ Each server has a **weight = its capacity** – e.g. **Server 1 weight = 3×**, 
 
 **Disadvantages**
 - If **requests have different processing times** (e.g. request 4 → 10 s, request 8 → 20 s while others take ~50 ms), the low-capacity server may get the heavy requests and **get overburdened.**
+
+<!-- isw:18-4 -->
+**In simple words**
+
+Each server has a **weight, which is its capacity.** For example Server 1 weight 3 and Server 2 weight 1: out of every 4 requests Server 1 gets 3 and Server 2 gets 1. **Advantages:** the **low-capacity server is saved** from a large number of requests, and it is **easy** because the weights are **static.** **Disadvantage:** if requests have **different processing times** (for example request 4 takes 10 s and request 8 takes 20 s while others take about 50 ms), the low-capacity server may get the heavy requests and **become overburdened.**
+<!-- /isw:18-4 -->
+
 
 ## ③ IP Hash
 
@@ -177,6 +177,13 @@ The LB computes **Hash(source IP address)** and, using that value, **assigns the
 **Disadvantages**
 - If client requests come **through a proxy**, **all clients appear with the same source IP** (e.g. `162.16.0.1`) → **one server gets overloaded.**
 - **Cannot ensure equal distribution.**
+
+<!-- isw:18-5 -->
+**In simple words**
+
+The LB computes **Hash(source IP address)** and uses that value to **assign the request to a server.** **Advantages:** it is good where the **same client must connect to the same server** (session stickiness) and it is easy to implement. **Disadvantages:** if requests come **through a proxy**, **all the clients appear with the same source IP,** so **one server gets overloaded;** and it **cannot ensure equal distribution.**
+<!-- /isw:18-5 -->
+
 
 ---
 
@@ -205,6 +212,13 @@ The LB **checks which server has fewer active connections** and sends the new re
 - **TCP connections can be active but possibly carry no traffic** → purpose is defeated.
 - **No difference between low-capacity and high-capacity servers** → the low-capacity server can get overburdened.
 
+<!-- isw:18-6 -->
+**In simple words**
+
+The LB **checks which server has fewer active connections** and sends the new request there. In the example Server 1 has connections from Client 1 and 3 and Server 2 from Client 2, so the new request from Client 4 goes to Server 2. **Advantage:** it is **dynamic**; it looks at the **current load of each server**, so a server is less likely to be overburdened **when all servers have equal capacity.** **Disadvantages:** **TCP connections can be active but carry no traffic**, which defeats the purpose; and it makes **no difference between low-capacity and high-capacity servers.**
+<!-- /isw:18-6 -->
+
+
 ## ② Weighted Least Connection
 
 <!-- diagram:18-6 -->
@@ -221,6 +235,13 @@ graph LR
 - **Calculate the ratio of number of active connections to the server's weight.**
 - **The server with the minimum ratio gets the request.**
 - Example: Server 1 weight = 10 with 2 active connections → ratio `2/10 = 0.2`; Server 2 weight = 1 with 1 active connection → ratio `1/1 = 1` → **Server 1 gets the request.**
+
+<!-- isw:18-7 -->
+**In simple words**
+
+**Calculate the ratio of the number of active connections to the server's weight; the server with the minimum ratio gets the request.** Example: Server 1 has weight 10 and 2 active connections, ratio `2/10 = 0.2`; Server 2 has weight 1 and 1 active connection, ratio `1/1 = 1`. So **Server 1 gets the request.**
+<!-- /isw:18-7 -->
+
 
 ## ③ Least Response Time
 
@@ -240,6 +261,13 @@ graph LR
 - **Picks the server which has fewer active connections and the least TTFB**; **if there is a clash, follow round robin.**
 - Example: S1 → TTFB 3 × 2 active connections = **6**; S2 → TTFB 1 × 4 active connections = **4**; S3 → TTFB 2 × (0–1 active connection) = **2**/lowest → choose the smallest score.
   *(the S3 figures are partly illegible in the scan)*
+
+<!-- isw:18-8 -->
+**In simple words**
+
+This uses **TTFB (Time To First Byte): the time between sending a request and receiving the first byte of the response.** It **picks the server with fewer active connections and the least TTFB**, and **if there is a tie it follows round robin.** In the example the score is TTFB × active connections: S1 = 3 × 2 = 6, S2 = 1 × 4 = 4, and S3 has the lowest score (its figures are partly illegible in the scan); the smallest score is chosen.
+<!-- /isw:18-8 -->
+
 
 ---
 

@@ -8,42 +8,6 @@ Source (handwritten, 2 pages): https://drive.google.com/file/d/1s_rhkuSserKURoOT
 
 ---
 
-<!-- simple-explanation -->
-## In simple words – the thundering herd problem
-
-### The story
-It's 12:00 PM and tickets for a popular show go on sale. Thousands of people hit **Book** at the same instant. The booking app has a few servers, each with a small waiting line (queue) for requests.
-
-1. The servers are already **fully busy** and their queues are **full**.
-2. New requests are **rejected** ("server busy").
-3. Rejected users – and the app itself – **retry immediately**.
-4. Now the servers face the **original traffic plus all the retries**, still at the same moment.
-5. They reject even more, which triggers even more retries… The overload feeds itself and the whole app goes down.
-
-That stampede of simultaneous requests and retries is the **thundering herd**. The retries meant to *help* are what keep the system down.
-
-### Fix 1 – Exponential backoff
-Make each client wait **longer after every failure**: the delay is `base × 2ⁿ`, where *n* is how many times it already failed. With a base of 100 ms:
-- 1st retry → wait about 200 ms
-- 2nd retry → wait about 400 ms
-- 3rd retry → about 800 ms…
-
-The retries spread out in time and the load on the server drops. **But** there's still a catch: if 1,000 clients all failed at the same moment, they all wait exactly 200 ms, then exactly 400 ms… so they still arrive together in "waves".
-
-### Fix 2 – Exponential backoff **with jitter**
-**Jitter** means *randomness*. Instead of waiting exactly `base × 2ⁿ`, each client waits a **random time between 0 and that value** (and never more than a maximum, e.g. 30 s). Now the 1,000 clients retry at 1,000 slightly different moments, so the herd turns into a smooth trickle. This is the standard recommendation for distributed systems.
-
-### Fix 3 – Protect the front door with rate limiting
-Put an **API gateway with a rate limiter** (e.g. the *token bucket* algorithm) in front of the load balancer. It only lets through the number of requests the servers can actually handle and rejects the rest quickly and cheaply. The servers never get flooded in the first place; excess users get a polite "try again shortly" message.
-
-### Quick summary
-| Problem | Cause | Cure |
-|---|---|---|
-| Many clients retry together | fixed or no waiting | backoff + **jitter** |
-| Servers swamped at peak | no limit on incoming load | **rate limiting** at the gateway |
-<!-- simple-explanation -->
-
-
 ## 1. Problem: "Why does a ticket-booking app go down during peak traffic?"
 
 <!-- diagram:27-0 -->
@@ -79,6 +43,15 @@ Diagram in notes:
   2. **Clients retry** – the denied requests come back again, on top of the new ones.
 - So the load balancer is hit by *new requests **plus** retried requests*, all at the same moment → the surge feeds itself → the system **goes down**. This is the **Thundering Herd problem**: many clients retry at the same time, causing a surge of retry traffic.
 
+<!-- isw:27-0 -->
+**In simple words**
+
+The scenario is a ticket-booking app when the **12:00 PM sale has started.** The load balancer (annotated Min = 10, Max = 100) sits in front of ticket-service instances TS 1, TS 2 and TS 3, each with its own request queue. **Every instance's queue is also filled and all its threads are busy,** so when more requests come, **nothing can accept a new request.** Then: (1) **new requests get denied;** (2) **clients retry:** the denied requests come back on top of the new ones.
+
+So the load balancer is hit by *new requests **plus** retried requests,* all at the same moment, and the surge feeds itself until the system **goes down.** This is the **Thundering Herd problem:** many clients retry at the same time, causing a surge of retry traffic.
+<!-- /isw:27-0 -->
+
+
 ---
 
 ## 2. Solutions
@@ -103,12 +76,26 @@ Example with Base = 100 ms:
 - Retry 1 ⇒ 100 × 2¹ = **200 ms**
 - Retry 2 ⇒ 100 × 2² = **400 ms**
 
+<!-- isw:27-1 -->
+**In simple words**
+
+Make each retry wait **longer** than the previous one: **`delay = Base × 2ⁿ`, where n is the number of failures (the retry attempt).** With Base = 100 ms: retry 1 = 100 × 2¹ = **200 ms**, retry 2 = 100 × 2² = **400 ms.**
+<!-- /isw:27-1 -->
+
+
 ### ② Exponential Backoff + Jitter
 Exponential backoff alone still makes all clients retry at the same moments (same formula). **Bring some randomness**:
 
 `delay = min( MaxWaitTime , Random(0, Base × 2ⁿ) )`
 
 This **spreads the retries over time** so the herd doesn't arrive together.
+
+<!-- isw:27-2 -->
+**In simple words**
+
+Exponential backoff alone still makes **all the clients retry at the same moments, because they all use the same formula.** So the notes **bring in some randomness:** `delay = min(MaxWaitTime, Random(0, Base × 2ⁿ))`. This **spreads the retries over time,** so the herd does not arrive together.
+<!-- /isw:27-2 -->
+
 
 ### ③ Protect the entry with a Rate Limiter (Application / API Gateway)
 
@@ -135,6 +122,13 @@ graph TD
    TS1    TS2    TS3
 ```
 Put an **API/application gateway with a rate limiter (Token Bucket algorithm)** in front of the load balancer so that only an allowed rate of requests reaches the services.
+
+<!-- isw:27-3 -->
+**In simple words**
+
+Put an **API / application gateway with a rate limiter (Token Bucket algorithm) in front of the load balancer,** so that only an allowed rate of requests reaches the services.
+<!-- /isw:27-3 -->
+
 
 ---
 

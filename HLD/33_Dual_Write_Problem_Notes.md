@@ -10,50 +10,6 @@ Sources:
 
 ---
 
-<!-- simple-explanation -->
-## In simple words – the dual write problem and the outbox pattern
-
-### The problem
-In microservices a service often has to do **two things** after a business action: **save data in its database** *and* **publish an event to a message broker (like Kafka)** so other services can react. For example, after creating a user, save the user and publish "UserCreated".
-
-These are two **different systems**, so there is no single transaction covering both. Things can fail halfway:
-- The event is published but the database save fails → others are told about something that doesn't exist.
-- The database save works but publishing fails → data exists but nobody is told, so the rest of the system is out of sync.
-
-This is the **dual write problem**: you must keep two systems consistent without a shared transaction. It appears everywhere in the SAGA pattern, where each service saves its own data and then notifies the next service.
-
-### Why not just use 2PC (two-phase commit)?
-2PC makes all participants "prepare", then "commit" together. It is unsuitable here because:
-- Many message brokers **don't support** 2PC at all.
-- It is **slow**, as everyone waits for everyone else.
-- If the **coordinator crashes**, participants are stuck in limbo until it recovers.
-
-### Solution 1 – Transactional Outbox pattern
-Idea: **use only the database for the atomic part.**
-1. In **one local database transaction**, write the business data (e.g. the User row) **and** the event into an extra table called the **outbox table**. Either both are saved or neither is.
-2. A separate process, the **poller**, regularly reads new rows from the outbox table and **publishes them to the broker**.
-3. Once published, the row is marked done or deleted.
-
-Since the event is saved safely with the data, it can't be lost; if publishing fails, the poller just tries again.
-
-**Things to handle (the trade-offs):**
-- **Extra work and delay:** you must build the poller, and events are published slightly after the write.
-- **Duplicates:** a poller may publish the same event more than once (at-least-once delivery). Kafka's `enable.idempotence=true` gives each producer an ID and sequence numbers so it drops duplicates from the *same* producer. But if **several pollers** pick the same event, they have different IDs, so **consumers must also be idempotent** (e.g. remember processed event IDs).
-- **Ordering:** Kafka only guarantees order within one partition. If one entity's events (Created → Updated → Deleted) go to different partitions or are published by different pollers, a consumer could see them in the wrong order. Use the same message key for the same entity so they land in the same partition, or use a single poller/partition where ordering is critical.
-- **Broker down:** retry with exponential backoff and jitter; after repeated failures, move the event to a failed-events table so it isn't lost.
-- **Growing table:** delete rows after publishing, or clean up with a periodic batch job.
-
-### Solution 2 – Listen-to-Yourself pattern
-A variation: the service writes **only the event** (a single write). The poller publishes it, and the **service also consumes its own event** and only then updates its own database. This way there is just one write at the start, and all the real work is driven from the event.
-
-### Solution 3 – Transaction log tailing (CDC)
-Instead of polling an outbox table, a tool reads the **database's transaction log** and turns every committed change into an event. No polling and no extra writes by your code. (The source notes only name this one.)
-
-### Takeaway
-Don't write to two systems at once. Write to **one** (the database, atomically), and let a reliable second step deliver the event, then protect against duplicates and ordering problems. See also [Distributed Transactions / SAGA](20_Distributed_Transactions_Notes.md) and [Idempotent POST](14_Idempotent_POST_API_Notes.md).
-<!-- simple-explanation -->
-
-
 ## 1. The Dual Write Problem
 
 <!-- diagram:33-0 -->
@@ -86,6 +42,15 @@ Two failure sequences (service → DB / message broker):
 1. Message to broker ✔, then DB write ✗ → event published but data not saved.
 2. DB write ✔, then publish to broker ✗ → data saved but nobody is told.
 
+<!-- isw:33-0 -->
+**In simple words**
+
+The dual-write problem occurs **when a component must persist a change in two different systems,** for example **a DB and a message broker like Kafka.** We must make sure **both are in a consistent state:** there must **never be a case where the DB write succeeds but the event publishing fails, or the other way round.**
+
+It shows up in the **SAGA pattern:** in a saga `SA → SB → SC` each service has its own DB (for example SA's DB: "Invoice created") and must also publish an event to the next service through a queue. The two failure sequences are: (1) the message to the broker succeeds, then the DB write fails → the event is published but the data is not saved; (2) the DB write succeeds, then publishing to the broker fails → the data is saved but nobody is told.
+<!-- /isw:33-0 -->
+
+
 ---
 
 ## 2. How to resolve it? First idea – 2PC (Two-Phase Commit)
@@ -96,6 +61,22 @@ Two failure sequences (service → DB / message broker):
 - Dual-write scenarios involve **heterogeneous systems (DB + message queue)**, and **some message queues / brokers do not support 2PC.**
 - In a distributed system **2PC is slow (high latency)** because it provides **strong consistency by waiting for all participants to commit.**
 - **If the 2PC coordinator crashes, participants may be stuck in an uncertain state till it recovers.**
+
+<!-- isw:33-1 -->
+**In simple words**
+
+The first idea is **2PC (Two-Phase Commit):** a **coordinator** sends a **Prepare** message to all participant services and waits for an **Ack;** once all acks arrive it sends **Commit** and again waits for an **Ack,** which ensures **all participants committed properly.**
+<!-- /isw:33-1 -->
+
+<!-- isw:33-2 -->
+**In simple words**
+
+The notes say 2PC is **not a viable solution** here because: dual-write scenarios involve **different kinds of systems (a DB and a message queue), and some message queues / brokers do not support 2PC;** in a distributed system **2PC is slow (high latency)** because it gives strong consistency by waiting for all participants to commit; and **if the 2PC coordinator crashes, the participants may be stuck in an uncertain state until it recovers.**
+<!-- /isw:33-2 -->
+
+
+
+
 
 ---
 
@@ -157,6 +138,22 @@ Table design options: **one common event table** (UE, OE, IE – user/order/inve
    1. **After every message/event is published successfully**, or
    2. **A batch job.**
 
+<!-- isw:33-4 -->
+**In simple words**
+
+Instead of writing to the DB **and** publishing an event, **write the event into a separate table called the OUTBOX table, in the same local DB transaction** as the business data. **Later, a separate process (the poller) reads the Outbox table and publishes the event to the message broker asynchronously.** The example (User service): Begin Txn → insert User, insert User Event (both in **one transaction** in the same DB) → Commit; the poller gets events from the UserEvent table and the publisher publishes them to the message broker. The table can be **one common event table** (user / order / inventory events together) **or separate tables per event type.** The **outbox table is cleaned regularly** once the messages are published.
+
+**Challenges:**
+1. **Extra effort** to write the poller service.
+2. A **delay** between writing an event and publishing it.
+3. **A poller may publish the same event several times** → **idempotency must be handled.** The producer sets **`enable.idempotence=true`;** Kafka then **assigns a producer ID (PID)** to each producer when it starts; every message carries a **monotonically increasing sequence number;** if Kafka sees a duplicate **(producer id + sequence no.)** it **discards the event automatically.**
+4. **Several pollers can pick the same events and cause duplication.** `enable.idempotence=true` **does not help here** because **different producers (pollers) get different PIDs,** so **idempotency must also be handled on the consumer side** (for example **store the unique IDs of processed events in a cache**).
+5. **Events might be published out of order** if different pollers pick events in parallel. Kafka **only guarantees order with 1 producer and 1 partition;** with several producers and partitions order is not guaranteed. If order is a must, **Kafka Streams** can be used (it re-orders). *Example:* an entity's events Creation, Updation, Deletion may reach the notification service as *Deleted → Updated → Created* if they land in different partitions. **`hash(message key) % number of partitions`** decides the partition (same key ⇒ same partition), and **1 publisher → 1 partition keeps the order.**
+6. **If the poller cannot publish to the broker,** the event must not be lost: (1) **retry with exponential backoff and jitter;** (2) after the retries, **move it to a failed-events table** or, if a **status column** is kept, keep it in the same table.
+7. **The outbox table can grow,** so clean it regularly: (1) **after every successfully published message,** or (2) with a **batch job.**
+<!-- /isw:33-4 -->
+
+
 ### ② Listen-to-Yourself Pattern
 
 <!-- diagram:33-2 -->
@@ -183,8 +180,31 @@ Poller ── get event ──► publish ──► Message Broker ──► Con
                                            └─► User Service Daemon application ── writes into DB (User table)
 ```
 
+<!-- isw:33-5 -->
+**In simple words**
+
+This is **a variation of the Transactional Outbox pattern.** The **application writes only the event** in the outbox / event table (a **single write**). The **poller fetches the event** and **publishes** it to the message broker. **The application also listens to the same event** (through a consumer, the "User Service daemon application") **and only then updates its own DB** (writes into the User table).
+<!-- /isw:33-5 -->
+
+
 ### ③ Transactional Log Tailing
 Listed as the third pattern (read the DB's transaction log instead of polling a table); the PDF doesn't go into details.
+
+<!-- isw:33-3 -->
+**In simple words**
+
+The answer is one of three patterns: **1. Transactional Outbox, 2. Listen-to-Yourself, 3. Transactional Log Tailing** (named in the notes; the PDF does not give details on the third).
+<!-- /isw:33-3 -->
+
+<!-- isw:33-6 -->
+**In simple words**
+
+It is listed as the third pattern (read the DB's transaction log instead of polling a table); the PDF does not go into details.
+<!-- /isw:33-6 -->
+
+
+
+
 
 ---
 

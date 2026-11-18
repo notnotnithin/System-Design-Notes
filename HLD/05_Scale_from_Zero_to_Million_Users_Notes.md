@@ -17,44 +17,14 @@ Source (handwritten, 9 pages): https://drive.google.com/file/d/16FIwh_zZ2nowjFh_
 8. Messaging queue
 9. Database scaling
 
+<!-- isw:05-0 -->
+**In simple words**
+
+The notes list nine steps in the order in which a system grows. Each step adds one new part to fix a problem of the previous step: a single server, then separate application and database servers, a load balancer with several app servers, database replication, a cache, a CDN, data centres, a messaging queue and finally database scaling. The sections below take them one by one.
+<!-- /isw:05-0 -->
+
+
 ---
-
-<!-- simple-explanation -->
-## In simple words – scaling from one user to a million
-
-Think of it as a story: you start with one tiny server and, every time something becomes a bottleneck, you add one new building block. Here are the nine steps and the problem each one solves.
-
-**1. Single server.** Your website, business logic and database all run on one machine. Simple and cheap, but if it's busy or crashes, everything stops.
-
-**2. Separate the application server from the database server.** Run the app on one machine and the database on another. Now each can be upgraded and scaled independently, and a heavy database query no longer steals CPU from the web app.
-
-**3. Add a load balancer and several app servers.** One app server can only handle so many users. So run several copies and put a **load balancer** in front. Clients talk only to the load balancer, which forwards each request to one of the servers. Bonus: the servers use **private IPs**, so they aren't directly exposed to the Internet (better security).
-
-**4. Replicate the database (master–slave).** A single database is a single point of failure and also a bottleneck. Keep one **master** that accepts all **writes** and one or more **slaves** (replicas) that copy the master and serve **reads**. If a slave dies, others still answer. If the master dies, one slave is **promoted** to be the new master.
-
-**5. Add a cache (e.g. Redis).** Calling the database over the network is slow and expensive. Put a fast in-memory cache next to the app servers and **always check it first**. Found = **cache hit** (fast). Not found = **cache miss**: read from the DB and save the value in the cache for next time. Every entry has a **TTL (time to live)**, after which it expires so that the cache doesn't serve outdated data forever.
-
-**6. Add a CDN (Content Delivery Network).** If your servers are in India, a user in the USA has a long network trip, so pages feel slow. A CDN keeps copies of **static files** (images, videos, CSS, HTML) on servers around the world. The user is served from the nearest CDN node; only if it doesn't have the file does it go to another node and finally to your origin server. Result: lower latency, less load on your servers and lower cost.
-
-**7. Multiple data centres.** Even a whole data centre can fail (power cut, flood). Run a second one (e.g. India and USA) and let the load balancer send traffic to whichever is healthy. The catch: the second data centre needs the same data, so the databases must **replicate between data centres**.
-
-**8. Message queue (RabbitMQ, Kafka).** Some work doesn't need to happen while the user waits, e.g. sending an email after a purchase. The app (**producer**) drops a message in a queue, and a separate worker (**consumer**) handles it later. This makes the system **asynchronous**, decoupled and better at absorbing bursts.
-- In RabbitMQ the producer sends to an **exchange**, which routes messages to queues:
-  - **Direct** – goes to the queue whose binding key exactly matches the routing key.
-  - **Fan-out** – copied to every bound queue.
-  - **Topic** – matched with wildcard patterns.
-
-**9. Scale the database itself.**
-- **Vertical scaling:** give the DB machine more CPU and RAM. Easy, but there is always a ceiling.
-- **Horizontal scaling (sharding):** split the data across many machines.
-  - *Horizontal sharding* splits a table by **rows** (rows 1–100 on shard 1, 101–200 on shard 2, or names A–P vs Q–Z).
-  - *Vertical sharding* splits by **columns**.
-- Sharding has costs: a shard can become **hot** and overfill (fix with re-sharding / [consistent hashing](06_Consistent_Hashing_Notes.md)), and you can **no longer JOIN across shards** (fix by denormalizing, i.e. storing the needed data together).
-
-### The big picture
-Load balancer → many app servers → cache → replicated, sharded databases, with a CDN for static content, a queue for background work, and several data centres for safety. Each piece fixes exactly one problem of the previous design.
-<!-- simple-explanation -->
-
 
 ## 1. Single server
 
@@ -70,6 +40,13 @@ graph LR
 
 `Client (web, mobile) ⇄ Server (Application + DB on the same machine)`.
 
+<!-- isw:05-1 -->
+**In simple words**
+
+In the simplest setup the **client** (web or mobile) talks to **one server**, and the **application and the database both run on that same machine**.
+<!-- /isw:05-1 -->
+
+
 ## 2. Application & DB server separation
 
 <!-- diagram:05-1 -->
@@ -83,6 +60,13 @@ graph LR
 
 
 `Client ⇄ Application server (mid tier) ⇄ DB server (data / DB tier)` – the app and the database now run on separate machines so each can be scaled/managed independently.
+
+<!-- isw:05-2 -->
+**In simple words**
+
+The application and the database are moved to **separate servers**: the client talks to the **application server (mid tier)**, and the application server talks to the **DB server (data tier)**. Now each tier is a machine of its own, so the application and the database can be handled separately.
+<!-- /isw:05-2 -->
+
 
 ## 3. Load balancer + multiple app servers
 
@@ -111,6 +95,16 @@ graph LR
 - The LB brings **security and privacy** – **the LB and app servers talk only over private IPs.**
 - The LB can **equally divide the traffic/requests.**
 
+<!-- isw:05-3 -->
+**In simple words**
+
+Now there are **several app servers (S1, S2, S3)** and a **load balancer** in front of them. The notes give three points:
+- The **client can talk only to the load balancer**; the load balancer decides **to which server a request is forwarded**.
+- The load balancer brings **security and privacy**: the load balancer and the app servers talk to each other **only over private IP addresses**, so the app servers are not directly reachable by the client.
+- The load balancer can **divide the traffic equally** between the servers.
+<!-- /isw:05-3 -->
+
+
 ## 4. Database replication (to handle the failure issue)
 
 <!-- diagram:05-3 -->
@@ -132,6 +126,16 @@ graph LR
 - If one slave is down (damaged), **another DB node is up and should handle the request.**
 - If the **master DB fails, any slave DB can get promoted to master.**
 
+<!-- isw:05-4 -->
+**In simple words**
+
+The notes use **replication to handle failure**: there is a **master DB** and one or more **slave DBs** that copy the master.
+- **Write requests go to the master and read requests go to the slaves.**
+- If one slave is damaged, **another DB node is up and handles the request.**
+- If the **master DB fails, any slave DB can be promoted to master.**
+<!-- /isw:05-4 -->
+
+
 ## 5. Cache (performance improvement)
 
 <!-- diagram:05-4 -->
@@ -152,6 +156,15 @@ graph LR
 - **Always check the cache before going to the DB:** data present in cache = **cache hit**; not present = **cache miss** (then read from DB and populate the cache).
 - **TTL (Time To Live)** – how long an entry stays in cache; chosen **depending upon the application requirement.**
 
+<!-- isw:05-5 -->
+**In simple words**
+
+The reasoning in the notes: every time the application server talks to the DB it is a **network call, and that takes a lot of time (an expensive call).** So a cache (for example **Redis**) is placed next to the app servers.
+- **Always check the cache before going to the DB.** If the data is in the cache it is a **cache hit**; if not it is a **cache miss**, and then the data is read from the DB and the cache is filled.
+- Each entry has a **TTL (Time To Live)**, which says how long it stays in the cache. The TTL is chosen **depending on the application requirement.**
+<!-- /isw:05-5 -->
+
+
 ## 6. CDN (Content Delivery Network)
 
 <!-- diagram:05-5 -->
@@ -171,6 +184,19 @@ graph LR
 - **CDN does caching of static data** (HTML / video / CSS / images). CDN nodes sit near users (USA, India, France, Japan…).
 - **Request flow:** the user's request first goes to **their own (nearest) CDN node**; if the data is there → done; if not present it goes to **another nearest CDN**; if still not present, it goes to the **original server** (and is cached).
 - Benefits: **performance increases, security enhanced, cost cutting.**
+
+<!-- isw:05-6 -->
+**In simple words**
+
+The notes first say: **a CDN does caching, but not everything that does caching is a CDN.**
+
+*The problem:* the origin data centre is in India, so users far away are slower. The example numbers are: India user about **1 ms**, South Africa **2 ms**, USA **3 ms**, Japan **4 ms**; the farther the user, the higher the latency. That is the **latency issue** a CDN solves.
+
+*How it works:* the CDN **caches static data (HTML, video, CSS, images)** on nodes placed near the users (USA, India, France, Japan, …). A user's request first goes to **their own (nearest) CDN node**. If the data is there, we are done. If not, the request goes to **another nearest CDN node**, and if it is still not found it goes to the **original server** (and the data is cached).
+
+*Benefits in the notes:* **performance increases, security is enhanced, and cost is cut.**
+<!-- /isw:05-6 -->
+
 
 ## 7. Data centre
 
@@ -206,6 +232,16 @@ graph TD
 **Advantage:** if the India data centre is down, the **load balancer can fulfil the requirement from the USA data centre.**
 **Problem:** when India is down and requests are served by USA, **only USA data will be found** (India's data isn't there). **Solution: replication** between data centres.
 
+<!-- isw:05-7 -->
+**In simple words**
+
+Here the system runs in **two data centres** (an India DC and a USA DC), each with its own app servers, cache, message queue and master and slave DB, all behind the CDN and a load balancer.
+- **Advantage:** if the India data centre is down, the **load balancer can serve the request from the USA data centre.**
+- **Problem:** when India is down and the USA serves the requests, **only the USA's data will be found**, because India's data is not there.
+- **Solution:** **replication between the two data centres**, so both have the same data.
+<!-- /isw:05-7 -->
+
+
 ## 8. Messaging queue (RabbitMQ, Kafka)
 - Brings **asynchronous nature** in the codebase: **Producer → Messaging Queue (queue/topic) → Subscriber (consumer)**; failed messages can go to a **requeue**.
 
@@ -232,12 +268,38 @@ Exchange types:
 2. **Fan-out** – the exchange **copies the message to all bound queues** (Q1, Q2, Q3, Q4).
 3. **Topic** – routing by **wildcard** pattern (e.g. `*`) matching.
 
+<!-- isw:05-8 -->
+**In simple words**
+
+A messaging queue brings an **asynchronous nature** to the code. The flow is **Producer → Messaging queue (queue / topic) → Subscriber (consumer)**, and failed messages can go to a **requeue**.
+<!-- /isw:05-8 -->
+
+<!-- isw:05-9 -->
+**In simple words**
+
+In RabbitMQ the **producer** sends a message with a **routing key** to an **exchange**. The exchange sends it, according to the **binding**, to one or more **queues (Q1, Q2, …)**, and each queue delivers it to its **subscriber (Su1, Su2, Su3)**. The notes name three exchange types:
+1. **Direct** – the message goes to the queue whose binding key is **exactly equal to the routing key**.
+2. **Fan-out** – the exchange **copies the message to all the queues** bound to it (Q1 to Q4 in the picture).
+3. **Topic** – routing by a **wildcard** pattern match (for example `*`).
+<!-- /isw:05-9 -->
+
+
+
+
+
 ## 9. Database scaling
 Two types: **① Vertical** and **② Horizontal.**
 
 ### ① Vertical scaling
 Increase the capacity of the existing DB server – **more CPU and RAM**, because when more requests come, CPU and RAM take care.
 **Disadvantage:** **there is always a limit** – you cannot increase CPU/RAM beyond a point.
+
+<!-- isw:05-11 -->
+**In simple words**
+
+Vertical scaling means **adding more power to the existing DB server: more CPU and more RAM**, because when more requests come, CPU and RAM take care of them. The notes' **disadvantage: there is always a limit**; you cannot increase CPU and RAM beyond a point.
+<!-- /isw:05-11 -->
+
 
 ### ② Horizontal scaling
 
@@ -265,9 +327,36 @@ graph LR
 **Horizontal sharding** – a table is **divided into multiple tables based on rows**: e.g. table T1 with rows 1–100 → Shard T1 (R1–R100 …) and Shard T2 (R101–…); another example by name: A–P → ST1, Q–Z → ST2.
 **Vertical sharding** – a table is **divided into multiple tables based on columns**: e.g. columns C1–C10 → table with C1–C5 and table with C6–C10.
 
+<!-- isw:05-12 -->
+**In simple words**
+
+Horizontal scaling means **adding more nodes**, and it is done through **sharding**, which has two kinds:
+- **Horizontal sharding:** a table is **divided into several tables by rows**. For example rows 1–100 go to shard 1 and the next rows to shard 2, or by name: A–P to shard ST1 and Q–Z to ST2.
+- **Vertical sharding:** a table is **divided into several tables by columns**. For example columns C1–C10 are split into a table with C1–C5 and a table with C6–C10.
+<!-- /isw:05-12 -->
+
+
 ### Drawbacks of sharding
 1. **Hot shard / re-sharding:** if the "A" set is very large and "A to P" is going on ST1, ST1 **immediately fills up** → we **shard again** (ST1(1), ST1(2)…). In sharding, **a "tree" of shards should be possible.** *Tree can solve with **consistent hashing**.* (See [Consistent Hashing](06_Consistent_Hashing_Notes.md).)
 2. **Joins:** once rows are divided, **we can't JOIN** across shards – we can solve it with **denormalization.**
+
+<!-- isw:05-10 -->
+**In simple words**
+
+There are **two types of database scaling**: **vertical** and **horizontal**. They are explained below.
+<!-- /isw:05-10 -->
+
+<!-- isw:05-13 -->
+**In simple words**
+
+Two drawbacks are listed:
+1. **Hot shard / re-sharding:** if there are very many names starting with "A", the shard holding "A to P" (ST1) **fills up immediately**, so we have to **shard again** (ST1(1), ST1(2), …). The notes say a "tree" of shards should be possible, and that this *can be solved with consistent hashing* (see the [Consistent Hashing](06_Consistent_Hashing_Notes.md) note).
+2. **Joins:** once rows are divided into different shards, **we can no longer JOIN** across them. The notes' answer is **denormalization**.
+<!-- /isw:05-13 -->
+
+
+
+
 
 ---
 

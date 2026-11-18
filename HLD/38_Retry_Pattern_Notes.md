@@ -8,55 +8,6 @@ Source: https://drive.google.com/file/d/1F4e2EwjCfi11-q7RdujOqiPgt7oCbO7B/view?u
 
 ---
 
-<!-- simple-explanation -->
-## In simple words – the retry pattern
-
-### What problem does it solve?
-When your service calls another service, the call can fail for a **transient (temporary)** reason: a network glitch, a brief timeout, a server restarting. If you simply try again after a short pause, it often works. That is the **retry pattern**.
-
-**"Why not let the client call our API again?"** By the time the downstream call fails, your service may have already done 90 % of the work (queries, calculations, memory). If the client re-sends the whole request you repeat all of that work. Retrying only the failed downstream call is cheaper and gives the user a smoother experience.
-
-Two questions to answer: **when** should we retry, and **how** (how long to wait)?
-
-### When to retry
-**Retry only if the failure might go away on its own.**
-- ❌ **Don't retry client errors (4xx)** such as 400 (bad input), 401, 403, 404. The same request will fail again. A 409 (conflict) also won't fix itself.
-- ✅ **Retry server errors (5xx)**: 500 (internal error), 502 (bad gateway), 503 (service unavailable). They may be temporary.
-- ✅ **429 (Too Many Requests)** is also retryable, but **with a delay**.
-- ⚠️ **Network errors and timeouts** are retryable **only if the operation is idempotent** (repeating it causes no harm). If a non-idempotent call (like a payment) times out, you don't know whether it went through. A blind retry could duplicate it. See [Idempotent POST API](14_Idempotent_POST_API_Notes.md).
-
-### How to retry – the four strategies
-`maxAttempts` counts the **original call too** (4 attempts = 1 original + 3 retries).
-
-**1. Fixed interval** – wait the same time every time (e.g. 2 s, 2 s, 2 s).
-- ✅ Simple, easy to debug.
-- ❌ If many clients fail together they all retry together, creating a **retry storm** (the [thundering herd](27_Thundering_Herd_Notes.md)).
-
-**2. Exponential backoff** – the wait **doubles** after each failure: `delay = base × 2ⁿ`. With base 100 ms: 100 ms, 200 ms, 400 ms…
-- ✅ Gives the struggling service more and more breathing room.
-- ❌ A short outage may make the user wait longer than needed, and all clients still use the same formula, so some herd risk remains.
-
-**3. Exponential backoff + jitter** – the same, but each wait is a **random value** between 0 and the calculated delay: `random(0, min(maxDelay, base × 2ⁿ))`.
-- ✅ Retries spread out over time, so the herd is very unlikely. **Best for distributed systems.**
-- ❌ A bit harder to reason about and debug because delays vary.
-
-**4. Custom** – you write your own delay function (e.g. Fibonacci delays).
-- ✅ Full control. ❌ More to maintain.
-
-### Using it in Spring Boot (Resilience4j)
-- Put `@Retry(name = "productService", fallbackMethod = "productFallback")` on a method that contains **only the downstream call**, so only that part is repeated.
-- The method must **throw the exception** for a retry to trigger (don't swallow it in a try/catch without rethrowing).
-- When all attempts are used up, the **fallback method** runs, so you can return a friendly default.
-- Fixed interval config: `maxAttempts=3`, `waitDuration=2s`.
-- Exponential: add `enableExponentialBackoff=true` and `exponentialBackoffMultiplier=2`.
-- With jitter: also add `enableRandomizedWait=true`.
-- Custom strategies can't be configured in properties, so you create a `Retry` bean from a `RetryConfig` (with your `IntervalFunction`) and wrap the call manually with `customRetry.executeSupplier(...)`.
-
-### Where it sits in the stack
-RateLimiter → Bulkhead → TimeLimiter → CircuitBreaker → **Retry**. Retry is applied last so that it doesn't amplify traffic that the earlier protections would have blocked.
-<!-- simple-explanation -->
-
-
 ## 1. Why Retry?
 
 <!-- diagram:38-0 -->
@@ -87,6 +38,15 @@ Each call does a lot of heavy processing that is **not free** (memory, time, res
 - Retrying only the failed downstream call, if it succeeds, **saves cost and gives a better user experience.**
 
 Two questions: **When to retry?** and **How to retry?**
+
+<!-- isw:38-0 -->
+**In simple words**
+
+In a distributed system a call to a downstream service can fail because of **transient issues:** short, temporary problems like network glitches or timeouts, and **retrying the same request after a short delay can succeed.**
+
+*"Why should we retry? Why can't the client just call our API again?"* Each call does a lot of heavy processing that is **not free** (memory, time, resources). Say 90 % of the API's work is done and then a transient issue hits during the downstream call: throwing away that 90 % and redoing it all on a fresh API call wastes cost, whereas retrying only the failed downstream call, if it succeeds, **saves cost and gives a better user experience.** Two questions follow: **when to retry?** and **how to retry?**
+<!-- /isw:38-0 -->
+
 
 ---
 
@@ -130,6 +90,23 @@ graph TD
 | 502 Bad Gateway | Downstream service failure | **Yes** |
 | 503 Service Unavailable | Service down/overloaded | **Yes** |
 | Network error | Connection failure, timeout | **Yes (idempotent only)** |
+
+<!-- isw:38-1 -->
+**In simple words**
+
+- **Do not retry permanent failures,** for example **4xx.** They are validation or input errors, and the same request will fail again.
+- **Do not retry if the operation is not idempotent.** Idempotency ensures that if a request is retried several times, **duplicate processing does not happen.** The problem scenario: a timeout on an endpoint that is **not idempotent;** what if we retry? It could create duplicates (see HLD #14, [Idempotent POST API](14_Idempotent_POST_API_Notes.md)).
+- **Rule of thumb: retry on 5xx.** 5xx means a system issue and the request was not successful; it could be transient and is pretty safe to retry.
+- **Retry network errors and timeouts only if the endpoint ensures idempotency.**
+<!-- /isw:38-1 -->
+
+<!-- isw:38-2 -->
+**In simple words**
+
+The table: **200** success → no; **400** client error → no; **401** authentication needed → no; **403** access denied → no; **404** resource not found → no; **409** (listed in the notes as "resource not found"; it is really a state conflict) → no; **429** rate limiting → **yes, with a delay;** **500** server issue → **yes;** **502** downstream service failure → **yes;** **503** service down or overloaded → **yes;** **network error** (connection failure, timeout) → **yes, but only if idempotent.**
+<!-- /isw:38-2 -->
+
+
 
 ---
 
@@ -216,6 +193,15 @@ public Retry fixedRetry() {
 }
 ```
 
+<!-- isw:38-4 -->
+**In simple words**
+
+Retry after a **constant delay.** Example: total attempts = 4 (the original + 3 retries) with a fixed delay of 2 s: the original call at t = 2, the 1st retry at 4, the 2nd at 6 and the 3rd at 8. **Advantages:** very simple, easy to configure and debug. **Disadvantage:** a high chance of a **retry storm (thundering herd problem):** many clients retry at the same time, causing a surge of retry traffic, so the system spends its resources on retries instead of new requests (see [Thundering Herd](27_Thundering_Herd_Notes.md)).
+
+**The code:** `@Retry(name = "productService", fallbackMethod = "productFallback")` goes **on the method where only the downstream invocation is present** (make sure the method contains only the code you want to retry); **when all retries are exhausted the fallback method is invoked.** The properties are `maxAttempts=3` and `waitDuration=2s`. To test, stop the Product service so the failure happens at invocation, and in a try / catch **rethrow the exception** so the retry triggers. **Output:** max attempts 3 gives **1 original call + 2 retry calls.** The "what the AOP proxy might do internally" snippet builds a `RetryConfig` (max attempts, an `IntervalFunction` such as `IntervalFunction.of(2000)` for a fixed delay or `ofExponentialBackoff(...)`, and `retryExceptions(...)`, the exceptions for which retry happens).
+<!-- /isw:38-4 -->
+
+
 ### 3.2 Exponential Backoff
 
 <!-- diagram:38-3 -->
@@ -260,6 +246,15 @@ try {
 }
 ```
 **Output:** max attempts 4 → 1 original + 3 retries.
+
+<!-- isw:38-5 -->
+**In simple words**
+
+The **delay grows exponentially:** `delay = Base × 2^(number of failed retry attempts)`. Example: total attempts = 4, Base = 100 ms: 1st retry 100 × 2⁰ = **100 ms,** 2nd 100 × 2¹ = **200 ms,** 3rd 100 × 2² = **400 ms.** **Advantages:** it reduces the load on the downstream during an outage and helps to avoid the thundering herd **to some extent.** **Disadvantages:** if the outage is short, the user may wait longer than needed; and there is **still some risk of a thundering herd** because all clients use the same formula.
+
+The code is the same, only the config changes: `maxAttempts=4`, `waitDuration=1s`, `enableExponentialBackoff=true` and `exponentialBackoffMultiplier=2`. The framework class `Backoff.java` computes *initial wait × (factor ^ number of failed attempts)*: 1st retry 1000 × 2⁰ = 1 s, 2nd 2 s, 3rd 4 s. **Output:** max attempts 4 = 1 original + 3 retries.
+<!-- /isw:38-5 -->
+
 
 ### 3.3 Exponential Backoff + Jitter
 
@@ -306,6 +301,13 @@ resilience4j.retry.instances.productService.enableExponentialBackoff=true
 resilience4j.retry.instances.productService.exponentialBackoffMultiplier=2
 resilience4j.retry.instances.productService.enableRandomizedWait=true
 ```
+
+<!-- isw:38-6 -->
+**In simple words**
+
+It is exponential backoff but with **jitter (randomness) added to the delay to avoid retry storms:** `delay = random_between(0, min(maxDelay, baseDelay × 2^failed_retry_attempt))`. **Advantages:** best for distributed systems; the thundering-herd probability becomes very low; it **spreads the retries over time,** reducing the peak load. **Disadvantages:** not easy to debug and a little complex. In code it uses `IntervalFunction.ofExponentialRandomBackoff(initialIntervalMillis, multiplier)`; in properties the same exponential settings plus **`enableRandomizedWait=true`.**
+<!-- /isw:38-6 -->
+
 
 ### 3.4 Custom Retry
 Define **your own retry delay strategy**.
@@ -359,6 +361,22 @@ public class OrderService {
 | Exponential backoff | Base × 2^n | less load on downstream | slow for short outages; some herd risk |
 | Exp. backoff + jitter | random(0, min(max, Base×2^n)) | best for distributed systems | harder to debug |
 | Custom | your function | full control | harder to maintain |
+
+<!-- isw:38-3 -->
+**In simple words**
+
+The notes describe four ways to decide the wait between retries: fixed interval, exponential backoff, exponential backoff with jitter and a custom strategy.
+<!-- /isw:38-3 -->
+
+<!-- isw:38-7 -->
+**In simple words**
+
+You define **your own retry delay strategy.** **Advantage:** full control and flexibility. **Disadvantage:** harder to maintain. In the code a `Retry` bean is created from a `RetryConfig` with your own `IntervalFunction` (the example just returns 2000 ms) and you call `customRetry.executeSupplier(...)`. The notes explain that you must **manually wrap the call within Retry,** because the **`@Retry` annotation works only for the retry types whose configuration can be given in `application.properties`.**
+
+The summary table: **fixed interval** (constant delay; simple and easy to debug; retry storm), **exponential backoff** (Base × 2^n; less load on the downstream; slow for short outages and some herd risk), **exponential backoff + jitter** (random between 0 and min(max, Base × 2^n); best for distributed systems; harder to debug) and **custom** (your own function; full control; harder to maintain).
+<!-- /isw:38-7 -->
+
+
 
 ---
 

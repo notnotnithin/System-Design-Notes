@@ -20,50 +20,6 @@ Source (handwritten, 10 pages): https://drive.google.com/file/d/1kfnXbRlobCeK-U9
 
 ---
 
-<!-- simple-explanation -->
-## In simple words – messaging queues, Kafka and RabbitMQ
-
-### What is a messaging queue?
-A **producer** puts a message into a **queue**, and a **consumer** takes messages out and processes them. The producer and consumer never talk to each other directly. It is like dropping letters in a post box: you don't wait for the receiver to read them.
-
-### Why do we need it?
-Example: a user clicks **Buy**. We should confirm the order immediately, but sending the email/SMS can happen a moment later. So the order service drops a "send notification" message in a queue and returns at once.
-1. **Faster responses** – the user is not blocked by slow side tasks.
-2. **Retries** – if the consumer is down or fails, the message stays in the queue and can be retried.
-3. **Pace matching** – three services produce 10, 20 and 30 messages/second, but the notification service can only handle 15/second. The queue absorbs the difference and the consumer works at its own speed.
-4. **Absorbing bursts** – e.g. thousands of cabs send GPS locations every 10 seconds; the queue smooths the flow for the dashboard to process.
-
-### Two messaging styles
-- **Point-to-Point:** each message is processed by **exactly one** consumer (even if several consumers listen). Use it for tasks to be done once.
-- **Publish/Subscribe:** a message is **broadcast to many queues**, so **every subscriber** gets and processes its own copy.
-
-### Kafka – the main ideas
-- **Producer** sends messages; **consumer** reads them.
-- **Topic** – a named category of messages (like a channel). A topic is divided into **partitions**; each partition is an ordered log, and each message has an **offset** (its position number: 0, 1, 2…).
-- **Broker** – one Kafka server. A **cluster** is a group of brokers. **ZooKeeper** keeps metadata, such as which partition lives on which broker.
-- **Message** has an optional **key** and a **value**. `hash(key) → partition`, so messages with the same key always go to the same partition (this preserves their order).
-- **Consumer group** – consumers that share the work. **Within one group, a partition is read by only one consumer.** If a second application needs the same data, it uses a different group.
-- **Committed offset** – how far a consumer group has read. After a crash, the consumer resumes from there instead of starting over.
-- **Leader and followers (replication)** – each partition has a **leader** (handles all reads and writes) and **followers** (copies on other brokers). If the leader's broker dies, a follower is promoted. This protects against message loss.
-- Kafka is **pull-based**: consumers ask for messages when ready.
-
-### When a message can't be processed
-Suppose offsets 0–6 are fine but offset 7 has a bug. The consumer **retries** it (e.g. 3 times). If it keeps failing, the message is moved to a **Dead Letter Queue (DLQ)**, a side queue for bad messages, so the consumer can continue with the rest, and engineers can inspect the failed ones later.
-
-### RabbitMQ – the main ideas
-- Producer → **exchange** → **queues** → consumers. The exchange uses a **routing key** and each queue's **binding key** to decide where to send a message.
-  - **Fan-out:** copy to all bound queues.
-  - **Direct:** exact key match.
-  - **Topic:** wildcard match (like `india.*`).
-- RabbitMQ is **push-based**: it pushes messages to consumers. A failed message is **requeued** and retried, and eventually goes to the DLQ.
-
-### Handling failures at scale
-- Queue full → **add more brokers/partitions**.
-- Broker down → **a follower becomes leader**.
-- Consumer down → **another consumer in the group takes over its partitions**.
-<!-- simple-explanation -->
-
-
 ## 1. Messaging queue & why it's needed
 
 <!-- diagram:16-0 -->
@@ -88,6 +44,24 @@ E-commerce app (producer): the user clicks **Buy** → we must send a notificati
 3. **Pace matching** – E-commerce produces 10 msg/s, Inventory management 20 msg/s and App XYZ 30 msg/s, but the notification service can handle only **15 msg/s**. All three put messages into one queue and the consumer **consumes them at its own pace.**
 4. **Smoothing bursts** – e.g. cab GPS: every cab sends its car ID + current location every 10 s; the consumer application builds a **dashboard** of car locations from the queue and processes at its own rate.
 
+<!-- isw:16-0 -->
+**In simple words**
+
+A **messaging queue** works like this: a **producer** produces a message, the message goes into a particular **queue**, and a **consumer** reads the messages (`Producer → queue → Consumer`).
+<!-- /isw:16-0 -->
+
+<!-- isw:16-1 -->
+**In simple words**
+
+In an e-commerce app (the producer), when the user clicks **Buy** a notification or mail must be sent, **but the user should not have to wait for it.** The producer puts a message on the async queue and the **"send notification" consumer** processes it (if that consumer is down, the message stays in the queue).
+
+The advantages listed: (1) **latency improves,** because the user is not blocked; (2) **retry capability;** (3) **pace matching:** E-commerce produces 10 messages/s, Inventory management 20/s and another app 30/s, but the notification service can handle only **15/s**; all three put messages in one queue and the consumer **takes them at its own pace;** (4) **smoothing bursts:** for example every cab sends its car ID and location every 10 s and the consumer builds a **dashboard** from the queue at its own rate.
+<!-- /isw:16-1 -->
+
+
+
+
+
 ## 2. Point-to-Point (P2P) vs Pub/Sub
 
 <!-- diagram:16-1 -->
@@ -110,6 +84,14 @@ graph LR
 
 - **P2P:** publisher → queue → **only one consumer** processes each message. A message is **consumed/processed only once** – by either Consumer 1 or Consumer 2, **but only once.**
 - **Pub/Sub:** publisher → **exchange (with logic)** → **multiple queues (Q1, Q2)** → each consumer. Whenever a message comes in, based on the logic the exchange **puts/broadcasts the message to all the queues**, and **both consumers consume and process the message.**
+
+<!-- isw:16-2 -->
+**In simple words**
+
+- **Point-to-point:** publisher → queue → **only one consumer processes each message.** A message is **consumed once**, by either consumer 1 or consumer 2, **but only once.**
+- **Pub/Sub:** publisher → **exchange (with logic)** → **several queues (Q1, Q2)** → their consumers. When a message comes in, the exchange **puts or broadcasts it to all the queues**, and **both consumers consume and process it.**
+<!-- /isw:16-2 -->
+
 
 ---
 
@@ -149,10 +131,26 @@ graph LR
 
 **Rule:** inside one consumer group, **one partition is consumed by only one consumer** – e.g. Topic A has partitions P0 and P1; if Consumer 1 uses P0, Consumer 2 takes P1, but Consumer 2 can't also take P0. If P0 must be read by another consumer, that consumer must be in a **different consumer group.**
 
+<!-- isw:16-3 -->
+**In simple words**
+
+Kafka's parts, as listed in the notes: **producer** (sends messages), **consumer** (**reads from a partition**), **consumer group** (each consumer is part of one), **topic** (a category or channel where data is stored and organised; data is kept on partitions only), **partition** (a small part of a topic that helps distribute and process data efficiently; partitions can have different lengths), **offset** (the position of a message inside a partition, like an index: 0, 1, 2, …, and each partition has its own), **broker** (a **Kafka server**; the producer talks to it), **cluster** (**a group of brokers**, each on a different machine) and **ZooKeeper** (helps the brokers interact and keeps metadata, for example which partition of Topic 1 lives on which broker).
+
+**The rule:** inside one consumer group, **one partition is consumed by only one consumer.** Example: Topic A has partitions P0 and P1; if consumer 1 uses P0, consumer 2 takes P1, but consumer 2 cannot also take P0. If P0 must be read by another consumer, that consumer must be in a **different consumer group.**
+<!-- /isw:16-3 -->
+
+
 ### How a message flows
 - **Message has:** **Key** (string/id, optional), **Value** (actual message), **Partition** (empty unless specified), **Topic** (topic name).
 - The producer sends `key: 123456…` → **hash(key) → partition** (e.g. P1). Messages with the same key always land in the same partition.
 - Consumer 1 (Consumer Group A) reads Topic A / Partition P0 and has a **committed offset = 3** (kept in Kafka/ZooKeeper per consumer-group+topic+partition) – **the offset tells how far the consumer has read**, so after a crash it resumes from there.
+
+<!-- isw:16-4 -->
+**In simple words**
+
+A message has a **key** (optional), a **value** (the actual message), a **partition** (empty unless specified) and a **topic** (name). The producer sends a message with a key and **`hash(key)` decides the partition** (for example P1), so messages with the same key always land in the same partition. A consumer in a group has a **committed offset** (for example 3) stored per consumer-group, topic and partition; **it tells how far the consumer has read**, so after a crash it continues from there.
+<!-- /isw:16-4 -->
+
 
 ### Cluster, leader & followers (replication)
 
@@ -184,6 +182,13 @@ graph LR
 - **All reads/writes happen through the Leader.** **Whenever the leader goes down, a replica takes over and becomes the leader.**
 - A **follower always follows the leader** – any new message that comes in, it takes and adds to its own copy, so it keeps syncing itself from the leader.
 
+<!-- isw:16-5 -->
+**In simple words**
+
+Partitions can live on **different Kafka servers** (Broker 1 has P0 of Topic 1, Broker 2 has P1). *What if a partition goes down and its messages are lost?* That is why a **replica** is kept. The partition that is **not a replica is the leader; replicas are followers** (for example P0's leader on Broker 1 is replicated on Broker 2; P1's leader on Broker 2 is replicated on Broker 3). **All reads and writes go through the leader**, and **when the leader goes down a replica takes over and becomes the leader.** A **follower always follows the leader:** every new message is added to its own copy, so it keeps syncing from the leader.
+<!-- /isw:16-5 -->
+
+
 ### 7. What happens when a consumer can't process a message?
 
 <!-- diagram:16-4 -->
@@ -206,6 +211,13 @@ Example: partition offsets 0…6 processed properly; **offset 7 = a buggy messag
 - After the retries are exhausted the message is moved to a **Failure / Dead Letter Queue (DLQ)** so the consumer can move on.
 
 **RabbitMQ vs Kafka (delivery model):** **RabbitMQ = push-based approach**; **Kafka = pull-based approach** (consumers poll).
+
+<!-- isw:16-6 -->
+**In simple words**
+
+Offsets 0 to 6 are processed fine; **offset 7 is a buggy message**, so the consumer polls it and fails. The **committed offset stays at 6** (it does not move to 7), so the message would be delivered again. **Retry = 3:** every message is retried 3 times. After the retries are used up, the message is moved to a **failure / Dead Letter Queue (DLQ)** so the consumer can move on. The notes add that **RabbitMQ is push-based and Kafka is pull-based** (consumers poll).
+<!-- /isw:16-6 -->
+
 
 ---
 
@@ -233,8 +245,33 @@ graph LR
 2. **Direct exchange** – **exact match** between **message (routing) key and binding key.**
 3. **Topic exchange** – can use **wildcards** (e.g. binding `*123` matches routing key `india-123`).
 
+<!-- isw:16-8 -->
+**In simple words**
+
+1. **Fan-out exchange** – pushes the message **to all the queues** attached to the exchange.
+2. **Direct exchange** – an **exact match** between the **message (routing) key and the binding key.**
+3. **Topic exchange** – can use **wildcards** (for example the binding `*123` matches the routing key `india-123`).
+<!-- /isw:16-8 -->
+
+
 ### Failure handling in RabbitMQ
 If Consumer 1 reads a message but **can't process it**, the message is **re-queued to the back of the queue** (MSG1 requeue) and retried again; after repeated failures it goes to the **Dead Letter Queue.**
+
+<!-- isw:16-7 -->
+**In simple words**
+
+The flow is **Producer → Exchange → (binding / routing key) → Queue 1 / 2 / 3 → Consumer 1 / 2 / 3.** The producer sends a message with a **routing key** (for example `india-123`), and the exchange routes it to the queue or queues whose **binding key** matches (Q1 ↔ key 1 or `*123`, Q2 ↔ key 2, Q3 ↔ key 3). There can be several exchanges.
+<!-- /isw:16-7 -->
+
+<!-- isw:16-9 -->
+**In simple words**
+
+If consumer 1 reads a message but **cannot process it,** the message is **re-queued to the back of the queue** (MSG1 requeue) and tried again; after repeated failures it goes to the **Dead Letter Queue.**
+<!-- /isw:16-9 -->
+
+
+
+
 
 ---
 

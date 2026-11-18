@@ -8,45 +8,6 @@ Source: https://drive.google.com/file/d/11DAZgXFoArZ17xVLhkIxTYQtUYAJNnr-/view?u
 
 ---
 
-<!-- simple-explanation -->
-## In simple words – service discovery with Eureka
-
-### The problem
-In microservices, service instances are **created and destroyed all the time** (scaling up, scaling down, crashes, redeploys), and each one may get a different IP address and port. If the Order service has Product service's URL **hardcoded**, things break:
-- **Single point of failure:** if that one instance dies, Order can't reach any other Product instance.
-- **No load balancing:** one instance does all the work while others sit idle.
-- **Tight coupling:** moving or changing Product means editing Order.
-- **Painful testing:** dev, QA and production have different URLs, so config keeps changing.
-
-### The solution: a service registry
-Think of a **phone book**. Instead of remembering numbers, services look people up by name.
-- **Eureka Server** is the phone book. It stores, for every registered service: its name, instance ID, IP, port and health status.
-- **Eureka Client** (every microservice) **registers itself** when it starts and **looks up** other services by name.
-
-### Setting it up (Spring Boot)
-- **Server:** add `spring-cloud-starter-netflix-eureka-server`, put `@EnableEurekaServer` on the main class, and set `register-with-eureka=false` and `fetch-registry=false` (the server shouldn't register with itself). The dashboard appears at `http://localhost:8761`.
-- **Client:** add `spring-cloud-starter-netflix-eureka-client`, give the app a `spring.application.name` (e.g. `product-service`) and point `eureka.client.service-url.defaultZone` at the server. It then shows up on the dashboard automatically.
-
-### Calling another service
-- **RestTemplate:** you ask `DiscoveryClient.getInstances("product-service")`, get a list, and must **choose an instance yourself** (so load balancing is your job).
-- **FeignClient:** you just write `@FeignClient(name = "product-service")`. With `spring-cloud-starter-loadbalancer` added, the framework finds the instances and **balances the load for you**, with no URL needed.
-
-### Questions an engineer would naturally ask
-**1. How does Eureka know a service is up or down?**
-- *Graceful shutdown:* the client sends a **de-registration** message and is marked DOWN.
-- *Crash or network loss:* clients send **heartbeats** (every 30 s by default). If the server hears none for a while (90 s by default), it removes the instance. Settings: `lease-renewal-interval-in-seconds` (how often the client sends) and `lease-expiration-duration-in-seconds` (how long the server waits). If you set the expiry shorter than the renewal interval (as in the demo), the server removes a perfectly healthy client, which is a good way to see how it works.
-- *Self-preservation mode:* by default, if too many heartbeats are missed the server **stops removing** instances, assuming a network problem rather than mass failure. You can turn it off for testing.
-
-**2. Where is the data stored?** Only **in memory**, in a map keyed by `appName/instanceId` whose value holds the instance details (IP, port, status, last-renewed time, lease duration…).
-
-**3. What if the Eureka server dies?** A single server is a **single point of failure**. In production, run a **cluster of 3 nodes**. Each node is also a client of the others, so they replicate the registry between themselves. Clients list all three URLs, so if one is down they use another.
-
-**4. Doesn't every call need an extra hop to Eureka?** No. At startup a client **downloads the registry and caches it locally** and refreshes it periodically (default every 30 s via `registry-fetch-interval-seconds`). Calls use the local copy, so there's no extra hop.
-
-**5. What if the cache is stale and points to a dead instance?** It can happen. It's a **trade-off**: you accept slightly stale data in return for speed and fewer calls. (That is where retries and circuit breakers help.)
-<!-- simple-explanation -->
-
-
 ## 1. Why Service Discovery?
 
 <!-- diagram:34-0 -->
@@ -84,6 +45,19 @@ Example: *Order service* hardcodes the URL of *Product service*. This is fine on
 
 - **Eureka Server** – acts like a **phone book**. Holds info of all registered clients: service name, instance id, IP, port, health status, etc.
 - **Eureka Client** – **registers itself** with the server and **discovers** instances of other services via the server.
+
+<!-- isw:34-0 -->
+**In simple words**
+
+In microservices, service instances are **created and deleted dynamically,** so you **cannot hardcode the URL** of an instance; it is not scalable or feasible. The example: the *Order service* hardcodes the URL of the *Product service.* That works only while Product has a single instance. With several instances (or when an instance is removed), the table in the notes lists the problems:
+- **Single point of failure:** if the hardcoded instance dies, Order cannot reach any other instance.
+- **No load balancing:** only one Product instance is overburdened and the others sit idle.
+- **Tight coupling:** Order cannot change or move Product without being updated.
+- **Difficult testing:** prod, QA and dev use different URLs, so config changes often and mistakes are likely.
+
+The **solution is Service Discovery (for example Netflix Eureka).** The **Eureka Server acts like a phone book:** it holds the information of all registered clients (service name, instance id, IP, port, health status and so on). A **Eureka Client registers itself** with the server and **discovers** the instances of other services through it.
+<!-- /isw:34-0 -->
+
 
 ---
 
@@ -136,6 +110,13 @@ eureka.client.fetch-registry=false
 ```
 Start the server → dashboard at **http://localhost:8761**.
 
+<!-- isw:34-1 -->
+**In simple words**
+
+Generate the project with Spring Initializr (start.spring.io). Steps: (1) add the dependency **`spring-cloud-starter-netflix-eureka-server`** in `pom.xml` (the version is resolved by `spring-cloud-dependencies` 2023.0.1 in the dependency management); (2) put **`@EnableEurekaServer`** on the main class, which **tells Spring Boot to create the beans needed for a Eureka server (EurekaController, the dashboard, …);** (3) in `application.properties` set the name `eureka-server`, port **8761**, and **`register-with-eureka=false`** and **`fetch-registry=false`,** because it is a server and should neither register itself nor fetch instance details. Start the server and the **dashboard is at `http://localhost:8761`.**
+<!-- /isw:34-1 -->
+
+
 ---
 
 ## 3. Setting up Eureka Client (Product Service)
@@ -162,6 +143,13 @@ eureka.client.register-with-eureka=true
 eureka.client.fetch-registry=true
 ```
 Start Product Service and see it on the dashboard. Order Service is registered the same way.
+
+<!-- isw:34-2 -->
+**In simple words**
+
+Steps for the Product service: (1) add **`spring-cloud-starter-netflix-eureka-client`** (with the same dependency-management block); (2) in `application.properties` set the port (8082), the application name (`product-service`), the **Eureka server path** (`eureka.client.service-url.defaultZone=http://localhost:8761/eureka`), and optionally `register-with-eureka=true` and `fetch-registry=true` (these defaults are already true, so they can be skipped). Start the Product service and it appears on the dashboard. The Order service is registered the same way.
+<!-- /isw:34-2 -->
+
 
 ---
 
@@ -196,6 +184,13 @@ public void callProductAPI(String id) {
 ```
 ➡ With RestTemplate, **load balancing logic (choosing an instance) must be handled by you.**
 
+<!-- isw:34-4 -->
+**In simple words**
+
+**Without service discovery** the URL is hardcoded: `restTemplate.getForObject("http://localhost:8082/products/" + id, String.class)`. **With service discovery** you inject the **`DiscoveryClient`,** call `getInstances("product-service")`, take `instances.get(0).getUri()` and call that URI. The notes point out: **with RestTemplate the load-balancing logic (choosing an instance) must be handled by you.**
+<!-- /isw:34-4 -->
+
+
 ### Using FeignClient
 ➡ With FeignClient, **load balancing is handled automatically by the framework.** Add the load balancer dependency apart from eureka-client:
 ```xml
@@ -220,6 +215,20 @@ public interface ProductClient {
     String getProductById(@PathVariable("id") String id);
 }
 ```
+
+<!-- isw:34-3 -->
+**In simple words**
+
+Order now calls Product in two possible ways, shown below.
+<!-- /isw:34-3 -->
+
+<!-- isw:34-5 -->
+**In simple words**
+
+**With FeignClient, load balancing is handled automatically by the framework.** Add the load-balancer dependency (`spring-cloud-starter-loadbalancer`) besides eureka-client. Earlier (without discovery) the Feign client has `@FeignClient(name = "product-service", url = "${feign.client.product-service.url}")`; **with service discovery** only the name is needed: `@FeignClient(name = "product-service")`.
+<!-- /isw:34-5 -->
+
+
 
 ---
 
@@ -290,10 +299,26 @@ eureka.server.eviction-interval-timer-in-ms=6000
 ```
 With the above test config: client sends a heartbeat after 60 s, but server waits only 5 s → server **removes the instance from the list even though the client is running and up.**
 
+<!-- isw:34-7 -->
+**In simple words**
+
+Two ways: **(a) the client's de-registration request** (on a graceful shutdown the Eureka client sends a de-registration request and the server marks it **DOWN;** visible in both logs); **(b) the client heartbeat** (the client regularly sends a heartbeat; if it dies without de-registering, for example from a network issue, the server waits for a heartbeat for a certain interval decided at registration, and if none arrives **the server removes the instance itself**).
+
+The client properties: **`lease-renewal-interval-in-seconds`** (after this many seconds the client sends a new heartbeat; **default 30 s**) and **`lease-expiration-duration-in-seconds`** (how long the server waits for a heartbeat before removing the instance; **default 90 s**). On the server side, **by default the server does NOT remove clients even if heartbeats are missed (self-preservation)**; you turn it off with `eureka.server.enable-self-preservation=false` so the server can remove clients, and `eviction-interval-timer-in-ms` sets how often the eviction task runs. In the notes' test configuration the client sends a heartbeat after 60 s but the server waits only 5 s, so the server **removes the instance even though the client is running and up.**
+<!-- /isw:34-7 -->
+
+
 ### Q2. How does Eureka store data?
 **Only in memory**: `Map<String, Lease<InstanceInfo>>`
 - Key: `appName/instanceId`, e.g. `PRODUCT-SERVICE/192.157.2.27:product-service:8082`
 - Value: `InstanceInfo` object containing: instance id, app name, IP address, host name, port, status (UP/DOWN), last renewed timestamp, lease duration, etc.
+
+<!-- isw:34-8 -->
+**In simple words**
+
+**Only in memory,** in a `Map<String, Lease<InstanceInfo>>`. The **key** is `appName/instanceId` (for example `PRODUCT-SERVICE/192.157.2.27:product-service:8082`). The **value** is an `InstanceInfo` object with the instance id, app name, IP address, host name, port, status (UP / DOWN), last renewed timestamp, lease duration and so on.
+<!-- /isw:34-8 -->
+
 
 ### Q3. What if Eureka Server goes down?
 
@@ -334,6 +359,13 @@ eureka.client.service-url.defaultZone=http://eureka-1:8761/eureka,http://eureka-
 ```
 Now even if one server is down, client availability is not impacted.
 
+<!-- isw:34-9 -->
+**In simple words**
+
+Yes, a **single Eureka server is a single point of failure.** Usually a **3-node cluster** is used: for example eureka-1 (8761), eureka-2 (8762) and eureka-3 (8763) on different machines or containers. **Each server is also a client:** they register themselves, fetch the registry and replicate the changes (server 1 lists servers 2 and 3 in its `defaultZone`, and so on). The clients list all three URLs in their `defaultZone`. Now **even if one server is down, the client's availability is not affected.**
+<!-- /isw:34-9 -->
+
+
 ### Q4. Latency – 2 hops per call?
 
 <!-- diagram:34-3 -->
@@ -359,8 +391,29 @@ Eureka Server is **not called for every request.** At startup the client (e.g. o
 eureka.client.registry-fetch-interval-seconds=30
 ```
 
+<!-- isw:34-10 -->
+**In simple words**
+
+**The Eureka server is not called for every request.** At startup the client (for example order-service) **fetches the registry** (`fetch-registry=true`) and **caches it locally;** later requests use the local copy to find the instance. The refresh is configurable: `registry-fetch-interval-seconds=30` means the local copy is refreshed every 30 seconds.
+<!-- /isw:34-10 -->
+
+
 ### Q5. Stale local cache → calling a dead instance?
 Valid scenario – **it's a trade-off** (availability/performance vs. freshness).
+
+<!-- isw:34-6 -->
+**In simple words**
+
+The notes list five doubts. **Registration:** (1) How does Eureka Server know whether a client is UP or DOWN? (2) Where and how is the data stored? (3) What if Eureka Server itself goes down; is it a single point of failure? **Discovery:** (4) Latency: does each call now need 2 hops (Eureka Server, then the actual call)? (5) What if the local cache is stale; can it lead to calling a dead instance? The answers follow.
+<!-- /isw:34-6 -->
+
+<!-- isw:34-11 -->
+**In simple words**
+
+This is a valid scenario: **it is a trade-off** (availability and performance versus freshness).
+<!-- /isw:34-11 -->
+
+
 
 ---
 

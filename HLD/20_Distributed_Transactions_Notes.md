@@ -1,57 +1,14 @@
 # Handle Distributed Transactions – Two-Phase Commit (2PC), Three-Phase Commit (3PC), SAGA Pattern (HLD #20 – Lecture 57)
 
 <!-- nav -->
-⬅ [19 Distributed Cache and Caching Strategies](19_Distributed_Cache_and_Caching_Strategies_Notes.md) · [Index](00_HLD_Index.md) · [24 OAuth 2.0](24_OAuth_2.0_Notes.md) ➡
+⬅ [19 Distributed Cache and Caching Strategies](19_Distributed_Cache_and_Caching_Strategies_Notes.md) · [Index](00_HLD_Index.md) · [21 Database Indexing](21_Database_Indexing_Notes.md) ➡
 <!-- nav -->
 
 Sources:
 - Handwritten PDF (7 pages): https://drive.google.com/file/d/1kPHF4MMoqc2xFXNXaXHfqqrEDdeU0kLO/view?usp=drive_link
-- Typed Zoho note (JavaScript-rendered, not readable automatically): https://notebook.zohopublic.in/public/notes/u3i1sc0949c83b482441887cc4eba8031560e
+- Typed Zoho note (checked, same content as this note): https://notebook.zohopublic.in/public/notes/u3i1sc0949c83b482441887cc4eba8031560e
 
 ---
-
-<!-- simple-explanation -->
-## In simple words – distributed transactions: 2PC, 3PC and SAGA
-
-### What is a transaction?
-A **transaction** groups several steps into one unit, e.g. "take ₹100 from A, give ₹100 to B". It follows **ACID**:
-- **Atomicity** – all steps happen or none do. If crediting B fails, the debit from A is undone.
-- **Consistency** – rules always hold. Total money stays the same before and after.
-- **Isolation** – transactions running together behave as if they ran one after another.
-- **Durability** – once committed, the result survives crashes.
-
-A single database does this for you with `Begin → … → Commit / Rollback`.
-
-### The problem in microservices
-Placing an order might need to update the **Order database** *and* the **Inventory database**, which belong to different services. A normal transaction only works **inside one database**, so you can't just wrap both updates in one `Begin/Commit`. We need a way to make multiple databases agree. Three options:
-
-| Pattern | Style | Used? |
-|---|---|---|
-| Two-Phase Commit (2PC) | synchronous (the user waits) | popular |
-| Three-Phase Commit (3PC) | synchronous | rare, too complex |
-| SAGA | asynchronous | very common in microservices |
-
-### Two-Phase Commit (2PC)
-A **coordinator** manages the **participants** (e.g. Order service and Inventory service).
-- **Phase 1 – Prepare (voting):** the coordinator asks everyone "can you commit?". Each participant locks its data, gets ready, and answers **OK** or **NO**.
-- **Phase 2 – Commit/Abort (decision):** if everybody said OK, the coordinator sends **COMMIT**. If anyone said NO or timed out, it sends **ABORT**. Everyone obeys and confirms.
-
-What can go wrong?
-- **Prepare message lost / OK message lost:** the coordinator waits, times out, and **aborts**. Safe.
-- **COMMIT/ABORT message lost, or the coordinator crashes:** a participant that voted OK is **stuck**. It can't commit or abort by itself because only the coordinator knows the decision, so it keeps its locks and **waits**. This is the **blocking problem** of 2PC.
-
-### Three-Phase Commit (3PC)
-Adds an extra **Pre-Commit** step between prepare and commit. After the votes, the coordinator first tells everyone "I have decided to commit" and they acknowledge; only then does the actual **COMMIT** go out. Since every participant already knows the decision, they can finish even if the coordinator crashes, so it is **non-blocking**. The price is more messages and complexity, so it's rarely used.
-
-### SAGA pattern
-Instead of one big locked transaction, break the work into a **chain of small local transactions**, one per service: Service 1 commits in its own DB then triggers Service 2 (usually by publishing an event to a message broker), then Service 3, and so on.
-- If a later step fails (say step 5), the earlier services run **compensating transactions** to undo their work in reverse order (4 → 3 → 2 → 1). For example "cancel the order" compensates "create the order".
-- It is **asynchronous** and doesn't hold locks across services, so it scales well. The trade-off: data is only **eventually consistent**, and you must write the compensating logic.
-
-### Quick guide
-2PC = strong consistency, but slow and can block. 3PC = fewer blocking issues, complex. SAGA = scalable and flexible, eventually consistent. Related: [Dual Write Problem](33_Dual_Write_Problem_Notes.md), [High Availability](15_High_Availability_Architecture_Notes.md).
-<!-- simple-explanation -->
-
 
 ## 1. What is a transaction?
 A **set of operations (a group of tasks) that must be performed against the DB.** It has **4 properties (ACID):**
@@ -73,6 +30,19 @@ Begin-Transaction
 Close-Transaction
 ```
 (e.g. A: 100 → 0, B: 100 → 200.)
+
+<!-- isw:20-0 -->
+**In simple words**
+
+A transaction is **a set of operations (a group of tasks) that must be performed against the DB.** It has four properties (**ACID**):
+- **Atomicity:** all operations in the transaction succeed or all fail. Example: debit A 100 and credit B 100; if the credit fails, the debit must not stay applied.
+- **Consistency:** the DB is in a consistent state before and after. Example: A = 100 and B = 50 (total 150) → after the transfer A = 0 and B = 150, still total 150.
+- **Isolation:** transactions running together appear as if they ran one after another.
+- **Durability:** after a successful transaction, the data must not be lost even if the DB fails.
+
+A **local transaction** is written as: Begin → withdraw from A → deposit to B → if all succeed, **Commit**, else **Rollback** → Close.
+<!-- /isw:20-0 -->
+
 
 ## 2. The problem in a distributed system
 
@@ -109,6 +79,22 @@ Close-Transaction
 | ③ | **Saga Pattern** | **still used very much**, **asynchronous** |
 
 In the synchronous ones **the customer is waiting for the transaction to complete.**
+
+<!-- isw:20-1 -->
+**In simple words**
+
+Suppose a transaction needs to **update the Order DB and the Inventory DB.** *Will one Begin / Commit around both work?* **No.** ACID is local to one database: the Order DB has its own ACID transaction and the Inventory DB has its own, and **a transaction is local to a particular database.** The question is how to satisfy the transaction properties when an operation involves several databases.
+<!-- /isw:20-1 -->
+
+<!-- isw:20-2 -->
+**In simple words**
+
+There are three ways: **2-Phase Commit** (very popular, **synchronous**), **3-Phase Commit** (not used much because of complexity, **synchronous**) and the **Saga pattern** (still used very much, **asynchronous**). In the synchronous ones **the customer is waiting for the transaction to complete.**
+<!-- /isw:20-2 -->
+
+
+
+
 
 ---
 
@@ -160,6 +146,27 @@ Two phases: **1. Voting / Prepare phase** and **2. Decision / Commit phase.**
 2. **OK message is lost** → the **Transaction Coordinator waits some time; if the timeout is over, it aborts the Txn.**
 3. **COMMIT / ABORT message is lost** → the participant said OK to Prepare and now hears nothing. **The participant cannot decide on its own** – it has to **wait and ask the coordinator what happened (COMMIT or ABORT)** because **the decision is held only by the coordinator.** (This is the **blocking** weakness of 2PC – participants stay locked while the coordinator is down.)
 
+<!-- isw:20-3 -->
+**In simple words**
+
+There are two phases: **1. voting / prepare** and **2. decision / commit.** The actors are the application, a **transaction coordinator**, **participant 1** (Order microservice) and **participant 2** (Inventory microservice).
+
+**Flow:** (1) the application asks the coordinator to perform the operation, and the coordinator **starts the transaction.** (2) The coordinator sends the **update query** to both participants, and each **takes a lock.** (3) **Phase 1:** the coordinator writes a "send prepare" record to a **lock file in permanent storage** and sends **PREPARE** to both. (4) Each participant writes its own lock file and replies **OK** (or **NO** if it cannot commit). (5) **Phase 2:** the coordinator updates its log and decides: **all OK → COMMIT** to everyone; **any NO or timeout → ABORT** to everyone. (6) The participants apply it and reply done; the coordinator **closes the transaction.**
+<!-- /isw:20-3 -->
+
+<!-- isw:20-4 -->
+**In simple words**
+
+Two things can fail: **the coordinator or a participant.** The message-loss cases in the notes:
+1. **The prepare message is lost → abort the transaction** (the coordinator times out waiting for the vote and then aborts).
+2. **The OK message is lost →** the coordinator waits; **if the timeout is over, it aborts the transaction.**
+3. **The COMMIT / ABORT message is lost →** a participant had said OK to prepare and now hears nothing. **It cannot decide on its own;** it has to **wait and ask the coordinator what happened,** because **only the coordinator holds the decision.** This is the **blocking** weakness of 2PC: participants stay locked while the coordinator is down.
+<!-- /isw:20-4 -->
+
+
+
+
+
 ---
 
 ## 4. Three-Phase Commit (3PC) – a **non-blocking** protocol
@@ -192,6 +199,17 @@ Three phases: **1. Prepare phase** [same as 2PC] · **2. Pre-Commit phase** · *
 
 Why it helps: because every participant **already knows the decision (from the pre-commit)** before the final commit, if the coordinator fails after the pre-commit message a participant can still proceed (the diagram shows the coordinator `C` crashing after sending *Prepare : Commit* to participant `P` – the participants hold the decision). **But it's more complex → rarely used.**
 
+<!-- isw:20-5 -->
+**In simple words**
+
+It is a **non-blocking** protocol with three phases: **1. Prepare** (same as 2PC), **2. Pre-Commit** and **3. Commit.**
+
+**Flow:** (1) the application asks the coordinator, which **starts the transaction** and sends the update queries. (2) **Phase 1:** PREPARE → the participants reply **OK.** (3) **Phase 2 (pre-commit):** the coordinator makes the decision and sends **Pre-Commit: Commit** (*"we are just sharing information about what the coordinator has decided"*), and the participants **acknowledge.** (4) **Phase 3:** **COMMIT** → the participants reply **DONE** and the transaction is closed.
+
+**Why it helps:** every participant **already knows the decision from the pre-commit** before the final commit, so if the coordinator fails after the pre-commit message, a participant can still go on (the notes' diagram shows the coordinator crashing after sending "Prepare: Commit" to a participant). **But it is more complex, so it is rarely used.**
+<!-- /isw:20-5 -->
+
+
 ---
 
 ## 5. SAGA pattern (asynchronous)
@@ -216,6 +234,15 @@ graph LR
 - **Failure handling:** if a later step fails (e.g. **P5 fails**), the previous services run **compensating transactions – Rollback** in reverse order: P4 → P3 → P2 → P1 (each undoing its committed work).
 - Communication is **asynchronous** (event published to a queue; "Msg fail" if the message can't be delivered must be handled too).
 
+<!-- isw:20-6 -->
+**In simple words**
+
+A Saga is a chain of **local transactions** P1 → P2 → P3 → P4 → P5 → P6. Each service does **its own update and commit in its own DB** and then triggers the next one (for example by **publishing an event to a queue / message broker**). It is **sequential in nature.**
+
+**Failure handling:** if a later step fails (say **P5 fails**), the earlier services run **compensating transactions (rollback) in reverse order:** P4 → P3 → P2 → P1, each undoing its committed work. The communication is **asynchronous** (an event is published to a queue; the case where the message cannot be delivered ("Msg fail") must also be handled).
+<!-- /isw:20-6 -->
+
+
 ---
 
 ## Quick revision
@@ -228,5 +255,5 @@ graph LR
 ---
 
 <!-- nav -->
-⬅ [19 Distributed Cache and Caching Strategies](19_Distributed_Cache_and_Caching_Strategies_Notes.md) · [Index](00_HLD_Index.md) · [24 OAuth 2.0](24_OAuth_2.0_Notes.md) ➡
+⬅ [19 Distributed Cache and Caching Strategies](19_Distributed_Cache_and_Caching_Strategies_Notes.md) · [Index](00_HLD_Index.md) · [21 Database Indexing](21_Database_Indexing_Notes.md) ➡
 <!-- nav -->

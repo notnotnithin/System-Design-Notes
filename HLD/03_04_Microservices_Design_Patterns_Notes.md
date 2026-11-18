@@ -6,342 +6,333 @@
 
 Source (same PDF for both entries, handwritten, 10 pages): https://drive.google.com/file/d/1d8R5wkQo9gnCcB_e2DFKCn-TgxWoJMsd/view?usp=drive_link
 
----
-
-<!-- simple-explanation -->
-## In simple words – microservices and their design patterns
-
-### Monolith vs microservices
-A **monolith** is one big application that contains everything (orders, inventory, payments, login…) and is deployed as one unit.
-- ❌ The code base becomes huge and slow to work with.
-- ❌ **Scaling is all-or-nothing:** if only the Order part is busy you still have to scale the entire application.
-- ❌ **Tightly coupled:** a small change in one area can accidentally break many others.
-
-**Microservices** split the application into small, independent services (Product, Order, Billing, Login, Payment…).
-- ✅ Each is small, so developers manage it easily.
-- ✅ Each can be **scaled and deployed independently**.
-- ❌ But new problems appear: services talk over the network (**latency**); a single user request passes through many services, so **debugging and monitoring are harder**; and each service has its own database, so you **lose one big ACID transaction**.
-
-"How small is small?" There is no strict rule. That's what the patterns below help decide.
-
-### The four phases of designing microservices
-**Decomposition → Database → Communication → Integration**
-(how to split, how to store data, how services talk – API calls or events – and how clients enter via an API gateway with monitoring).
-
-### Decomposition: how to split a monolith
-1. **By business capability** – one service per thing the business does: order management, product management, account management, login. You need good knowledge of the business.
-2. **By subdomain (Domain-Driven Design)** – divide the business into **domains** (Order, Payment…) and break each domain into sub-domains/services. For example, the Payment domain might have a few services.
-
-### Strangler pattern – migrating step by step
-Rewriting a monolith in one go is risky. Instead, put a **routing layer (facade)** in front. At first 100 % of traffic goes to the monolith. As you rebuild each feature as a microservice, route a bit more traffic to it (0 % → 20 % → 60 % → 100 %). When nothing uses the monolith anymore, switch it off. Like a strangler vine slowly replacing a tree.
-
-### Data management: shared vs per-service database
-**Shared database** (all services use one DB):
-- ✅ Easy joins and easy ACID transactions.
-- ❌ Can't scale services independently (a busy Order service forces you to scale the whole DB).
-- ❌ Risky schema changes: removing a column needs checking every service that uses it.
-
-**Database per service** (each service owns its data):
-- ✅ Each service picks the best database (SQL, MongoDB, PostgreSQL…), scales independently and is easy to maintain.
-- Rule: service S2 must **not** query S3's database. It must **ask S3 through its API**.
-- ❌ You lose cross-service joins (solved with **CQRS**, a separate read model) and cross-service transactions (solved with **SAGA**).
-
-### SAGA – transactions across services
-Example: place an order → reserve stock → take payment. Each step is a **local transaction** in its own database. If payment fails after the order and inventory were saved, we can't "roll back" normally, so the earlier services run **compensating actions** (cancel the order, release the stock).
-Two styles:
-- **Choreography (event-based):** there's no boss. Each service does its work, **publishes an event**, and the next service reacts. If one fails it publishes a failure event and the earlier ones undo their work. Simple for a few steps, but it becomes tangled (**cyclic dependencies**) as services multiply.
-- **Orchestration:** a central **orchestrator** calls S1, then S2, then S3 in order. If S3 fails, the orchestrator tells S2 and S1 to compensate. The flow is easy to follow in one place, but the orchestrator is a central component to maintain.
-
-See also [Distributed Transactions](20_Distributed_Transactions_Notes.md) and [Dual Write Problem](33_Dual_Write_Problem_Notes.md).
-<!-- simple-explanation -->
-
-
-# PART 1
-
-## 1. Monolithic vs Microservices (p1–p2)
-
-<!-- diagram:03_04-0 -->
-**Diagram – Monolith versus microservices**
-
-```mermaid
-graph LR
-  subgraph M["Monolith: one deployable unit"]
-    direction TB
-    MA["Order, Inventory, Payment, Login ... all in one application"] --> MD[("One database")]
-  end
-  subgraph MS["Microservices: small independent services"]
-    direction TB
-    P["Product"] --> PD[("DB")]
-    O["Order"] --> OD[("DB")]
-    B["Billing"] --> BD[("DB")]
-    L["Login"] --> LD[("DB")]
-  end
-```
-<!-- /diagram:03_04-0 -->
-
-
-### Monolithic (legacy) application
-One big application containing everything (Order, Inventory, Payment, … – e.g. an online store), deployed as a single unit (GB-sized).
-
-**Disadvantages**
-1. **Overloads the IDE** (huge code-base).
-2. **Scaling is very hard** – e.g. if one sub-operation (the example mentions a "CI job" being fast) is fast it's easy to scale, but you must scale the **whole** application.
-3. **Tightly coupled** – if we change one line it might **impact so many domains.**
-
-### Why microservices?
-Break the monolith into small services – Product, Order, Billing, Login, Account, Payment, …
-
-**Advantages**
-1. **Managing is very easy for developers** (small focused code-bases).
-2. **We can scale independently.**
-
-### Disadvantages of microservices
-1. **Latency / communication** – the components are **loosely coupled** but must communicate a lot over the network → **latency issue.** (Properly broken-down services still give more inter-service communication.)
-2. **Debugging is too hard** – e.g. flow S1 → S2 → S3; if there is a new code change in S3 and something breaks, **finding who the culprit is is hard.** **Monitoring is difficult.**
-3. **Transaction management** – in a monolith a request runs under **one DB with ACID** (start → end/stop in one transaction). In microservices a request R1 touches **S1 (own DB), S2 (own DB)** … – each has its own transaction, so there is no single ACID transaction. *(→ SAGA, see below.)*
+*How to read this note: each section first lists **what your notes say** (nothing added), and then **In simple words** explains exactly those points in more detail.*
 
 ---
 
-## 2. Micro-services – "how small is small?"
-**Micro + Services** – services should be small, but **there is no definition of how much "micro" is.**
+## 1. Monolithic and Microservices (pages 1–2)
 
-### Phases of microservices
+### What the notes say – the monolith (legacy application)
+- A **legacy / monolithic application** is one big application containing everything – in the picture: **Order, Inventory, Payment, …** (example: an **Online Store**). Its size is in **GB**.
+- **Disadvantages:**
+  1. **It overloads the IDE.**
+  2. **Scaling is very hard** – the note links this to the **CI job**: *"if the sub-operation (CI job) is fast, then it is easy to scale."*
+  3. **A monolith is tightly coupled.** *If we change one line it might impact so much domain.*
 
-<!-- diagram:03_04-1 -->
-**Diagram – The four phases**
+**In simple words**
+- *One big application:* all the features of the online store (orders, inventory, payments and more) live in a single code base and are built and deployed as a **single unit**. Because everything is in one place, the application grows to gigabytes.
+- *Overloads the IDE:* the code base is so large that the editor (IDE) becomes heavy and slow to work with.
+- *Scaling is very hard:* the notes tie scaling to the **CI job** (the automated build and deploy). If the unit you have to build and deploy is huge, the job is slow and so is scaling. The note says the opposite is also true: when the job (the sub-operation) is fast, scaling becomes easy. A small, separate piece gives you a fast job, a giant monolith does not.
+- *Tightly coupled:* the parts of the monolith depend on each other so closely that changing even **one line** in one place can affect many other areas (domains), so every change is risky.
+
+### What the notes say – why microservices?
 
 ```mermaid
 graph LR
-  P1["1 Decomposition<br/>by business capability<br/>by subdomain"] --> P2["2 Database<br/>database per service<br/>shared database"]
-  P2 --> P3["3 Communication<br/>API (sync)<br/>Event (async)"]
-  P3 --> P4["4 Integration<br/>API Gateway<br/>observability, monitoring"]
+  M["Legacy application (one big box)"] --> P["Product"]
+  M --> O["Order"]
+  M --> B["Billing"]
+  M --> L["Login"]
+  M --> A["Account"]
+  M --> PY["Payment"]
 ```
-<!-- /diagram:03_04-1 -->
 
+- The big box is broken into many small services: **Product, Order, Billing, Login, Account, Payment, …**
+- Advantages: **1. Managing is very easy for the developer. 2. We can scale independently.**
+
+**In simple words**
+- Instead of one big box, the same application becomes **several small applications**, each doing one job (product, order, billing, login, account, payment).
+- *Easy for the developer:* a developer only has to understand one small service, not the whole application.
+- *Scale independently:* if only **Order** is busy, you scale just the Order service, and the others are left alone.
+
+### What the notes say – disadvantages of microservices
+
+**1. Loosely coupled, but a latency issue**
+```mermaid
+graph LR
+  S1["Service"] <--> S2["Service"]
+  S1 <--> S3["Service"]
+  S2 <--> S4["Service"]
+  S3 <--> S4
+  S2 <--> S3
+```
+- *"We can properly break the microservices. All components are loosely coupled… we give more communication. It is a latency issue."*
+
+**In simple words:** the services are separate (loosely coupled), but to finish one job they have to **talk to each other a lot**. Every conversation between services is a call over the network, and each call takes time. More communication means more waiting, and that is the **latency issue**.
+
+**2. Debugging is too hard**
+```mermaid
+graph LR
+  S1["S1"] --> S2["S2"] --> S3["S3 (live): new code changes"]
+```
+- *"Debugging is too hard. If the change is on S3, finding who is the culprit is hard."*
+- *"Monitoring is difficult."*
+
+**In simple words:** one request passes through S1, then S2, then S3. Say a **new code change** goes live in S3 and something breaks. The symptom may show up at S1 or S2, so it is hard to find **which service** (the culprit) caused it. Watching (monitoring) many services together is also difficult.
+
+**3. Transaction management**
+```mermaid
+graph LR
+  subgraph MONO["Monolith"]
+    R["Request"] --> DB[("One DB: ACID, start to stop")]
+  end
+  subgraph MICRO["Microservices"]
+    R1["Request R1"] --> S1["S1"] --> DB1[("Own DB: Txn start to stop")]
+    R1 --> S2["S2"] --> DB2[("Own DB: Txn start to stop")]
+  end
+```
+- In the monolith a request works against **one DB with ACID**, from start to stop.
+- In microservices a request R1 goes to **S1 (its own DB)** and **S2 (its own DB)**, each with its own transaction start and stop.
+
+**In simple words:** in the monolith, one request is one transaction on one database, so either everything is saved or nothing is (ACID). In microservices each service has **its own database and its own transaction**. There is no single transaction that covers S1 and S2 together. This problem is solved later in the notes with the **SAGA** pattern.
+
+---
+
+## 2. Micro + Services – "how small?" (page 3)
+
+### What the notes say
+- **Micro-service = Micro + Services**: *Small – how much small??*
+- **Phases of microservices:**
 
 | # | Phase | Contents |
 |---|---|---|
 | 1 | **Decomposition** | decompose by **business capability**; decompose by **subdomain** |
-| 2 | **Database** | **database per service**; **shared database** |
-| 3 | **Communication** | **API** (synchronous); **Event** (asynchronous) |
-| 4 | **Integration** | **API Gateway** → also **Observability** and **Monitoring** |
+| 2 | **Database** | **database per service**; **database shared** |
+| 3 | **Communication** | **API**; **Event** |
+| 4 | **Integration** | **API Gateway** → **Observability**, **Monitoring** |
+
+- Then the notes start with **1. Decomposition** (one big box → several small boxes) and **2. Database** (small services with databases).
+
+**In simple words**
+- The name says the services should be **small**, but the notes ask the real question: *how small is small?* There is no fixed answer (this comes back on page 4).
+- Building microservices is described in **four phases**:
+  1. **Decomposition** – *how do we cut the big application into small pieces?* Two ways: by what the business does, or by subdomain.
+  2. **Database** – *where does the data live?* Either each service has its own database, or all share one.
+  3. **Communication** – *how do the services talk?* Through an **API** (a direct call and answer) or through an **event** (one service announces something, others react).
+  4. **Integration** – *how does the outside world reach all these services?* Through an **API Gateway**, together with **observability and monitoring** to see what is happening.
 
 ---
 
-## 3. Decomposition patterns (p3–p5)
-Question: *how much small?* Two approaches:
+## 3. Decomposition patterns (pages 4–5)
 
-### ① By business capability / functionality
+### What the notes say
+- Question: *How much small?* The big application is broken into small pieces in **two ways:**
+  1. **By business functionality / capability**
+  2. **By subdomain – DDD** (**Domain Driven Design**)
 
-<!-- diagram:03_04-2 -->
-**Diagram – Decompose by business capability**
-
+### 3.1 By business capability
 ```mermaid
 graph TD
-  APP["Online order application"] --> O["Order management"]
-  APP --> P["Product management"]
+  APP["Online Order Application"] --> O["ORDER management"]
+  APP --> P["PRODUCT management"]
   APP --> A["Account management"]
   APP --> L["Login"]
 ```
-<!-- /diagram:03_04-2 -->
+- Example – **Online Order Application:** Order management, Product management, Account management, Login.
+- **Challenge:** you need **knowledge of which functions exist in your business.**
+- **There is no definition of how much micro.**
 
+**In simple words:** you look at the business and give **each business function its own service**: orders, products, accounts, login. The difficulty is that you must **know the business well** to find these functions. And because nobody defines how small a service must be, deciding where to stop is a judgement call.
 
-Decompose by what the business does. Example – **Online Order Application** → **Order management, Product management, Account management, Login** …
-**Challenge:** you need **knowledge of which functions exist in your business**; and **there is no definition of how much micro.**
-
-### ② By subdomain – DDD (Domain-Driven Design)
-
-<!-- diagram:03_04-3 -->
-**Diagram – Decompose by subdomain (DDD)**
-
+### 3.2 By subdomain (DDD)
 ```mermaid
 graph TD
-  OM["Order Management domain"] --> OT["Order tracking"]
-  OM --> OP["Order placing"]
-  OM --> OR["Order returning"]
-  PD["Payment domain"] --> FP["Forward payment"]
-  PD --> RP["Reverse payment"]
+  OM["Domain: Order Management"] --> A["service"]
+  OM --> B["service"]
+  OM --> C["service"]
+  PD["Payment Domain"] --> D["service"]
+  PD --> E["service"]
 ```
-<!-- /diagram:03_04-3 -->
+- **Domain Driven Design:** a **domain** is split into several services. In the picture the **Order Management** domain has **3** boxes and the **Payment domain** has **2** boxes.
 
-
-Use **Domain-Driven Design**: split the application into **domains**, and each domain into sub-domains/services – e.g. **Order Management domain → several services**, **Payment domain → a few services.**
+**In simple words:** first find the big areas of the business (**domains**), such as *Order Management* and *Payment*. Then split each domain into smaller parts (**subdomains**), and each part becomes a service. The business capability approach splits by *function*; DDD splits by *area of the business and then its parts*.
 
 ---
 
-# PART 2
+## 4. Strangler Pattern (page 6)
 
-## 4. Strangler Pattern (refactoring a monolith into microservices) (p6)
-
-<!-- diagram:03_04-4 -->
-**Diagram – Strangler pattern: traffic moves gradually to the new services**
+### What the notes say
+The page is headed **"HLD – SAGA Pattern | Strangler Pattern | CQRS"**.
+- **Strangler pattern (refactoring to microservices):** on the left a **monolith** (the picture marks its APIs, about 1000 APIs), on the right the **new microservices** (S1 …). A **controller** sits between them and the incoming API traffic.
+- The controller sends traffic either to the monolith or to the microservices. The picture shows traffic to the microservices going **0 → 20 → 60 → 100** while the traffic to the monolith **goes down**.
 
 ```mermaid
 graph LR
-  C["Clients"] --> R["Router / facade"]
-  R -->|"100% at the start, then 80%, 40%, 0%"| M["Legacy monolith"]
-  R -->|"0% at the start, then 20%, 60%, 100%"| S1["New microservice S1"]
-  R --> S2["New microservice S2"]
+  T["API traffic"] --> C["Controller"]
+  C -->|"traffic goes down over time"| M["Monolith"]
+  C -->|"0, then 20, then 60, then 100"| MS["Microservices (S1, S2, ...)"]
 ```
-<!-- /diagram:03_04-4 -->
 
-
-- Put a **controller / routing layer (a facade)** in front of the **monolith** and the **new microservices** (S1, S2, …).
-- Initially **all traffic (100 %) goes to the monolith.** As each module is rebuilt as a microservice, the controller **gradually shifts traffic** – e.g. **0 % → 20 % → 60 % → 100 %** to the microservices while the monolith traffic **goes down** – until the monolith can be retired. (The diagram shows an API count example: ~1000 APIs, 900 still in the monolith.)
-
-## 5. Data management in microservices (p6)
-Two options: **Database for each individual service** · **Shared database.** (SAGA / CQRS are needed with the database-per-service approach.)
-
-### Why a shared database is not a success
-
-<!-- diagram:03_04-5 -->
-**Diagram – Shared database: services are tied together**
-
-```mermaid
-graph TD
-  S1["S1 Order"] --> DB[("One shared DB")]
-  S2["S2 Inventory"] --> DB
-  S3["S3 Payment"] --> DB
-  DB -.- N["Scaling or changing one service affects all"]
-```
-<!-- /diagram:03_04-5 -->
-
-
-**Case 1 – can't scale independently.** S1 (Order), S2 (Inventory), S3 (Payment) share one DB. If **Order** has lots of traffic and we want to scale only the Order service, **we have to scale the whole database** → **we can't scale independently.**
-
-**Case 2 – schema changes are risky.** One team has a common database with 10 tables; S3 wants to modify table 10 / delete a column. S3 **cannot just delete it – it must first check dependencies** on every other service.
-
-**What *is* easy with a shared DB:**
-- **Query joins** (10 tables are easy to join). *(With separate DBs, CQRS helps to solve this.)*
-- **Easy to maintain the transaction property (ACID).**
-
-> **Note:** these "easy" things become **difficult in a distributed database.** If a request spans S1, S2, S3 DBs, each only has a **local transaction (ACID)** – *"my transaction is now spanning over the distributed database"* → this challenge is **solved by the SAGA design pattern.**
-
-### Database-per-service
-
-<!-- diagram:03_04-6 -->
-**Diagram – Database per service**
-
-```mermaid
-graph TD
-  S1["S1"] --> D1[("D1: relational SQL")]
-  S2["S2"] --> D2[("D2: NoSQL / MongoDB")]
-  S3["S3"] --> D3[("D3: PostgreSQL")]
-  S2 -. "needs D3 data: calls the API of S3, never the DB" .-> S3
-```
-<!-- /diagram:03_04-6 -->
-
-
-- S1 → D1 (relational DB / SQL), S2 → D2 (NoSQL / MongoDB), S3 → D3 (PostgreSQL) – **each service can choose its own DB type.**
-- **S2 will not query DB3 directly**; if S2 wants D3's data it must **request S3 through an API** and S3 gives the data.
-- **Easy to maintain a particular DB**, and **we can scale independently.**
+**In simple words:** this pattern is for **moving an existing monolith to microservices step by step**. A **controller** is put in front of both. At the beginning all the traffic goes to the monolith. As each feature is rebuilt as a microservice, the controller sends a bit more traffic to the new services (20 %, then 60 %, then 100 %) and the monolith gets less and less. When the microservices get all the traffic (100 %), the monolith is no longer needed. Nothing is switched off at once, so the move is gradual.
 
 ---
 
-## 6. SAGA pattern (p9–p10)
+## 5. Data management in microservices (pages 6–8)
 
-<!-- diagram:03_04-7 -->
-**Diagram – SAGA: local transactions with compensation**
+### What the notes say
+- Two options: **Database for each individual service** and **Shared database.**
+  - With a separate database per service the notes write **SAGA, CQRS**.
+  - With the shared database all of S1, S2, S3 point to one database.
+
+### 5.1 Why a shared database is not a success
+
+**Case 1 – we can't scale independently**
+- S1 = Order (scale), S2 = Inventory, S3 = Payment, all using **one database**.
+- *"Suppose Order has lots of traffic. If we try to scale only the Order service, at that moment we have to scale the whole database."* → **We can't scale independently.**
+
+**In simple words:** the Order service gets a lot of traffic and needs more power. But Order, Inventory and Payment all use the same database, so scaling Order means scaling **the whole shared database**, which also serves the other two. You cannot scale one service on its own.
+
+**Case 2 – changing the database is risky**
+- One team has a common database with **10 tables** (T1 … T10). S3 wants a modification in table 10, for example to **delete a column**.
+- *"S3 will not delete the column. First it checks the dependency."*
+
+**In simple words:** because the tables are shared, other services may use that same column. So S3 cannot simply delete it. It first has to check which other services depend on it. Changing the shared database always needs this checking.
+
+**What is easy with a shared database (from the notes)**
+- **Query join** – *10 tables, easy to join* (the notes add: *CQRS helps here to solve it*).
+- **Easy to maintain the transaction properly (ACID).**
+
+**In simple words:** the shared database has real benefits. All the tables are in one place, so joining them in a query is easy, and one transaction can safely change several tables at once (ACID).
+
+**Note – the easy task becomes difficult in a distributed database**
+```mermaid
+graph LR
+  O["Order"] --> S1[("S1 DB: local Txn ACID")]
+  S1 -->|"touch"| S2[("S2 DB: local Txn ACID")]
+  S2 --> S3[("S3 DB: local Txn ACID")]
+```
+- *"Now my transaction is spanning over the distributed database. Challenge."*
+- **This challenge is solved by the SAGA design pattern.**
+
+**In simple words:** once each service has its own database, one request touches several databases. Each database guarantees ACID only **for itself** (a *local* transaction). Our one business transaction now spans all of them, and no database guarantees it as a whole. That is the challenge, and SAGA (section 6) is the answer.
+
+### 5.2 Database per service
+```mermaid
+graph TD
+  S1["S1"] --> D1[("D1: relational DB (SQL)")]
+  S2["S2"] --> D2[("D2: NoSQL (MongoDB)")]
+  S3["S3"] --> D3[("D3: PostgreSQL")]
+  S2 -. "if S2 wants DB3 data: request S3 through its API" .-> S3
+```
+- **S1 → D1** (relational DB, SQL), **S2 → D2** (NoSQL, MongoDB), **S3 → D3** (Postgres).
+- *"S2 will not query DB3. If S2 wants DB3 data, S2 will first request S3 through an API. S3 has to give the data."*
+- *"Easy to maintain a particular DB."* · *"We can scale independently."*
+
+**In simple words:** every service owns its own database, and **each can use a different type** (SQL, MongoDB, Postgres). A service never reads another service's database. If S2 needs data that lives in D3, it **asks service S3 through its API**, and S3 reads its own database and returns the data. The benefits listed are that each database is easy to maintain and each service can scale on its own.
+
+---
+
+## 6. SAGA pattern (pages 9–10)
+
+### What the notes say – why we need SAGA
+- Transaction: **place an order → payment.** Three databases:
+  - **ORDER** (T1, T2) – *order row successful*
+  - **INVENTORY** (T3, T4) – *inventory successful*
+  - **PAYMENT** (T5, T6) – *failed ✗*
+- *"The ACID property tells that success will be **all or none**."* The notes ask: **Local ACID? Local Txn?** – *that's why we need a Saga.*
+
+**In simple words:** the order was saved and the inventory was updated, but the **payment failed**. ACID says "all or nothing", but ACID only works **inside one database** (local). Here the first two steps are already saved in their own databases, and nothing automatically undoes them when the payment fails. We need another way to undo them, and that is a **Saga**.
+
+### What the notes say – what a Saga is
+- **Saga means a sequence of local transactions.**
+- In the picture the **Order Placed Txn** goes to **S1 Order**, which sends an **event** to **S2 Inventory**, which sends an **event** to **S3 Payment**. **Failure** events travel back, and the databases that already changed are **rolled back**.
+- *"Suppose one Order request comes. Order updates its DB and publishes an event. Inventory listens to the Order event, and on that basis updates its own DB and generates an event. Payment listens to the event. Suppose Payment has failed…"* (the page text is cut off at the bottom).
 
 ```mermaid
 sequenceDiagram
-  participant O as Order service
-  participant I as Inventory service
-  participant P as Payment service
-  O->>O: save order in ORDER DB
-  O->>I: event: order created
-  I->>I: update INVENTORY DB
-  I->>P: event: stock reserved
-  P->>P: payment fails
-  P-->>I: failure event
-  I-->>I: roll back (compensate)
-  I-->>O: failure event
-  O-->>O: roll back (compensate)
+  participant S1 as S1 Order
+  participant S2 as S2 Inventory
+  participant S3 as S3 Payment
+  S1->>S1: update own DB
+  S1->>S2: event
+  S2->>S2: update own DB
+  S2->>S3: event
+  S3->>S3: payment fails
+  S3-->>S2: failure event
+  S2-->>S2: rollback
+  S2-->>S1: failure event
+  S1-->>S1: rollback
 ```
-<!-- /diagram:03_04-7 -->
 
+**In simple words:** a Saga breaks the big business transaction into **small local transactions, one per service**. Each service does its own work in its own database and then publishes an **event** to tell the next service. The next service listens, does its part and announces its own event. If one service fails (payment), it sends a **failure event backwards** and each earlier service **rolls back** (undoes) what it did. So instead of one big transaction there is a chain of small ones that can undo each other.
 
-**Why do we need Saga?** Transaction: *Place an order → payment.* Three DBs: **ORDER** (T1, T2), **INVENTORY** (T3, T4), **PAYMENT** (T5, T6). Order row inserted successfully, inventory updated successfully, **payment fails** ✗.
-- ACID tells that success is **all or none** – but it is only **local** ("Local ACID? Local Txn?"). We need to undo the earlier steps.
+### What the notes say – the two types of Saga
+**① Choreography**
+- Services talk through a **message event queue**: **Q1 for success** events and a second queue for **failure** events.
+- **S1:** *"Service 1 has processed and sent the event."*
+- **S2:** *"S2 has listened and done its work, and S2 has done the work and published an event."*
+- **S3:** *"S3 works based on the event. If it succeeds it publishes the event. If it fails…"* (rollback arrow back to S2).
+- **Drawback: cycle dependency.**
 
-> **Saga = a sequence of local transactions.** Each service updates **its own DB** and **publishes an event**; the next service listens to the event. If a step fails it publishes a **failure** event, and the earlier services **roll back** (compensate).
+**In simple words:** in choreography **there is no boss**. Each service reacts to the event it receives and then publishes the next event, like dancers who each know their next move. Success events go on the success queue, failures on the failure queue, and a failure makes the earlier services roll back. The drawback in the notes is **cyclic dependency**: the services depend on one another's events, so the flow is hard to follow and maintain.
 
-Walk-through: *an order request arrives → Order service updates its DB and publishes an event → Inventory listens to the Order event, updates its own DB and publishes an event → Payment listens; suppose Payment fails → it generates a **failure** event → Inventory and Order roll back.*
-
-### Two types of Saga
-
-<!-- diagram:03_04-8 -->
-**Diagram – Choreography versus orchestration**
-
+**② Orchestrator**
 ```mermaid
 graph LR
-  subgraph CH["Choreography: no central brain"]
-    direction LR
-    A1["S1"] -->|"event"| BR(("Message broker"))
-    BR -->|"event"| A2["S2"]
-    A2 -->|"event"| BR
-    BR -->|"event"| A3["S3"]
-  end
-  subgraph OR["Orchestration: central coordinator"]
-    direction TB
-    O["Orchestrator"] -->|"1 call"| B1["S1"]
-    O -->|"2 call after S1 replies"| B2["S2"]
-    O -->|"3 call after S2 replies"| B3["S3"]
-  end
+  O["Orchestrator"] --> S1["S1"]
+  O --> S2["S2"]
+  O --> S3["S3"]
 ```
-<!-- /diagram:03_04-8 -->
+- *"The orchestrator is the one who calls S1. Based on the reply from S1 the orchestrator calls S2. The orchestrator again calls S3 based on S2. Suppose S3 fails, the orchestrator has to make sure that the rollback of S2 and S1 is done."* (the page text is cut off).
 
-
-**① Choreography** (event-based, no central brain)
-- Services communicate through a **message broker / queues** (Q1 = success events, Q2 = failure events).
-- S1 processes and sends an event; **S2 listens, does its work and publishes an event**; S3 works based on the event and, if it succeeds, publishes the next event; **if it fails it publishes a failure event** and the previous ones roll back.
-- **Drawback: cyclic dependency** between services (each listens to others' events – hard to follow/maintain).
-
-**② Orchestrator** (central coordinator)
-- An **Orchestrator** calls **S1**, then **based on S1's reply calls S2**, then **based on S2's reply calls S3.** **If S3 fails, the orchestrator makes sure that the rollback (compensation) of S2, S1 is done.**
-- (Single place that knows the whole flow; easier to follow, but the orchestrator is a central component.)
-
-### CQRS
-
-<!-- diagram:03_04-9 -->
-**Diagram – CQRS: separate write side and read side**
-
-```mermaid
-graph LR
-  CL["Client"] -->|"command: create, update, delete"| W[("Write DBs: DB1, DB2")]
-  W -->|"events"| V[("Read view DB<br/>already joined")]
-  CL -->|"query: read"| V
-```
-<!-- /diagram:03_04-9 -->
-
-
-Mentioned at the page edge as the companion pattern for **querying across per-service databases** (Command Query Responsibility Segregation) – see "CQRS" in the data-management section above.
+**In simple words:** in the orchestrator type **one central controller runs the show.** It calls S1 and waits for the reply, then calls S2, then S3. The services do not call each other, only the orchestrator calls them. If S3 fails, the **orchestrator is responsible for rolling back S2 and S1**.
 
 ---
 
-## Quick revision
-- Monolith: tight coupling, hard scaling, heavy. Microservices: independent scaling/deploys, but **latency, debugging/monitoring, distributed transactions.**
-- 4 phases: **decomposition → database → communication (API/event) → integration (API gateway, observability).**
-- Decompose by **business capability** or **DDD subdomain**; migrate with the **Strangler pattern** (route traffic gradually).
-- **Database per service** (+ **SAGA** for transactions, **CQRS** for queries) beats a **shared database** (can't scale/change independently).
-- **SAGA** = sequence of local transactions with compensations; **choreography** (events, cyclic-dependency risk) vs **orchestration** (central orchestrator).
+## Quick revision (only from the notes)
+- **Monolith:** one big GB-sized application; overloads the IDE, hard to scale (CI job), tightly coupled.
+- **Microservices:** easy for the developer, scale independently; but latency, hard debugging and monitoring, and transaction management.
+- **Four phases:** Decomposition → Database → Communication → Integration (API Gateway, observability, monitoring).
+- **Decomposition:** by business capability or by subdomain (DDD). No definition of how micro.
+- **Strangler:** a controller moves the traffic gradually (0 → 20 → 60 → 100) from the monolith to the microservices.
+- **Shared database:** can't scale independently, changing a column needs a dependency check; easy joins and ACID. **Database per service:** own DB type per service, ask another service through its API, scale independently.
+- **SAGA:** a sequence of local transactions with rollback on failure; **choreography** (events, cycle dependency) or **orchestrator** (one caller that also does the rollback).
 - Related: [Distributed Transactions](20_Distributed_Transactions_Notes.md), [Dual Write Problem](33_Dual_Write_Problem_Notes.md), [API Gateway](40_41_API_Gateway_Part1_Part2_Notes.md).
 
 ---
 
-## Extra from the 36-page handwritten compendium (pages 7–14)
-These pages are in the same PDF as notes #1, #7, #9 and #11 (https://drive.google.com/file/d/1iegvlzgcLJtcGvbjJbPqF4hZaB5u_nrh/view?usp=drive_link); kept here because they belong to this topic.
+## From the other PDF (36-page compendium, pages 7–14)
+These pages are in a different PDF (https://drive.google.com/file/d/1iegvlzgcLJtcGvbjJbPqF4hZaB5u_nrh/view?usp=drive_link), on the same topic. Again, what the notes say first, then an explanation.
 
-- **Monolithic ("legacy"):** every functionality in a single app. **Disadvantages:** overloads the IDE, scaling is hard, deployment/CI.
-- **Microservices:** each service has a **single responsibility** → **easy to scale, easy to maintain, easy to integrate and deploy.** **Disadvantages** (if services are partitioned incorrectly and still tightly connected): **latency increases**, **monitoring is difficult** (a change by anyone impacts other services), **transaction management** (if one service's transaction fails, the overall system becomes inconsistent).
-- **Phases:** I. make services *micro* – decomposition by business capability, by subdomain, self-contained service, **service per team**; II. choose DB – **database per service** or **shared DB**; III. communication – **API composition**, **event sourcing**; IV. integrate – **API Gateway**.
-- **Decomposition examples:** by business capability – Order, Product, Account, Login, Billing, Payment management. By subdomain (DDD) – *Order Management domain* → Order Tracking, Order Placing, Order Returning; *Payment domain* → Forward payment, Reverse payment.
-- **Microservices II (post-decomposition): Strangler, SAGA, CQRS.**
-- **Strangler:** *"How do you migrate a legacy monolith to microservices?"* – **modernize by incrementally developing a new application around the legacy app**; named after a vine that slowly strangles a tree. Stages **Transform → Co-exist → Eliminate** with a **router** sending traffic to legacy, to both, then to modern only. **Features:** gradual migration, co-existence, strangling behaviour.
-- **SAGA:** *data management in microservices* – database per service (each ACID locally) vs shared DB (all data at one place; scaling one service impacts others; but **easy joins** and **ACID transactions**). Problem: an order affects several DBs – ACID across all is not possible → **SAGA = a sequence of local transactions**; events between local transactions; **on failure a failure event triggers rollback.**
-  - **Choreography:** each local transaction **publishes domain events that trigger local transactions in other services** (Order → *Order Created* on Order event channel → Customer service → *Credit Reserved / Credit limit exceeded* on Customer event channel). "One after other" – services know what to do next.
-  - **Orchestration:** **an orchestrator (object) tells the participants what local transactions to execute** (command channel & saga reply channel through a message broker); the order stays in a *pending* state until the customer service replies, then approved/rejected. Example: A pays B ₹10 → A: 100−10=90; B fails → +10 back → **rollback** to 100.
-- **CQRS – Command Query Request Segregation:** segregate **commands (Create/Update/Delete)** from **queries (Select/Read)**. Writes go to DB1/DB2; **events** update a separate **read VIEW DB** – *"no need for joining; it behaves like it's joined but is independent."*
+**Monolith and microservices.** *Monolithic ("legacy"): every functionality in a single app; disadvantages are that it overloads the IDE, scaling is hard, and deployment/CI. Microservices: each service has a single responsibility, so it is easy to scale, easy to maintain, easy to integrate and deploy. Disadvantages (if services are partitioned incorrectly and still tightly connected): latency increases, monitoring is difficult (a change by anyone impacts other services), and transaction management (if one service's transaction fails, the overall system becomes inconsistent).*
+In simple words: each microservice does **one job**, which makes it easy to scale and deploy. But if the services were cut badly and still depend closely on each other, you get the same coupling as before, plus extra network delay, and if one service's transaction fails the data across services can become inconsistent.
+
+**Phases.** *I. Make services micro – decomposition by business capability, by subdomain, self-contained service, service per team. II. Choose the DB – database per service or shared DB. III. Communication – API composition, event sourcing. IV. Integrate – API Gateway.*
+In simple words: it is the same four phases as page 3, with a few extra ideas named: a **self-contained service**, **one service per team**, **API composition** (one call that collects data from several services) and **event sourcing** (storing the changes as events).
+
+**Decomposition examples.** *By business capability – Order, Product, Account, Login, Billing, Payment management. By subdomain (DDD) – the Order Management domain → Order Tracking, Order Placing, Order Returning; the Payment domain → Forward payment, Reverse payment.*
+In simple words: these are the concrete services for the two pictures on pages 4 and 5. The Order Management domain becomes three services, and the Payment domain becomes two (paying forward and reversing a payment).
+
+**Microservices II (after decomposition): Strangler, SAGA, CQRS.**
+
+**Strangler.** *"How do you migrate a legacy monolith to microservices?" – modernise by incrementally developing a new application around the legacy app; it is named after a vine that slowly strangles a tree. Stages: Transform → Co-exist → Eliminate, with a router sending traffic to legacy, to both, then to modern only. Features: gradual migration, co-existence, strangling behaviour.*
+In simple words: you build the new application **around** the old one. First you **transform** (rebuild a part), then the old and new **co-exist** while the router sends traffic to the old one, to both, and finally only to the new one, and in the end you **eliminate** the old application.
+
+```mermaid
+graph LR
+  R["Router"] -->|"stage 1: transform, traffic to legacy"| L["Legacy app"]
+  R -->|"stage 2: co-exist, traffic to both"| L
+  R --> N["New (modern) app"]
+  R -->|"stage 3: eliminate, traffic only to modern"| N
+```
+
+**SAGA (data management).** *Database per service (each ACID locally) versus shared DB (all data at one place; scaling one service impacts others; but easy joins and ACID transactions). Problem: an order affects several DBs, ACID across all is not possible, so SAGA = a sequence of local transactions; events between local transactions; on failure, a failure event triggers rollback.*
+In simple words: this repeats the reasoning of sections 5 and 6 above.
+
+- **Choreography:** *each local transaction publishes domain events that trigger local transactions in other services (Order → "Order Created" on the Order event channel → Customer service → "Credit Reserved" or "Credit limit exceeded" on the Customer event channel). One after other; each service knows what to do next.*
+  In simple words: the Order service publishes **Order Created**. The Customer service hears it and publishes either **Credit Reserved** or **Credit limit exceeded**. The services simply react to each other's events.
+- **Orchestration:** *an orchestrator (object) tells the participants which local transactions to execute (command channel and saga reply channel through a message broker); the order stays in a pending state until the customer service replies, then approved or rejected. Example: A pays B ₹10 → A: 100 − 10 = 90; B fails → +10 back → rollback to 100.*
+  In simple words: the orchestrator **sends commands** and gets **replies**. Until the customer service answers, the order is **pending**; then it becomes approved or rejected. In the ₹10 example A's balance goes from 100 to 90, B's step fails, so 10 is added back and A is back to 100: that is the rollback.
+
+**CQRS – Command Query Request Segregation.** *Segregate commands (create / update / delete) from queries (select / read). Writes go to DB1 / DB2; events update a separate read VIEW DB: "no need for joining; it behaves like it's joined but is independent."*
+In simple words: this pattern **splits writing from reading**. Create, update and delete requests (commands) go to the normal databases. Each change also sends an **event** that updates a separate **read database (a view)**, which already holds the joined data. Reading then needs no joins across services, and the read side can be scaled separately. This is the CQRS that page 6 mentions next to the shared-database "easy join" point.
+
+```mermaid
+graph LR
+  C["Commands: create, update, delete"] --> W[("DB1, DB2: write side")]
+  W -->|"events"| V[("Read VIEW DB (already joined)")]
+  Q["Queries: select, read"] --> V
+```
 
 ---
 

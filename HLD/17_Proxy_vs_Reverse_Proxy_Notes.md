@@ -10,54 +10,19 @@ Source (handwritten, 6 pages): https://drive.google.com/file/d/18wyJRj2g11NE1Ll1
 
 ---
 
-<!-- simple-explanation -->
-## In simple words – proxy vs reverse proxy
-
-### What is a proxy?
-A **proxy** is a middleman. Instead of the client talking straight to the server, the client talks to the proxy, and the proxy talks to the server on its behalf. Think of a child who wants chocolate: the mother goes to the shop and brings it back. The shop only ever deals with the mother.
-
-Both kinds below are middlemen. The difference is **whose side they are on**.
-
-### Forward proxy – the middleman for *clients*
-It sits in front of a group of clients (for example, all computers in an office) and sends their requests out to the Internet.
-- When a computer asks for `google.com`, the proxy forwards the request using **its own IP address**. Google only sees the proxy, never the real computer. So the **clients stay hidden**.
-- Useful things it gives you:
-  1. **Anonymity** – your IP and location are not revealed to websites.
-  2. **Grouping** – if many people ask for the same page, the proxy can fetch it once.
-  3. **Bypassing restrictions** – if a site is blocked in your country, going through a proxy in another country makes the request look like it comes from there.
-  4. **Security / filtering** – the company can block unwanted sites.
-  5. **Caching** – popular pages are stored and served quickly.
-- It works at the application level (it understands requests like HTTP).
-
-### Reverse proxy – the middleman for *servers*
-It sits in front of your backend servers. Users talk only to the reverse proxy, which decides which server should handle the request. Think of a restaurant: customers talk to the **waiter**, never directly to the **kitchen**.
-- The **servers stay hidden**: the outside world only knows the proxy's address, not the servers' IPs.
-- Benefits:
-  - **Security** – attackers can't reach the real servers. In a DDoS attack, only the proxy takes the hit.
-  - **Caching** – common responses are served directly, which also lowers latency.
-  - **Load balancing** – it can spread requests across many servers.
-  - **CDN** – a Content Delivery Network is basically many reverse proxies placed around the world. A user in Paris is served by the Paris CDN node, which fetches from the origin server (say in Singapore) only when needed.
-
-**Easy memory trick:** forward proxy hides the *client*; reverse proxy hides the *server*.
-
-### Proxy vs VPN
-- A **proxy** mainly **masks your IP**, can cache and log. It usually does not encrypt your data.
-- A **VPN** creates an **encrypted tunnel** between your device and the VPN server. Your data is encrypted before leaving your computer and decrypted at the VPN server, so no one in between can read it.
-
-### Proxy vs load balancer
-A **reverse proxy can also act as a load balancer**, but a plain load balancer only distributes traffic; it doesn't offer anonymity, caching or logging. So: reverse proxy ⊃ load balancer.
-
-### Proxy vs firewall
-A **firewall** is a rule-based gatekeeper. It inspects the **packet headers** (IP addresses, ports, source and destination) and allows or blocks traffic based on rules. A proxy, in contrast, passes on requests on someone's behalf. They are often used together.
-<!-- simple-explanation -->
-
-
 ## 1. What is a Proxy Server?
 **Analogy:** a child wants chocolate from the **shop** – instead of going directly, the **mom (proxy)** goes to the shop on the child's behalf and brings it back.
 
 **Technical:** `Client 1 / Client 2 ⇄ Proxy Server ⇄ Server`
 
 > A **proxy server sits between client and server. It acts like an intermediary** between the client and the server. Requests **pass through the proxy – there is no direct interaction** between client and server.
+
+<!-- isw:17-0 -->
+**In simple words**
+
+The notes use an analogy: a child wants chocolate from the **shop**, but instead of going directly the **mom (the proxy)** goes to the shop on the child's behalf and brings it back. Technically: `Client 1 / Client 2 ⇄ Proxy server ⇄ Server`. **A proxy server sits between client and server and acts as an intermediary.** The requests **pass through the proxy and there is no direct interaction** between the client and the server.
+<!-- /isw:17-0 -->
+
 
 ---
 
@@ -98,6 +63,15 @@ graph LR
 
 **Disadvantage:** it **works at the application level.**
 
+<!-- isw:17-2 -->
+**In simple words**
+
+A forward proxy sits in front of **a group of clients in a closed network** (clients C1 `172.1.01`, C2 `172.2.01`, C3 `172.3.01`) and connects them to the Internet. **What it does: it hides the client networks**, so the outside server **does not know the internal client.** **How:** say client 1 (IP `172.1.01`) requests `google.com`. The proxy forwards the request using **its own IP address** (for example `192.30.1`), as if "the proxy is making a request on behalf of C1", so the server sees only the proxy's IP.
+
+**Advantages:** (1) **anonymity for the internal network:** the clients' IP address and location are hidden from the outside world; (2) **grouping of requests:** if many clients make the same `google.com` request, the proxy can **club them and send a single request** outside; (3) **access restricted content:** if a country blocks some websites (the notes mention India), a proxy lets you **bypass** it, since the request appears to come from a user in, say, the UK or US; (4) **it brings security;** (5) **caching:** the proxy can cache responses (a cache is drawn next to it). **Disadvantage:** it **works at the application level.**
+<!-- /isw:17-2 -->
+
+
 ### ② Reverse proxy
 
 <!-- diagram:17-1 -->
@@ -127,6 +101,24 @@ graph LR
 - **Latency** benefit (served from a nearby/cached location).
 - **Load-balancer capability** – a reverse proxy can distribute requests across servers.
 
+<!-- isw:17-1 -->
+**In simple words**
+
+The two types **differ in the direction of communication:** **forward** and **reverse.**
+<!-- /isw:17-1 -->
+
+<!-- isw:17-3 -->
+**In simple words**
+
+The picture is `Internet → [Reverse proxy] → Server 1 / Server 2 / … / Server n`. A reverse proxy is **like a security guard for your backend servers:** users talk to the **reverse proxy, which then forwards the request to the right server.** The notes' example is a restaurant: customers do not go directly to the **kitchen (backend servers)**; they order through the **waiter (reverse proxy)**, who talks to the kitchen and brings the food.
+
+**Advantages:** **security** (the outside world does not know the servers' IP addresses, only the reverse proxy's); **in a DDoS attack the attacker can only attack the reverse-proxy server;** a **CDN is a reverse proxy** (local clients in Paris, US and India go to their **local CDN** (CDN-Paris, CDN-US, CDN-India), which fetches from the origin server, for example in Singapore, so an attacker can attack only a CDN, not the origin); it can do **caching;** it gives a **latency** benefit; and it has **load-balancer capability** (it can distribute requests across servers).
+<!-- /isw:17-3 -->
+
+
+
+
+
 ---
 
 ## 3. Proxy vs VPN
@@ -151,11 +143,25 @@ graph LR
 | Path | `Client → Proxy → Server` | `Client → VPN client (on the home computer) → encrypted VPN tunnel across the Internet → VPN server → Server` |
 | What it gives | **Anonymity (IP address masking), caching, logging** | **Encryption of data** – data is encrypted at the client, travels through the tunnel, and is **decrypted at the VPN server** |
 
+<!-- isw:17-4 -->
+**In simple words**
+
+With a **proxy** the path is `Client → Proxy → Server`, and it gives **anonymity (IP masking), caching and logging.** With a **VPN** the path is `Client → VPN client (on the home computer) → encrypted VPN tunnel across the Internet → VPN server → Server`, and it gives **encryption of data:** the data is encrypted at the client, travels through the tunnel and is **decrypted at the VPN server.**
+<!-- /isw:17-4 -->
+
+
 ---
 
 ## 4. Proxy vs Load Balancer
 - **A reverse proxy offers IP anonymity, caching, logging – and can act as a load balancer.**
 - **A load balancer cannot be a proxy** (it only distributes traffic across Server 1 … Server n).
+
+<!-- isw:17-5 -->
+**In simple words**
+
+**A reverse proxy offers IP anonymity, caching and logging, and it can also act as a load balancer.** The notes say **a load balancer cannot be a proxy**, because it only distributes the traffic across Server 1 … Server n.
+<!-- /isw:17-5 -->
+
 
 ---
 
@@ -175,6 +181,13 @@ graph LR
 
 - A **firewall** is like a wall with **holes that decide what data may pass** between the Internet and your network – it follows **rules**.
 - It does **packet scanning** – looks at the packet **header: port number, IP address, source / destination** – and allows or blocks accordingly.
+
+<!-- isw:17-6 -->
+**In simple words**
+
+A **firewall** is like a wall **with holes that decide what data may pass** between the Internet and your network, and it follows **rules.** It does **packet scanning:** it looks at the packet **header (port number, IP address, source and destination)** and allows or blocks the packet accordingly.
+<!-- /isw:17-6 -->
+
 
 ---
 

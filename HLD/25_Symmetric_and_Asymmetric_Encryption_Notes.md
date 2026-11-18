@@ -6,68 +6,26 @@
 
 Sources:
 - Handwritten PDF (10 pages): https://drive.google.com/file/d/13oOxr-aZu0K3u7FqBS1ONOCNENjoWERm/view?usp=drive_link
-- Typed Zoho note (JavaScript-rendered, not readable automatically): https://notebook.zohopublic.in/public/notes/bietvf603d76e50a04c989bb3522c763be0ee
+- Typed Zoho note (checked, same content; the encryption example is taken from it): https://notebook.zohopublic.in/public/notes/bietvf603d76e50a04c989bb3522c763be0ee
 
 *Context hints in the notes: chat application end-to-end encryption, HTTPS.*
 
 ---
 
-<!-- simple-explanation -->
-## In simple words – encryption, AES, Diffie-Hellman and digital signatures
-
-### What is encryption?
-Encryption scrambles readable data (**plain text**) into unreadable data (**cipher text**) using a **key**, a secret value that controls the scrambling. Only someone with the right key can turn it back (**decryption**). A toy example is the Caesar cipher: shift every letter by 2 (key = 2), so `A → C`. Real encryption is the same idea with much stronger maths.
-
-There are two kinds: **symmetric** and **asymmetric**.
-
-### Symmetric encryption – one shared key
-The **same key** locks and unlocks the data, like a house key that both people hold.
-- **DES** (old, 64-bit key) is **broken and should not be used**.
-- **AES** is the standard today. Key sizes are 128, 192 or 256 bits (longer = safer but slightly slower), and it works on **128-bit blocks** of data.
-- ✅ **Fast**, so it is ideal for large amounts of data (e.g. chat messages, file transfers).
-- ❌ **Key distribution problem:** how do you safely send the key to the other person in the first place? And with many users you need to manage a separate key for each.
-
-### Asymmetric encryption – a key pair
-Each person has **two linked keys**: a **public key** (share with everyone) and a **private key** (keep secret). Whatever one key locks, only the other can unlock. To send someone a secret, you encrypt with **their public key**; only their **private key** can decrypt. Even a hacker in the middle can't read it.
-- Algorithms: **RSA** (very common), DSA, **Diffie-Hellman**, ECC/ECDHE.
-- ✅ No key-sharing problem; supports key exchange and digital signatures.
-- ❌ **Slow and compute-heavy**, so not good for big data.
-
-### How the real world combines them (e.g. HTTPS)
-1. Use **asymmetric** methods (Diffie-Hellman / ECDHE) at the start to **agree on a secret key safely**.
-2. Then use fast **symmetric AES** with that key for all the actual data.
-You get the safety of one and the speed of the other.
-
-### AES – a peek inside
-- AES is a **block cipher**: it chops the data into 16-byte (128-bit) blocks and scrambles each block.
-- Data sits in a **4 × 4 grid of bytes** (the "state"). The key is expanded into many **round keys** (a 128-bit key becomes 44 words = 11 round keys).
-- Every round does four things: **SubBytes** (replace each byte using a lookup table), **ShiftRows** (shift the rows), **MixColumns** (mix the bytes in each column) and **AddRoundKey** (XOR with the round key).
-- AES-128 does **10 rounds** (192-bit: 12, 256-bit: 14). Decryption does the reverse using the same key.
-
-### Diffie-Hellman – agreeing on a secret in public
-Goal: two people create a **shared secret** while talking over an open channel that a hacker is listening to. Small-number example:
-1. Both publicly agree on a prime **P = 7** and a base **g = 3**.
-2. Each picks a **private number**: sender **4**, receiver **5** (never shared).
-3. Each computes a **public value** = `g^private mod P`: sender `3⁴ mod 7 = 4`, receiver `3⁵ mod 7 = 5`.
-4. They **swap** public values (4 and 5). The hacker sees these too.
-5. Each computes `(other's public)^(own private) mod P`: sender `5⁴ mod 7 = 2`, receiver `4⁵ mod 7 = 2`.
-Both get **2**, the secret key, which was **never transmitted**. With huge real numbers, the hacker can't work backwards to the private numbers (the *discrete logarithm problem*).
-
-### Digital signature – proof of who sent it and that it wasn't changed
-Purpose: **authentication** (it really came from the sender) and **integrity** (nobody modified it).
-- **Sender:** hash the message (a short fingerprint), then **encrypt the hash with the sender's private key** → that is the signature. Send message + signature.
-- **Receiver:** decrypt the signature with the **sender's public key** to get the hash, and compute the hash of the received message themselves. If both hashes match → genuine and untampered. If not → reject.
-Only the real sender has the private key, so only they could have made that signature.
-<!-- simple-explanation -->
-
-
 ## 1. What is encryption?
 - **A process of converting readable data into text that is difficult to understand** (the result is the **cipher** text).
 - It uses a **cryptographic key** – *consider it a mathematical value which the encryption method uses to convert readable text into an unreadable format.*
 
-Example (key = 2, a Caesar-style shift): `HIMANSHU` → *Encryption method (key 2)* → `FRQPHSW FRGLQJ`-style cipher text → *Decryption method (same key)* → `HIMANSHU`.
+Example (the Zoho page labels it "Key: 2"): `CONCEPT CODING` → *Encryption method (key 2)* → `FRQFHSW FRGLQJ` → *Decryption method (same key)* → `CONCEPT CODING`. (Each letter has moved three places along the alphabet, C→F, O→R and so on, although the page writes the key as 2. The page's point is simply that the same key undoes the encryption.)
 
 Encryption is of two types: **① Symmetric** and **② Asymmetric.**
+
+<!-- isw:25-0 -->
+**In simple words**
+
+Encryption is **a process of converting readable data into text that is difficult to understand** (the result is the **cipher text**). It uses a **cryptographic key**, which the notes describe as *a mathematical value the encryption method uses to convert readable text into an unreadable format.* The example: `CONCEPT CODING` goes through the encryption method (key 2) and becomes `FRQFHSW FRGLQJ`, and the decryption method with the same key turns it back into `CONCEPT CODING`. Encryption is of two types: **symmetric** and **asymmetric.**
+<!-- /isw:25-0 -->
+
 
 ---
 
@@ -103,6 +61,19 @@ graph LR
 **Disadvantages**
 1. **Key distribution** – how to securely distribute the key between client and server?
 2. As the **number of clients increases**, the server has to **manage that many symmetric keys** and their distribution too.
+
+<!-- isw:25-1 -->
+**In simple words**
+
+In symmetric encryption **the same key is used for both encryption and decryption** (sender: plain text → encryption method with key 5 → cipher text → receiver: decryption method with key 5 → plain text).
+
+**Algorithms:**
+- **DES (Data Encryption Standard) – not recommended:** in 2005 it was cracked because its key is only **64 bits.** It has a fixed key length of 64 bits (56 effective), processes data in **64-bit blocks** and runs **16 rounds.**
+- **AES (Advanced Encryption Standard) – ⭐⭐ important:** key lengths of **128, 192 or 256 bits** (a bigger key is more secure but needs more computation, so it is slower); it processes **128-bit blocks;** the **number of rounds depends on the key size: 10 rounds for a 128-bit key, 12 for 192, 14 for 256.**
+
+**Advantages:** it is **fast and needs less computation** than asymmetric, and is **good for encrypting bulk data** (like chat). **Disadvantages:** **key distribution** (how to give the key safely to client and server), and as the **number of clients grows, the server must manage that many symmetric keys** and their distribution.
+<!-- /isw:25-1 -->
+
 
 ---
 
@@ -143,6 +114,19 @@ graph LR
 
 > **In practice (HTTPS):** use **asymmetric / key-exchange (Diffie-Hellman, ECDHE) to agree on a secret key**, then use **symmetric (AES) for the bulk data.**
 
+<!-- isw:25-2 -->
+**In simple words**
+
+Asymmetric encryption uses **two different keys, a public key and a private key:** the **public key is used by the sender to encrypt, and the private key is used by the receiver to decrypt.** (In the sketch the sender encrypts with the server's **public key**; a hacker in the middle cannot decrypt; the server decrypts with its **private key.**)
+
+**Algorithms:** **RSA** ⭐ (2048-bit key lengths, more secure), **DSA** (Digital Signature Algorithm), **Diffie-Hellman** ⭐⭐, and **ECC / ECDHE** (elliptic-curve).
+
+**Advantages:** **no problem with key distribution,** because each user has a **secret (private) key that is never forwarded;** it provides **key-exchange protocols** like Diffie-Hellman and ECDHE ⭐; and a **digital signature** can be created with it, which helps to **authenticate and provide integrity.** **Disadvantages:** it is **computation-intensive** compared with symmetric, and **might not be suitable for bulk data** because it is a little slow. (Its security rests on maths like `(prime number)^key`, for example 5^2048.)
+
+**In practice (HTTPS):** use **asymmetric / key-exchange (Diffie-Hellman, ECDHE) to agree on a secret key, then use symmetric (AES) for the bulk data.**
+<!-- /isw:25-2 -->
+
+
 ---
 
 ## 4. AES in detail (symmetric)
@@ -154,6 +138,13 @@ graph LR
 - A **set of 4 bytes (one column) is called a "Word".**
 - A **set of 4 words is called a "Round Key".**
 
+<!-- isw:25-4 -->
+**In simple words**
+
+The data and keys are arranged in a **4 × 4 array called the "state array"** (Byte 0–3 in column 1, Byte 4–7 next, and so on); **1 byte = 8 bits, so 16 bytes = 128 bits.** A set of **4 bytes (one column) is called a "Word"**, and a set of **4 words is called a "Round Key".**
+<!-- /isw:25-4 -->
+
+
 ### Key expansion logic
 - Key words **W0, W1, W2, W3** (the original 128-bit key).
 - `W4 = function(W3) XOR W0`
@@ -161,6 +152,13 @@ graph LR
 - `W6 = W5 XOR W2`
 - `W7 = W6 XOR W3`
 - …and so on **till W43** (so the **128-bit key is expanded into 44 words** = 11 round keys). Every 4th word uses `function(previous word)` (rotate/substitute/round-constant), the others are plain XORs.
+
+<!-- isw:25-5 -->
+**In simple words**
+
+The original 128-bit key is the words **W0, W1, W2, W3.** The next words are built from the earlier ones: `W4 = function(W3) XOR W0`, `W5 = W4 XOR W1`, `W6 = W5 XOR W2`, `W7 = W6 XOR W3`, and so on **until W43**, so the **128-bit key is expanded into 44 words = 11 round keys.** Every 4th word uses `function(previous word)` (rotate / substitute / round constant); the others are plain XORs.
+<!-- /isw:25-5 -->
+
 
 ### Normal text → cipher text (AES-128 encryption flow)
 
@@ -188,14 +186,44 @@ graph TD
 6. **Round 1** (4 operations, uses W4 W5 W6 W7) → **Round 2** → … → **Round 10** (uses W40–W43).
 7. Output: **128-bit cipher-text block.**
 
+<!-- isw:25-6 -->
+**In simple words**
+
+The steps: (1) **generate a 128-bit key;** (2) call the **AES-128 encrypt algorithm (data, key);** (3) **key expansion** (the 128-bit key becomes **44 words**); (4) **for each block of data,** take a **128-bit plain-text block;** (5) **Add Round Key** (W0 W1 W2 W3), the initial XOR; (6) **Round 1** (4 operations, using W4 W5 W6 W7), then Round 2, … up to **Round 10** (using W40–W43); (7) the output is a **128-bit cipher-text block.**
+<!-- /isw:25-6 -->
+
+
 ### Each round consists of 4 steps
 1. **Substitute Bytes** (S-box substitution of each byte)
 2. **Shift Rows**
 3. **Mix Columns**
 4. **Add Round Key** (XOR the state array with the round key's words: DB0⊕W0 … etc.)
 
+<!-- isw:25-7 -->
+**In simple words**
+
+Every round does four steps in this order: **1. Substitute Bytes** (an S-box substitution of each byte), **2. Shift Rows, 3. Mix Columns, 4. Add Round Key** (XOR the state array with the round key's words).
+<!-- /isw:25-7 -->
+
+
 ### Cipher text → plain text (decryption)
 Do the opposite: 128-bit cipher block → **Add Round Key** → Round 1 → … → Round 9 → Round 10 → **128-bit plain-text block** (using the same key).
+
+<!-- isw:25-3 -->
+**In simple words**
+
+**AES is a block cipher:** it processes data in **blocks of 128 bits** (for example `HIMANSHU` is turned into bits and split into 128-bit blocks).
+<!-- /isw:25-3 -->
+
+<!-- isw:25-8 -->
+**In simple words**
+
+Decryption does **the opposite:** the 128-bit cipher block goes through Add Round Key, Round 1 … Round 10 and comes out as the **128-bit plain-text block,** using the **same key.**
+<!-- /isw:25-8 -->
+
+
+
+
 
 ---
 
@@ -238,6 +266,20 @@ sequenceDiagram
 
 **Why a hacker can't break it:** `(value) ^ (private key – very, very big) mod N = output` – the hacker can't compute the private key from the output (discrete-log problem).
 
+<!-- isw:25-9 -->
+**In simple words**
+
+**Purpose:** a way to **share a secret key between the SENDER and the RECEIVER over an insecure network.** The steps with the notes' numbers:
+1. **Agree on public values:** **prime P = 7** and **primitive root = 3** (visible to everyone, even a hacker). *How to find the primitive root:* the powers of 3 mod 7 are 3, 2, 6, 4, 5, 1, which gives all the values 1–6, so 3 is a primitive root of 7.
+2. **Each side randomly picks a private key:** sender = **4,** receiver = **5.**
+3. **Calculate the public key = (primitive root ^ private) mod prime:** sender `3^4 mod 7 = 4`; receiver `3^5 mod 7 = 5.`
+4. **Exchange the public keys:** the sender gets 5 and the receiver gets 4. (A hacker sees P = 7, root = 3 and the two public values, but not the private keys.)
+5. **Calculate the shared secret = (other's public ^ own private) mod prime:** sender `5^4 mod 7 = 2`; receiver `4^5 mod 7 = 2.` **Both get the same secret 2,** which can now be used as the symmetric (AES) key.
+
+**Why a hacker cannot break it:** it is `(value) ^ (private key, very very big) mod N = output`, and the hacker cannot compute the private key from the output.
+<!-- /isw:25-9 -->
+
+
 ---
 
 ## 6. How a Digital Signature works
@@ -276,6 +318,17 @@ A digital signature has **two purposes:** ① **Authentication** ② **Integrity
 1. Take the received **Signature** and use the **sender's public key** in the **Verify algorithm** → recovers the **hash**.
 2. **Compute the hash of the received plain data** with the same hash function.
 3. **Compare (Is equal?) → YES/NO.** Equal ⇒ the data came from the sender (**authentication**) and wasn't changed (**integrity**).
+
+<!-- isw:25-10 -->
+**In simple words**
+
+A digital signature has **two purposes: (1) authentication and (2) integrity of the data** (the data has not changed).
+
+**Sender side:** (1) take the **plain data** (for example "Hello") and pass it through a **hash function** to get a fixed-size **hash;** (2) give the hash and the **sender's private key** to the **Sign algorithm** to get the **signature;** (3) send the **signature and the plain data** together.
+
+**Receiver side:** (1) take the received **signature** and use the **sender's public key** in the **Verify algorithm** to recover the **hash;** (2) **compute the hash of the received plain data** with the same hash function; (3) **compare: is it equal? YES / NO.** Equal means the data came from the sender (**authentication**) and was not changed (**integrity**).
+<!-- /isw:25-10 -->
+
 
 ---
 

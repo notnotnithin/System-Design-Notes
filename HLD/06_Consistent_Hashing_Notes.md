@@ -8,40 +8,6 @@ Source (handwritten, 5 pages): https://drive.google.com/file/d/1dMSY_fHaKwADw_ze
 
 ---
 
-<!-- simple-explanation -->
-## In simple words – consistent hashing, step by step
-
-### First, what is hashing?
-A **hash function** takes any input (a name, an ID, a URL) and turns it into a **number**. The same input always gives the same number. For example, `hash("Himanshu") = 14321`.
-
-To decide *where* to store something, we often use **mod hashing**: `hash(key) % N`, where **N is the number of servers**. With 3 servers, `14321 % 3 = 2`, so "Himanshu" goes to server 2. Every machine can calculate this on its own, so no lookup table is needed. It's a neat way to spread data evenly.
-
-### The problem: servers change
-What if you **add a 4th server**? Now the formula is `hash % 4`, and **almost every key suddenly maps to a different server**. The data would have to be moved around – with millions of records that is slow, expensive and can break the system. The same happens when a server crashes (N becomes smaller). This is called **rebalancing**, and mod hashing makes it terrible.
-
-### The idea behind consistent hashing
-Instead of using `% N`, imagine a **circle (ring)** with positions 0 to 11 (in real systems, billions of positions).
-1. Place each **server** on the ring by hashing its name. Example: S1 at position 3, S2 at 7, S3 at 11.
-2. Place each **key** on the ring by hashing it too. Example: key K1 at position 1.
-3. **Rule: a key belongs to the first server you meet moving clockwise from the key's position.** K1 at 1 → moves clockwise → meets S1 at 3. So S1 stores K1.
-
-That's all. Every machine can compute this independently.
-
-### Why this fixes the rebalancing problem
-- **Adding a server:** add S4 at position 5. Only the keys sitting between the previous server (S1 at 3) and S4 (at 5) – i.e. positions 4 and 5 – now belong to S4 instead of S2. **Every other key stays exactly where it was.** On average only about **1/N of the keys move** (with 10 servers, roughly 10%), instead of nearly all of them.
-- **Removing a server:** its keys simply move to the **next server clockwise**. Nobody else is affected.
-
-### A weakness: uneven load
-If servers happen to land **close together** on the ring (e.g. S1 at 2, S2 at 3, S3 at 4), one server will cover a huge arc and receive most keys, while others get almost nothing.
-
-### The fix: virtual nodes
-Give each real server **many positions** on the ring. Example: S1 sits at positions 2, 8 and 11; S2 at 3, 6 and 10; S3 at 4 and 9. Now each server owns several small arcs scattered around the ring, so the load averages out. When a server is added or removed, its load is shared among **many** neighbours instead of dumped on just one.
-
-### Where it is used
-Distributed caches (so adding a cache node doesn't flush everything), database sharding, load balancers that need the same user to hit the same server, and key-value stores like DynamoDB and Cassandra.
-<!-- simple-explanation -->
-
-
 ## 1. Hashing basics (p1)
 - **Hash function** takes a **key of arbitrary length** (e.g. `"Himanshu"`) and produces a **fixed-length** value.
   Example: `f("Himanshu") ⇒ 14321 % 6 ⇒ 2` → stored at **index 2** of a fixed-size table (size 6).
@@ -62,10 +28,35 @@ Two places where size changes:
 ```
 **Note:** the load balancer should **divide the traffic equally** across my app servers so that **only one server doesn't carry all the load** (e.g. 10 requests are spread evenly).
 
+<!-- isw:06-1 -->
+**In simple words**
+
+The load balancer picks the app server using `f(key) % 3` (App1, App2 or App3). The number of servers is **dynamic**: one app can go down or a new node can be added. The note repeats the load balancer's job: **divide the traffic equally so that one server does not carry all the load.**
+<!-- /isw:06-1 -->
+
+
 ### 2) Horizontal sharding
 - Example: 100 rows split by name range → **A–P → DB1 (50 rows), Q–Z → DB2 (50 rows)**.
 - Problem: if **many names start with "A"**, DB1 fills early → **load is not equally divided**.
 - With mod hashing instead: `LB: f(Himanshu) % 3 = 1 → Node 1`, `f(Rahul) % 3 = 2 → Node 2`, `f(Shivam) % 3 = 3 → Node 3` – evenly spread **as long as the node count stays 3.**
+
+<!-- isw:06-0 -->
+**In simple words**
+
+A **hash function** takes a **key of any length** (for example the string `"Himanshu"`) and produces a **fixed-length value**. In the notes' example `f("Himanshu")` gives `14321`, and `14321 % 6` gives `2`, so the item is stored at **index 2** of a table of size 6. Using the remainder of a division like this is called **mod hashing**: `hash(key) % N`, where N is the table size or the number of nodes.
+
+The notes then ask *what is the problem?* **If the size used for the mod is fixed there is no problem. If the size is not fixed, the problem starts.** The size changes in two places: **load balancing for application servers** and **horizontal sharding**.
+<!-- /isw:06-0 -->
+
+<!-- isw:06-2 -->
+**In simple words**
+
+With 100 rows split **by name range** (A–P to DB1 with 50 rows, Q–Z to DB2 with 50 rows), the problem is that **if many names start with "A", DB1 fills early** and the load is not divided equally. With mod hashing instead, `f(Himanshu) % 3 = 1` goes to Node 1, `f(Rahul) % 3 = 2` to Node 2 and `f(Shivam) % 3 = 3` to Node 3, which spreads evenly **as long as the node count stays at 3.**
+<!-- /isw:06-2 -->
+
+
+
+
 
 ---
 
@@ -96,6 +87,13 @@ Nodes N1, N2, N3 with `f(key) % 3`. **Add a new node N4** → formula becomes `f
 - e.g. `Himanshu` was on N1 and now maps to **N2** → **almost all keys get a new location.**
 - **Rebalancing = moving millions of DB entries.** Very costly.
 
+<!-- isw:06-3 -->
+**In simple words**
+
+Nodes N1, N2, N3 use `f(key) % 3`. When **a new node N4 is added**, the formula becomes `f(key) % 4`. For example `Himanshu` was on N1 and now maps to **N2**, and the same happens to almost every key. So **almost all keys get a new location**, and **rebalancing means moving millions of DB entries, which is very costly.**
+<!-- /isw:06-3 -->
+
+
 ---
 
 ## 3. Consistent Hashing – the idea
@@ -103,6 +101,13 @@ Nodes N1, N2, N3 with `f(key) % 3`. **Add a new node N4** → formula becomes `f
 - The **main motto: when nodes are added or removed, keep rebalancing minimal.**
 - Rebalancing moves only about **1/N of the total number of keys** (N = number of nodes) – "good".
   - e.g. N1 holds keys K1–K10, N2 holds K…, N3 (removed) – only its keys move.
+
+<!-- isw:06-4 -->
+**In simple words**
+
+The notes define the goal: in consistent hashing, **rebalancing happens when nodes (servers) are added or removed**, and the aim is **to minimise the number of keys that must be reassigned while keeping the distribution uniform.** The main motto: *when nodes are added or removed, keep the rebalancing minimal.* Only about **1/N of the total number of keys** has to move (N is the number of nodes), which the notes call "good".
+<!-- /isw:06-4 -->
+
 
 ---
 
@@ -147,6 +152,15 @@ graph LR
 - `S2 = K5, K7`
 - `S3 = K6, K3, K4`
 
+<!-- isw:06-5 -->
+**In simple words**
+
+The notes take a **virtual ring** with slots **0 to 11 (mod 12)**, read **clockwise**. The **servers are placed on the ring with mod hashing**: `S1 = hash(server1) % 12` gives slot 3, S2 gives slot 7, S3 gives slot 11. The **keys are placed the same way** (K1 at slot 1, K2 at 2, K7 at 4, K5 at 6, K6 at 8, K3 at 9, K4 at 10).
+
+**The rule:** a key is handled by **the first server found going clockwise from the key's position.** So the notes get: S1 handles K1 and K2; S2 handles K5 and K7; S3 handles K6, K3 and K4.
+<!-- /isw:06-5 -->
+
+
 ### Addition of servers
 
 <!-- diagram:06-2 -->
@@ -178,6 +192,13 @@ Add **S4 at slot 5**:
 - `S1 = K1, K2` · `S2 = K5` · `S3 = K6, K3, K4` · **`S4 = K7`**
 - ✱ **We can rebalance only a limited number of keys** (only the keys between the previous server and the new one move).
 - (Removing a server works the same way in reverse: only that server's keys move to the next server clockwise.)
+
+<!-- isw:06-6 -->
+**In simple words**
+
+Now **S4 is added at slot 5.** Key K7 (slot 4) now finds S4 first, so only K7 moves from S2 to S4; the other keys stay where they were: S1 = K1, K2 · S2 = K5 · S3 = K6, K3, K4 · S4 = K7. The notes underline that **only a limited number of keys has to be rebalanced** (the keys between the previous server and the new one).
+<!-- /isw:06-6 -->
+
 
 ---
 
@@ -233,6 +254,22 @@ graph LR
 - Example: **S1 → slots 2, 8, 11; S2 → slots 3, 6, 10; S3 → slots 4, 9.**
 - Result in the example: `S3 = K2, K1`; `S2 = K6, K7`; `S1 = K5, K4, K3` – a much more even spread.
 - More virtual nodes per server ⇒ smoother distribution (and when a server leaves, its load is shared among many servers).
+
+<!-- isw:06-7 -->
+**In simple words**
+
+The notes show a ring where the servers sit close together: **S1 at 2, S2 at 3, S3 at 4.** The keys K1–K6 are spread around the ring but **all of them walk clockwise to S1** (the next server), so S1 takes almost all the load. So consistent hashing **can fail to divide the load equally** when the servers' positions are uneven.
+<!-- /isw:06-7 -->
+
+<!-- isw:06-8 -->
+**In simple words**
+
+The fix is to **replicate each server at several points of the ring**. In the notes' example **S1 sits at slots 2, 8 and 11, S2 at 3, 6 and 10, and S3 at 4 and 9.** The result is a much more even split: S3 = K2, K1; S2 = K6, K7; S1 = K5, K4, K3. **More virtual nodes per server give a smoother distribution**, and when a server leaves, its load is shared among many servers.
+<!-- /isw:06-8 -->
+
+
+
+
 
 ---
 

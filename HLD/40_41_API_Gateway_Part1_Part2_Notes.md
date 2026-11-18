@@ -12,57 +12,6 @@ Sources:
 
 ---
 
-<!-- simple-explanation -->
-## In simple words – building an API gateway with Spring Cloud Gateway
-
-### What you are building
-An **API gateway** is the single front door to all your microservices. Clients call only the gateway (`/products/...`, `/orders/...`) and the gateway forwards each request to the right service. Because it sees every request, it is the natural place for **routing, load balancing, authentication (JWT), rate limiting, retries/circuit breaking, request/response changes, and logging.** For the theory see [API Gateway Concepts](28_API_Gateway_Concepts_Notes.md).
-
-### Part 1 – Routing
-**Why route at the gateway?** If you split one microservice into two, or merge two, every client would need updating. With a gateway, only the **gateway's route table** changes; clients keep calling the same URLs.
-
-A **route** has three main pieces:
-- **`id`** – any unique name for the route.
-- **`uri`** – where to send the request (e.g. `http://localhost:8082`).
-- **`predicates`** – conditions that decide whether the route matches, such as `Path=/products/**` (any URL starting with `/products/`) or `Method=GET,POST`.
-
-Example: requests to `/products/**` go to the product service on port 8082, and `/orders/**` to the order service on 8081. The gateway itself runs on 8083.
-
-**Adding load balancing:** hardcoded URIs have the same problems as before (see [Service Discovery](34_Service_Discovery_Notes.md)). Register all services with Eureka, add the Eureka client dependency to the gateway, and change the URI to **`lb://product-service`**. The `lb://` prefix tells the gateway: *ask service discovery for the instances of `product-service`, then pick one using Spring Cloud LoadBalancer.*
-
-### Part 2 – Filters
-A **filter** can **look at and modify the request and the response** as they pass through the gateway. Think of a series of checkpoints.
-
-| | Global filters | Route-specific filters |
-|---|---|---|
-| Apply to | **every** request | only requests matching a **particular route** |
-| Typical use | logging, authentication | rate limiting, retry, circuit breaker, header changes |
-
-**How a request travels:** Client → find the matching route (by predicate) → **pre-logic** of the global and route filters → forward to the microservice → the response comes back through the **post-logic** of those filters → Client. Each filter has a *pre* part (before the call is forwarded) and a *post* part (after the response returns).
-
-**Ordering.** Every filter has an **order number; a smaller number runs earlier** (−1 before 0). Most global filters run before route filters, but two built-in global filters that actually *forward* the request (`RouteToRequestUrlFilter` and `NettyRoutingFilter`) are given a huge number so that they run **last**: they must send the request only after all the other filters have had their say. A global filter with no order defaults to the lowest priority; route filters take their position in the list (0, 1, 2…) as their order.
-
-### Custom global filter – JWT authentication
-You write a class implementing `GlobalFilter` and `Ordered`:
-1. Let requests to `/auth/**` pass without a token (that's where users log in).
-2. Read the `Authorization` header. If missing → reply **401 Unauthorized** and stop.
-3. Extract the token (skip the `"Bearer "` prefix, 7 characters) and verify it. If invalid → 401.
-4. Otherwise call `chain.filter(exchange)` to continue; code inside `.then(...)` runs afterwards as the post-filter.
-Returning `-1` from `getOrder()` makes it run early. This way **every microservice is protected without writing any auth code** in them. See [JWT Explained](26_JWT_Explained_Notes.md).
-
-### Built-in route-specific filters
-`AddRequestHeader`, `AddResponseHeader`, `RemoveRequestHeader`, `RemoveResponseHeader`, `Retry`, `RequestRateLimiter` and `CircuitBreaker`. You switch them on in `application.properties` under the route using `filters[i].name` and `filters[i].args.*`. The name `AddRequestHeader` maps to a Java class `AddRequestHeaderGatewayFilterFactory`.
-
-- **Header filters:** e.g. remove a private header like `Api-private-Key` before the request reaches the microservice, or add `X-Test-RequestHeader` for downstream use.
-- **Retry filter:** `retries=4` and `methods=GET,DELETE` retry failed calls up to 4 times, only for those safe-to-repeat methods. (In the demo the product controller fails the first 3 calls on purpose; the gateway keeps retrying and the 4th succeeds.)
-- **CircuitBreaker filter:** add the Resilience4j starter, name the breaker, set `fallbackUri=forward:/fallback`, and configure it as in [Circuit Breaker](39_Circuit_Breaker_Notes.md). When the product service is down and the failure threshold is crossed, the circuit opens and callers get the fallback message ("Service is temporarily unavailable…") from a `/fallback` controller instead of errors.
-- **Custom route filter:** write a class named `<Name>GatewayFilterFactory` that extends `AbstractGatewayFilterFactory<Config>`. The `apply` method returns the filter logic: code before `chain.filter(exchange)` is the pre-logic, and code in `.then(...)` is the post-logic. Arguments from `application.properties` (like `country=India`) arrive in your config class.
-
-### Summary
-Routes decide **where** a request goes; filters decide **what happens on the way**. Put cross-cutting concerns (auth, limits, retries, breakers) in the gateway and your services stay simple.
-<!-- simple-explanation -->
-
-
 # PART 1
 
 ## 1. What is an API Gateway?
@@ -90,6 +39,13 @@ Benefits of this single entry point:
 5. **Resilience features** (Circuit breaker, Retry etc.)
 6. **Request/Response transformation**
 7. **Monitoring and logging** … etc.
+
+<!-- isw:40_41-0 -->
+**In simple words**
+
+An API gateway is **a single entry point to access all the microservices** (Client → API Gateway → `/api/invoice` → Invoice MS, `/api/order` → Order MS, `/api/sales` → Sales MS). The benefits listed: **1. routing** (forward requests to the right microservice), **2. load balancing, 3. authentication (like JWT), 4. rate limiting, 5. resilience features (circuit breaker, retry, …), 6. request / response transformation, 7. monitoring and logging.**
+<!-- /isw:40_41-0 -->
+
 
 ## 2. Routing
 If one microservice is split into 2 (or multiple microservices are merged), **all clients would need to update their routing logic**. With an API Gateway in the middle, **the change is needed only at one place – the Gateway**.
@@ -154,6 +110,20 @@ spring.cloud.gateway.routes[1].uri=http://localhost:8081
 spring.cloud.gateway.routes[1].predicates[0]=Path=/orders/**
 ```
 Start all 3 servers: Product, Order and API Gateway.
+
+<!-- isw:40_41-1 -->
+**In simple words**
+
+If one microservice is split into two (or several are merged), **all the clients would have to update their routing logic.** With an API gateway in the middle, **the change is needed only in one place, the gateway.**
+<!-- /isw:40_41-1 -->
+
+<!-- isw:40_41-2 -->
+**In simple words**
+
+The Product service (port 8082, `/products/{id}`) and the Order service (port 8081, `/orders/{id}`) are simple controllers. The **gateway app** is a new application with the dependency **`spring-cloud-starter-gateway`,** running on port 8083. A route has three main parts: **`id`** (just a unique name for the route), **`uri`** (the microservice host and port) and **`predicates`** (pattern matching to decide the routing; apart from `Path=/products/**` there can also be a `Method=GET,POST` predicate, meaning GET and POST requests to that path match the route). In the example `/products/**` is forwarded to product-service and `/orders/**` to order-service. Start all three servers: Product, Order and the API gateway.
+<!-- /isw:40_41-2 -->
+
+
 
 ## 3. API Gateway + Load Balancer
 
@@ -232,6 +202,13 @@ spring.cloud.gateway.routes[1].predicates[0]=Path=/orders/**
 eureka.client.service-url.defaultZone=http://localhost:8761/eureka
 ```
 
+<!-- isw:40_41-3 -->
+**In simple words**
+
+This part builds on the *Service Discovery* and *Client Side Load Balancer* notes (HLD #34 and #35). The Product and Order services get the `spring-cloud-starter-netflix-eureka-client` dependency and register with the **Eureka server** (port 8761), and the gateway also gets the Eureka client. In the gateway's routes the **hardcoded URI is replaced by `lb://product-service`** (and `lb://order-service`). The note explains: **internally it uses the Spring Cloud LoadBalancer framework, which first fetches the instances from service discovery and then applies the load-balancing algorithm.**
+<!-- /isw:40_41-3 -->
+
+
 ---
 
 # PART 2
@@ -263,6 +240,13 @@ A filter can **intercept and modify the HTTP request and response** as they pass
 ### Request flow (diagram)
 `Client → DispatcherHandler → RouteMappingHandler (finds the route by predicate e.g. Path=/products/**) → Global Filters (pre-filter logic) → Route-Specific Filters (pre-filter logic → next filter in chain) → Global filter **RouteToRequestUrlFilter** → Global filter **NettyRoutingFilter** → Microservice`, then the response travels back through the **post-filter logic** of each filter and finally the global **NettyWriteResponseFilter** → Client.
 
+<!-- isw:40_41-5 -->
+**In simple words**
+
+The flow in the notes' diagram: the client → `DispatcherHandler` → `RouteMappingHandler` (finds the route by predicate, for example `Path=/products/**`) → **global filters (pre-filter logic)** → **route-specific filters (pre-filter logic, then the next filter in the chain)** → global filter **`RouteToRequestUrlFilter`** → global filter **`NettyRoutingFilter`** → the microservice. Then the response travels back through the **post-filter logic** of each filter and finally the global **`NettyWriteResponseFilter`** → the client.
+<!-- /isw:40_41-5 -->
+
+
 ### Ordering – "why are some Global filters after the Route-Specific filters?"
 **Answer: ORDERING.** Every filter (Global or Route-Specific) is given an **ORDER**:
 - **Minimum order value = high priority**; **maximum = low priority** (e.g. order −1 runs before order 0).
@@ -276,6 +260,20 @@ public static final int ORDER = Ordered.LOWEST_PRECEDENCE;
 **Defaults**
 - Global filter with no Order defined → **`Ordered.LOWEST_PRECEDENCE`**.
 - Route-specific filters: with e.g. 3 filters on a route, their **index (0, 1, 2) is used as the Order value**.
+
+<!-- isw:40_41-4 -->
+**In simple words**
+
+To apply **authentication, rate limiting, resilience** and so on in the gateway, we must understand **filters.** A filter can **intercept and modify the HTTP request and the response** as they pass through the gateway. There are two kinds: **global filters** apply to **every request** going through the gateway (good examples: logging, authentication), and **route-specific filters (GatewayFilters)** apply **only to requests matching a particular route,** not globally (good examples: rate limiting, resilience).
+<!-- /isw:40_41-4 -->
+
+<!-- isw:40_41-6 -->
+**In simple words**
+
+The answer to "why are some global filters after the route-specific filters?" is **ORDERING.** Every filter (global or route-specific) is given an **ORDER:** the **minimum order value means high priority and the maximum means low priority** (for example order −1 runs before order 0). Most global filters have a lower value than route-specific filters, **but** two global filters, **`RouteToRequestUrlFilter` (`ROUTE_TO_URL_FILTER_ORDER = 10000`) and `NettyRoutingFilter` (`Ordered.LOWEST_PRECEDENCE`),** are intentionally given a high value so they **execute last.** **Defaults:** a global filter with no order defined gets **`Ordered.LOWEST_PRECEDENCE`;** for route-specific filters, with for example 3 filters on a route, their **index (0, 1, 2) is used as the order value.**
+<!-- /isw:40_41-6 -->
+
+
 
 ## 5. Custom Global Filter – JWT Authentication
 
@@ -341,6 +339,13 @@ public class JwtAuthGlobalFilter implements GlobalFilter, Ordered {
 }
 ```
 (What JWT is and how to verify it → see HLD #26 and the Spring Boot JWT notes.)
+
+<!-- isw:40_41-7 -->
+**In simple words**
+
+The `JwtAuthGlobalFilter` implements `GlobalFilter` and `Ordered` and works like this: (1) **skip the JWT validation for the auth endpoints** (paths starting with `/auth`); (2) **extract the Authorization header;** (3) **if the token is missing, set status 401 Unauthorized** and complete the response; (4) take the token (`authHeader.substring(7)`, after "Bearer ") and **verify it** (the verification logic goes here); if it fails, again **401;** (5) **call the next filter in the chain with `chain.filter(exchange)` and add the post-filter logic** inside `.then(...)`. `getOrder()` returns **−1** (a lower value means higher priority). What JWT is and how to verify it is in the [JWT note](26_JWT_Explained_Notes.md).
+<!-- /isw:40_41-7 -->
+
 
 ## 6. Route-Specific Filters (pre-existing)
 | Filter | Purpose |
@@ -430,6 +435,13 @@ public class ProductController {
 }
 ```
 
+<!-- isw:40_41-9 -->
+**In simple words**
+
+`Retry` with `args.retries=4` and `args.methods=GET,DELETE` means **retry on failure, a maximum of 4 attempts, on GET and DELETE requests only.** The class is `RetryGatewayFilterFactory.java`, whose config holds `retries`, `statuses` and `methods`. For testing, the product controller **purposely fails the first 3 calls** (500 "Fail") so you can verify that the gateway retries; the **4th call passes.**
+<!-- /isw:40_41-9 -->
+
+
 ### CircuitBreaker filter
 (See the Circuit Breaker notes, HLD #39.)
 
@@ -484,6 +496,13 @@ public class FallbackController {
 ```
 **Testing:** product microservice was **not started**; called more than 5 times → failure threshold crossed → circuit opened (visible in the DEBUG logs) and the fallback is returned.
 
+<!-- isw:40_41-10 -->
+**In simple words**
+
+(See the [Circuit Breaker](39_Circuit_Breaker_Notes.md) note.) You add the dependency `spring-cloud-starter-circuitbreaker-reactor-resilience4j`, and in the route's filters set **`CircuitBreaker`** with a name (`myCircuitBreakerName`) and **`fallbackUri=forward:/fallback`** (redirect to the fallback endpoint if the service fails), plus the usual `resilience4j.circuitbreaker.instances.myCircuitBreakerName.*` settings. A `FallbackController` with `GET /fallback` returns "Service is temporarily unavailable, please try again later." **Testing:** the product microservice was **not started;** after calling it more than 5 times the failure threshold was crossed, the circuit opened (visible in the DEBUG logs) and the fallback was returned.
+<!-- /isw:40_41-10 -->
+
+
 ### Custom Route-Specific filter
 Config in `application.properties` (here as the 6th filter, index 5):
 ```properties
@@ -519,6 +538,22 @@ public class CustomRouteGatewayFilterFactory
     }
 }
 ```
+
+<!-- isw:40_41-8 -->
+**In simple words**
+
+The pre-existing route-specific filters are: **`AddRequestHeader`** (add a header to the request), **`AddResponseHeader`** (add a header to the response), **`RemoveRequestHeader`** (remove a request header), **`RemoveResponseHeader`**, **`Retry`** (retry the request on failure, configurable), **`RequestRateLimiter`** (apply rate limiting) and **`CircuitBreaker`** (stop making repeated calls to a failed downstream). They are switched on in `application.properties` under `filters[i].name` and `filters[i].args.*`.
+
+Examples: **remove a request header** (`RemoveRequestHeader` with `args.name=Api-private-Key`); **several filters on one route** (add a request header `X-Test-RequestHeader`, add a response header `X-Test-ResponseHeader`, remove a request header). **Naming convention:** the filter `AddRequestHeader` maps to the Java class `AddRequestHeaderGatewayFilterFactory.java`, whose config class holds `name` and `value`.
+<!-- /isw:40_41-8 -->
+
+<!-- isw:40_41-11 -->
+**In simple words**
+
+A custom filter is configured in `application.properties` (here as the 6th filter, index 5): `filters[5].name=CustomRoute` and `filters[5].args.country=India`. The class must be named **`<FilterName>GatewayFilterFactory`** (so `CustomRouteGatewayFilterFactory`) and extend `AbstractGatewayFilterFactory<CustomConfig>`. Its `apply(config)` returns the filter: the code before `chain.filter(exchange)` is the **pre-filter logic** (it can read `config.getCountry()`), and the code inside `.then(Mono.fromRunnable(...))` is the **post-filter logic.**
+<!-- /isw:40_41-11 -->
+
+
 
 ---
 

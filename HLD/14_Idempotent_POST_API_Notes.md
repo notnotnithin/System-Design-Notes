@@ -8,53 +8,19 @@ Source (handwritten, 4 pages): https://drive.google.com/file/d/1pzl_Pr0iUD3jyRUt
 
 ---
 
-<!-- simple-explanation -->
-## In simple words – idempotent POST API
-
-### What does "idempotent" mean?
-An operation is **idempotent** if doing it **once or many times gives the same final result**. Think of pressing the "lift down" button five times: the lift still comes only once. Pressing "Pay ₹10" five times, however, should *not* pay ₹50.
-
-Why it matters: networks fail. A client sends a request, the response gets lost or times out, and the client **retries** because it doesn't know whether the first one worked. If the operation isn't idempotent, the retry may do the work twice (double payment, two identical cart items).
-
-### Which HTTP methods are safe to repeat?
-- **GET** only reads data, so repeating it changes nothing.
-- **PUT** sets something to a value ("name = Himanshu"). Doing it again leaves the same state.
-- **DELETE** removes something. Deleting an already-deleted item leaves the same state (gone).
-- **POST** usually *creates* or *triggers* something, so each repeat has a new effect. A payment of ₹10 from HS to Hardik, sent twice, moves ₹20. **POST is not idempotent, so we have to make it so.**
-
-(Don't confuse this with **concurrency**: that is many *different* users competing for the same resource, like two people grabbing the last seat on BookMyShow. Idempotency is about the *same* request arriving more than once.)
-
-### Two ways duplicates arrive
-1. **Sequential:** the first request times out, so the client sends it again. The server may have already finished the first one.
-2. **Parallel:** the original and the duplicate reach the server at almost the same moment, and both may start working.
-
-### The solution: an Idempotency Key (IK)
-An idempotency key is a **unique ID (a UUID) that identifies one logical operation**. The agreement is:
-- The **client creates** the key, once per operation.
-- **Retries of the same operation reuse the same key**; a different operation gets a new key.
-- The client sends it in a header, for example `Idempotency-Key: IK1`.
-
-### What the server does (step by step)
-1. **Is the key present in the request?** If not → reply **400 Bad Request**.
-2. **Look the key up in the database** (a small table with `Key` and `Status`).
-3. **Key not found** → this is a new operation. Insert `IK1 = Created`, do the work, then mark it `Consumed` and reply **201 Created**.
-4. **Key found, status `Created`** → the first request is still being processed. Reply **409 Conflict** ("wait, it's in progress").
-5. **Key found, status `Consumed`** → the work is already done. Reply **200 OK** with the earlier result, **without doing it again**.
-
-### Handling the parallel case
-If two requests with the same key arrive together, both might check the table, see "not found", and both insert. To prevent this, the "check and insert" step must be **atomic** – protected by a lock (mutex / `synchronized`) or, better, by a **unique constraint** in the database so that only one insert can succeed. The winner proceeds; the other gets 409 or 200.
-
-### Takeaway
-Idempotency keys let clients **retry safely**. This is exactly what makes retry patterns and "at-least-once" messaging safe to use (see the [Retry Pattern](38_Retry_Pattern_Notes.md) note).
-<!-- simple-explanation -->
-
-
 ## 1. Idempotency vs Concurrency
 - **Concurrency** – many requests (R) hitting the **same resource** at the same time (example in notes: **BookMyShow** seat).
 - **Idempotency** helps to **take care of duplicate requests**.
 - ✱ It enables clients to **safely retry an operation without worrying about the side effect** the operation can cause.
 
 Example operation: **adding an item into a cart** – `POST` followed by a duplicate `POST` would **create another row**.
+
+<!-- isw:14-0 -->
+**In simple words**
+
+**Concurrency** means many requests reach the **same resource at the same time** (the notes' example is a BookMyShow seat). **Idempotency** is about **duplicate requests**: it lets a client **safely retry an operation without worrying about the side effects.** The example operation is **adding an item to a cart**: a `POST` followed by a duplicate `POST` would **create another row.**
+<!-- /isw:14-0 -->
+
 
 ---
 
@@ -67,6 +33,16 @@ Example operation: **adding an item into a cart** – `POST` followed by a dupli
 | **GET** | Repeated `GET`s – **no side effect**; any time the client sends a GET the server returns the data. |
 | **PUT** | e.g. "update name HS → Himanshu": repeating the same PUT many times leaves the **same final state** (name = Himanshu). |
 | **POST** | Not idempotent. Example – payment **HS → Hardik ₹10**: 1st time: HS −10, Hardik +10. A repeated POST debits HS another −10 and credits Hardik another +10, and so on. **Money is moved multiple times.** |
+
+<!-- isw:14-1 -->
+**In simple words**
+
+**GET, PUT and DELETE are idempotent by default; POST is not, and we have to make it idempotent.** The table explains why:
+- **GET:** repeating it has **no side effect**; the server just returns the data.
+- **PUT:** for example "update name HS → Himanshu": repeating the same PUT many times leaves the **same final state** (name = Himanshu).
+- **POST:** for example a payment HS → Hardik ₹10: the first time HS −10 and Hardik +10; a repeated POST debits HS another 10 and credits Hardik another 10, and so on. **The money is moved many times.**
+<!-- /isw:14-1 -->
+
 
 ---
 
@@ -93,6 +69,15 @@ sequenceDiagram
 
 1. **Sequential** – client sends `POST` (e.g. "add item to cart"), the call **times out**, client sends a **duplicate/retry POST**. Server may already have processed the first one → *how do we handle this?*
 2. **Parallel** – the **original POST** and a **duplicate POST** arrive at (almost) the same time → *how to handle? Only **one** request should be processed.*
+
+<!-- isw:14-2 -->
+**In simple words**
+
+Duplicates come in two ways:
+1. **Sequential:** the client sends a `POST` (for example "add item to cart"), the call **times out**, and the client sends a **duplicate / retry POST.** The server may already have processed the first one, so how do we handle this?
+2. **Parallel:** the **original POST and the duplicate arrive at almost the same time.** Only **one** of them should be processed.
+<!-- /isw:14-2 -->
+
 
 ---
 
@@ -139,6 +124,21 @@ graph TD
 
 DB table: `| Key | Status |` e.g. `| IK1 | Created → Consumed |`.
 
+<!-- isw:14-4 -->
+**In simple words**
+
+For `POST /addItem` with the header `IK: IK1`:
+1. The client generates the key (the original and its retry use the same key).
+2. The client puts it in the **request header** and calls the server.
+3. **Validation:** is the IK present in the request? **No → HTTP 400** (validation error). Yes → continue.
+4. The server reads the key and **checks the DB: is this IK present?**
+5. **If the IK is in the DB,** check its **status:** `Created` (still being processed) → **HTTP 409** (conflict); `Consumed` (already completed) → **HTTP 200** (return the earlier result, do not do the work again).
+6. **If the IK is not in the DB,** the server **puts an entry** (`Key = IK1, Status = Created`) and performs the operation. When it **succeeds,** the key is **consumed** (status → `Consumed`) and the server returns **HTTP 201.**
+
+The DB table is `| Key | Status |`, for example `IK1 | Created → Consumed`. *(Transcription caveat: pages 3–4 of the PDF are rotated hand-drawn flowcharts, so the exact status codes were read from the diagram and are the most likely interpretation.)*
+<!-- /isw:14-4 -->
+
+
 ### Flow – parallel duplicates
 
 <!-- diagram:14-2 -->
@@ -170,6 +170,22 @@ Two requests `POST /addItem` with **the same IK (IK1)** arrive simultaneously.
    - The other request sees the IK already present (`Created`/`Consumed`) → handled per the table above (409 / 200) – **never processed twice**.
 
 > ⚠️ Pages 3–4 of the original are rotated hand-drawn flowcharts; the exact status-code labels (409 for Created, 200 for Consumed, 201 for first success, 400 for missing key) were read from the diagram and are the most likely interpretation.
+
+<!-- isw:14-3 -->
+**In simple words**
+
+The approach is to use an **Idempotency Key (IK): a unique UUID** tied to the operation. There is an **agreement with the clients:** (1) the **client generates** the key, and (2) **a new key is generated for each different operation** (a retry of the same operation reuses the same key). The key's life cycle is **Created / Acquired → Consumed / Claimed.**
+<!-- /isw:14-3 -->
+
+<!-- isw:14-5 -->
+**In simple words**
+
+Two requests with **the same key (IK1)** arrive together. The server validates that the IK is present (else 400). Then reading the IK from the DB and inserting it must be a **critical section**, protected by a **mutex / synchronized** (or an atomic DB operation such as a unique-key insert), so that **only one request wins.** The winner puts the entry (`IK1, Created`), does the operation, marks it `Consumed` and returns **HTTP 201.** The other request finds the key already present (`Created` or `Consumed`) and is handled as in the table above (409 or 200), so it is **never processed twice.**
+<!-- /isw:14-5 -->
+
+
+
+
 
 ---
 

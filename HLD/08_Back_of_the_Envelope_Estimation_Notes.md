@@ -8,46 +8,6 @@ Source (handwritten, 6 pages): https://drive.google.com/file/d/1AH37a-iSXNquC01P
 
 ---
 
-<!-- simple-explanation -->
-## In simple words – back-of-the-envelope estimation
-
-### What is it and why do we do it?
-Before designing a system you need a rough idea of its **size**: how many requests per second will it get, how much data will it store, how much memory should the cache have, how many servers are needed? Doing this quickly on "the back of an envelope" with **round numbers** is called back-of-the-envelope estimation. The goal is **not** an exact answer. The goal is to know whether you need 2 servers or 200, 1 GB or 1 PB, because that changes the whole design.
-
-Rules of thumb: keep it rough, don't spend long on it, and round numbers so the maths is easy (275 million → "about 300 million").
-
-### The only table you need to remember
-Every step of 3 zeros is a new unit: **Thousand (KB) → Million (MB) → Billion (GB) → Trillion (TB) → Quadrillion (PB)**.
-So to multiply, just multiply the small numbers and **add the zeros**.
-Example: 5 million users × 2 KB each → `5 × 2 = 10`, zeros = `6 + 3 = 9` → **10 GB**.
-
-Handy sizes: a character ≈ 2 bytes, a long ≈ 8 bytes, an average image ≈ 300 KB, a day ≈ 100,000 seconds (really 86,400, but 100,000 is easier).
-
-### The Facebook example, step by step
-**1. Traffic (how many requests per second?)**
-- 1 billion total users, but only about 25 % use it each day → **250 million daily active users (DAU)**.
-- Assume each does 7 actions a day (5 reads + 2 writes) → 250 M × 7 = 1.75 billion requests a day.
-- Spread over ~100,000 seconds → **about 18,000 requests per second (QPS)**.
-
-**2. Storage (how much disk?)**
-- Posts: 2 posts per user × 250 characters × 2 bytes = ~1 KB per user per day. 250 M users × 1 KB = **~250 GB per day**.
-- Images: say 10 % of users upload one 300 KB image → 25 M × 300 KB ≈ **~8 TB per day**.
-- For 5 years (~2000 days): posts ≈ **500 TB**, images ≈ **16 PB**. This tells you images dominate and need cheap object storage, not a normal database.
-
-**3. Cache memory (how much RAM?)**
-- Keep each active user's last 5 posts in memory: 5 × 500 bytes ≈ 3 KB per user. 250 M × 3 KB ≈ **750 GB**.
-- If one machine holds ~75 GB, you need **about 10 cache machines**.
-
-**4. Application servers (how many?)**
-- Goal: 95 % of requests finish within 500 ms, so one thread handles about 2 requests per second.
-- A server with 50 threads handles ~100 requests per second.
-- 18,000 ÷ 100 = **about 180 servers**.
-
-### Takeaway
-You get a full picture of the system – 18 K QPS, 8 TB/day, 16 PB in 5 years, 10 cache nodes, 180 servers – in a few minutes, using just multiplication and rounding. Interviewers care about your **reasoning and assumptions**, not exact numbers.
-<!-- simple-explanation -->
-
-
 ## 1. What is back-of-the-envelope estimation? (p1)
 Rough capacity estimation used to **drive design decisions** for a system. Typical questions the diagram raises:
 - **How many servers do we need?**
@@ -58,6 +18,22 @@ Rough capacity estimation used to **drive design decisions** for a system. Typic
 - Do a **rough ("T-shirt size") estimation.**
 - **Do not spend much time** on it.
 - **Keep the assumption values simple** – round numbers (e.g. 275 mil → treat as ~ 10 m / 100 m / 1000 m scale; 435 mil → round it).
+
+<!-- isw:08-0 -->
+**In simple words**
+
+It is a **rough estimate of the size of a system, used to drive design decisions.** The questions it answers: **how many servers do we need? what is the capacity of the database? how much storage? how big should the cache be? do we need a CDN? what load does the load balancer see?**
+<!-- /isw:08-0 -->
+
+<!-- isw:08-1 -->
+**In simple words**
+
+Three rules: do a **rough ("T-shirt size") estimation**, **do not spend much time** on it, and **keep the assumption values simple** by using round numbers (for example treat 275 million as roughly 300 million).
+<!-- /isw:08-1 -->
+
+
+
+
 
 ---
 
@@ -80,6 +56,19 @@ After you "come up with data" you then estimate: **No. of servers? RAM? Storage 
 
 **Formula (p3):** `X million users (6 zeros) × Y MB (6 zeros) ⇒ XY TB (12 zeros)` – i.e. just add the zeros.
 Example: `5 million users × 2 KB ⇒ 5 × 2 = 10`, zeros `6 + 3 = 9` ⇒ **10 GB**.
+
+<!-- isw:08-2 -->
+**In simple words**
+
+Everything goes in steps of **three zeros**: 3 zeros is **thousand (KB)**, 6 zeros **million (MB)**, 9 zeros **billion (GB)**, 12 zeros **trillion (TB)**, 15 zeros **quadrillion (PB)**.
+
+The notes also list **data sizes to remember:** a `char` is 2 bytes (ASCII 1 byte, Unicode 2 bytes), a `long` or `double` is 8 bytes, an `Integer` is 16 bytes (as noted; the note remarks that a primitive int is 4 bytes), and an **average image is 300 KB**.
+
+After you come up with the data, you estimate the **number of servers, the RAM and the storage capacity**, and then discuss the trade-offs (CAP).
+
+**The formula** is to just add the zeros: *X million users (6 zeros) × Y MB (6 zeros) = XY TB (12 zeros)*. Example: 5 million users × 2 KB gives `5 × 2 = 10`, with `6 + 3 = 9` zeros, so **10 GB**.
+<!-- /isw:08-2 -->
+
 
 ---
 
@@ -106,6 +95,13 @@ graph LR
   (a day = 60 × 60 × 24 = 86,400 s ≈ **100,000 s**, rounded for easy math)
 - ⇒ **≈ 18 K queries per second.**
 
+<!-- isw:08-3 -->
+**In simple words**
+
+The Facebook example starts with **1 billion total users**, of which **25 % are daily active users (DAU) = 250 million**. Each user is assumed to make **5 reads + 2 writes = 7 queries per day**. The queries per second are `(250 million × 7) / 100,000` seconds, where a day (86,400 s) is rounded to **100,000 s** to keep the maths easy. The result is **about 18 K queries per second.**
+<!-- /isw:08-3 -->
+
+
 ### ② Storage assumption
 Assumptions:
 1. Every user (DAU) makes **2 posts**, each post = **250 characters**.
@@ -123,21 +119,52 @@ Assumptions:
 - Posts: 2000 × 250 GB ≈ **500 TB**
 - Images: 2000 × 8 TB ≈ **16 PB**
 
+<!-- isw:08-4 -->
+**In simple words**
+
+Assumptions: every DAU makes **2 posts of 250 characters**, and **10 % of the users upload 1 image of 300 KB**.
+- **Posts:** one post is 250 chars × 2 bytes = **500 bytes**; 2 posts = 1000 bytes = **1 KB**; for 250 million users that is **about 250 GB per day.**
+- **Images:** 25 million users × 300 KB is about 7,500 GB, roughly **8 TB per day.**
+- **For 5 years** (1825 days, rounded to **2000 days**): posts about **500 TB** and images about **16 PB.**
+<!-- /isw:08-4 -->
+
+
 ### ③ RAM (cache) estimation
 - Keep the **last 5 posts of each user (DAU) in cache.**
 - 1 post = 500 bytes → 5 posts = 2500 bytes ≈ **3000 bytes (3 K)**
 - `250 million (DAU) × 3 K` (6 zeros + 3 zeros) ⇒ **≈ 750 GB of memory space**
 - **1 machine holds ~75 GB in memory** ⇒ **~10 machines for caching (cache nodes).**
 
+<!-- isw:08-5 -->
+**In simple words**
+
+The cache keeps **the last 5 posts of every DAU.** One post is 500 bytes, so 5 posts are 2500 bytes, rounded to **3000 bytes (3 K)**. For 250 million users that is about **750 GB of memory.** If **one machine holds about 75 GB**, we need **about 10 machines** for the cache.
+<!-- /isw:08-5 -->
+
+
 ### ④ Latency → number of application servers
 - **Latency target:** **95 % of requests within 500 ms** → one request takes ~500 ms, so **1 thread serves 2 requests / second**.
 - **1 server → 50 threads ⇒ ≈ 100 requests / second.**
 - Load = **18 K requests / second** ⇒ 18,000 / 100 = **≈ 180 servers.**
 
+<!-- isw:08-6 -->
+**In simple words**
+
+The latency target is **95 % of requests within 500 ms**, so one request takes about 500 ms and **one thread serves 2 requests per second.** **One server has 50 threads, so about 100 requests per second.** With a load of **18 K requests per second**, 18,000 / 100 gives **about 180 servers.**
+<!-- /isw:08-6 -->
+
+
 ---
 
 ## 4. CAP theorem trade-off (p6)
 The last page only sketches the CAP Venn diagram (**CA, CP, AP**) and a broken link between two nodes, with the remark: *"This topic is not fully clear – any one-time practice."* (See the CAP notes: [02_CAP_Theorem_Notes.md](02_CAP_Theorem_Notes.md).)
+
+<!-- isw:08-7 -->
+**In simple words**
+
+The last page only sketches the CAP Venn diagram (CA, CP, AP) and a broken link between two nodes. The notes themselves remark: *"This topic is not fully clear, any one-time practice."* See the [CAP note](02_CAP_Theorem_Notes.md).
+<!-- /isw:08-7 -->
+
 
 ---
 

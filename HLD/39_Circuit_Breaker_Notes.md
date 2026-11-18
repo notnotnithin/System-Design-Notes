@@ -8,52 +8,6 @@ Source: https://drive.google.com/file/d/1ApUVMYBXzsEiW_tCL_ZpfX0IGKZQ2IZe/view?u
 
 ---
 
-<!-- simple-explanation -->
-## In simple words – the circuit breaker
-
-### The idea
-In your house, a circuit breaker **cuts the power** when something goes wrong so that wires don't burn. A software circuit breaker does the same for calls to another service: when that service is clearly failing, it **stops calling it for a while**.
-
-Why that helps. Suppose Order calls Product and Product is failing:
-- Every extra call **adds load** to Product, so it takes **longer to recover**.
-- Order **wastes its own threads and time** waiting on calls that will probably fail.
-The breaker answers: *when should Order stop calling Product, and when should it try again?*
-
-### The three states
-- **CLOSED** (normal): the circuit is "closed" like a working switch, so **all calls go through**. The breaker silently counts successes and failures.
-- **OPEN** (tripped): too many failures happened. Now **calls are blocked and fail immediately** (or return a fallback), without touching Product. This gives Product time to recover and saves Order's resources.
-- **HALF-OPEN** (testing): after a waiting period, the breaker lets through **a few test calls**.
-  - If they **all succeed** (100 %) → Product seems healthy → back to **CLOSED**.
-  - If any **fail** → back to **OPEN** for another wait.
-
-Cycle: **CLOSED → (failures cross the threshold) → OPEN → (after wait time) → HALF-OPEN → CLOSED or OPEN.**
-
-### Using it in Spring Boot (Resilience4j)
-Annotate the method with `@CircuitBreaker(name = "productService", fallbackMethod = "fallback")`. The fallback runs on every failed attempt and also whenever the circuit is open.
-
-Key settings, in plain words:
-| Setting | What it means |
-|---|---|
-| `sliding-window-type` and `sliding-window-size` | What to measure: **COUNT_BASED** looks at the last N calls (e.g. 10); **TIME_BASED** looks at calls in the last N seconds. |
-| `minimum-number-of-calls` | Don't judge until at least this many calls were made (e.g. 5), so 1 failure out of 1 call doesn't trip it. |
-| `failure-rate-threshold` | The failure percentage that trips the breaker (e.g. 50 %). |
-| `wait-duration-in-open-state` | How long to stay OPEN before testing again (e.g. 10 s). |
-| `permitted-number-of-calls-in-half-open-state` | How many test calls to allow in HALF-OPEN (e.g. 3). |
-| `automatic-transition-from-open-to-half-open-enabled` | Move to HALF-OPEN by itself once the wait is over. |
-
-With the example numbers: once at least 5 of the last 10 calls have been made and 50 % or more failed, the breaker opens for 10 s, then allows 3 test calls.
-
-**Which errors count as failures?** By default every `RuntimeException` and `Error`. You can narrow it with `record-exceptions` (count only these) and `ignore-exceptions` (never count these, e.g. `IllegalArgumentException` caused by bad input, which isn't the downstream's fault).
-
-### How it works inside (for the curious)
-- Spring AOP intercepts your method and hands the call to the framework's **state machine** (`CircuitBreakerStateMachine`). After each result it checks whether the failure threshold was crossed; if so and the state is CLOSED, it switches to OPEN.
-- **How does OPEN automatically become HALF-OPEN after 10 s?** When the circuit opens, the framework **schedules a task** ("switch to half-open") to run after the wait duration, using a `ScheduledThreadPoolExecutor`. That executor keeps tasks in a **delay queue**: worker threads look at the first task, and if its time hasn't come they sleep for the remaining time, then run it.
-
-### Remember
-Breaker = **stop hammering a failing service and probe it carefully later.** It works well together with a **fallback** (a sensible default answer) and, in the stack of protections, sits just before **Retry**.
-<!-- simple-explanation -->
-
-
 ## 1. What & why
 
 <!-- diagram:39-0 -->
@@ -77,6 +31,15 @@ Without it (e.g. Order → Product while Product is failing):
 Question: *how does Order service know when to stop calling Product and when to restart?* → **Circuit Breaker**.
 
 Flow in the diagram: calls to Product fail → **failure threshold reached → stop future calls to Product** → calls are **blocked for some time and fail immediately** → afterwards **check if Product is healthy and allow further calls only if it is**.
+
+<!-- isw:39-0 -->
+**In simple words**
+
+A circuit breaker **prevents an application from making repeated calls to a downstream service that is likely to fail.** Without it (for example Order → Product while Product is failing): it **unnecessarily adds load** to the Product service, so Product may take **longer to recover;** and the Order service **wastes its own resources** (latency and thread blocking) on calls that are likely to fail. The question: *how does the Order service know when to stop calling Product and when to restart?* The answer is the circuit breaker.
+
+The flow in the picture: calls to Product fail → the **failure threshold is reached → future calls to Product are stopped** → calls are **blocked for some time and fail immediately** → afterwards it **checks whether Product is healthy and allows further calls only if it is.**
+<!-- /isw:39-0 -->
+
 
 ---
 
@@ -115,6 +78,18 @@ Transitions:
 - OPEN → HALF-OPEN: after the timeout/wait period completes.
 - HALF-OPEN → CLOSED: test calls' success rate is **100 %**.
 - HALF-OPEN → OPEN: test calls' success rate is **not 100 %**.
+
+<!-- isw:39-1 -->
+**In simple words**
+
+There are three states:
+- **CLOSED** – the initial state. **All calls are allowed** to the downstream service.
+- **OPEN** – **no calls are allowed** to the downstream; they **fail immediately.**
+- **HALF-OPEN** – after the timeout period, it allows only a **limited number of test calls** to the downstream and **tracks their success rate.**
+
+The transitions: **CLOSED → OPEN** when the failure limit crosses the threshold; **OPEN → HALF-OPEN** when the timeout / wait period is completed; **HALF-OPEN → CLOSED** when the test calls' success rate is **100 %;** **HALF-OPEN → OPEN** when the test calls' success rate is **not 100 %.**
+<!-- /isw:39-1 -->
+
 
 ---
 
@@ -193,6 +168,17 @@ resilience4j.circuitbreaker.instances.productService.automatic-transition-from-o
 | `wait-duration-in-open-state` | How long the circuit stays **OPEN** before moving to **HALF_OPEN** (automatically, if `automatic-transition-from-open-to-half-open-enabled=true`). |
 | `permitted-number-of-calls-in-half-open-state` | Number of **test calls allowed in HALF_OPEN** to find out if downstream is healthy. |
 
+<!-- isw:39-3 -->
+**In simple words**
+
+- **`sliding-window-type=COUNT_BASED`, `sliding-window-size=10`** – tracks the **last N calls (here 10).** With **`TIME_BASED`** and size `10s` it tracks the calls made in the **last N seconds (here 10 s).**
+- **`minimum-number-of-calls`** – the minimum number of calls needed in a window **before it starts evaluating the failure rate.**
+- **`failure-rate-threshold`** – the circuit moves to **OPEN** once this **percentage limit** is reached.
+- **`wait-duration-in-open-state`** – how long the circuit stays **OPEN** before moving to **HALF_OPEN** (automatically, if `automatic-transition-from-open-to-half-open-enabled=true`).
+- **`permitted-number-of-calls-in-half-open-state`** – the number of **test calls allowed in HALF_OPEN** to find out whether the downstream is healthy.
+<!-- /isw:39-3 -->
+
+
 ### Which exceptions count as failure?
 By default the Circuit Breaker records **all `RuntimeException`s and `Error`s as failures**. You can choose what to record or ignore:
 ```properties
@@ -201,6 +187,22 @@ resilience4j.circuitbreaker.instances.productService.ignore-exceptions=java.lang
 ```
 
 **Output observed:** once the max trial-call limit is reached in HALF_OPEN and success is not 100 %, the status changed **HALF_OPEN → OPEN**.
+
+<!-- isw:39-2 -->
+**In simple words**
+
+The service method has **`@CircuitBreaker(name = "productService", fallbackMethod = "fallback")`,** and the notes say the **fallback method is invoked for each failed attempt.** The properties used are `sliding-window-type=COUNT_BASED`, `sliding-window-size=10`, `minimum-number-of-calls=5`, `failure-rate-threshold=50`, `wait-duration-in-open-state=10s`, `permitted-number-of-calls-in-half-open-state=3` and `automatic-transition-from-open-to-half-open-enabled=true`.
+
+**Output observed:** once the maximum trial-call limit is reached in HALF_OPEN and the success is not 100 %, the status changed **HALF_OPEN → OPEN.**
+<!-- /isw:39-2 -->
+
+<!-- isw:39-4 -->
+**In simple words**
+
+By default the circuit breaker records **all `RuntimeException`s and `Error`s as failures.** You can choose what to record or ignore with `record-exceptions` (for example `java.io.IOException`) and `ignore-exceptions` (for example `java.lang.IllegalArgumentException`).
+<!-- /isw:39-4 -->
+
+
 
 ---
 
@@ -260,6 +262,15 @@ OpenState(final int attempts, final long waitDurationInMillis,
   - Each available worker thread looks at the **head** of the Delayed Queue.
   - If the task's delay hasn't expired, the thread **waits (blocks)** for the remaining delay; once the delay is over, the OS wakes the thread.
   - One thread picks the task from the head and executes it; other threads move to the next task in the queue – if it's not yet ready they wait (block) again.
+
+<!-- isw:39-5 -->
+**In simple words**
+
+**AOP intercepts the call and passes it to `CircuitBreakerStateMachine.java`,** which has the complete logic for changing from one state to another whenever there is a failure. In its method `checkIfThresholdsExceeded`, after every error it checks whether the state must change: **if the threshold limit is reached and the state is CLOSED, it moves to OPEN;** a similar method exists for the other states.
+
+*The question in the notes: after moving to OPEN, how does it automatically go to HALF_OPEN after, say, 10 s?* **The answer: it uses a `ScheduledThreadPoolExecutor`.** In the `OpenState`, if automatic transition is enabled, it **schedules the task `toHalfOpenState` with the wait duration as the delay.** Internally the `ScheduledThreadPoolExecutor` uses a **DelayedQueue:** each available worker thread looks at the **head** of the queue; if the task's delay has not expired, the thread **waits (blocks)** for the remaining delay, and once the delay is over the OS wakes the thread; one thread picks the task from the head and executes it, while the other threads move to the next task in the queue and wait again if it is not ready.
+<!-- /isw:39-5 -->
+
 
 ---
 

@@ -23,16 +23,16 @@ Notes made from the HLD links in *Unlock LLD & HLD* (original numbering). Most s
 | 18 | Load balancer & algorithms | [18_Load_Balancer_and_Algorithms_Notes.md](18_Load_Balancer_and_Algorithms_Notes.md) |
 | 19 | Distributed cache & caching strategies | [19_Distributed_Cache_and_Caching_Strategies_Notes.md](19_Distributed_Cache_and_Caching_Strategies_Notes.md) |
 | 20 | Distributed transactions (2PC/3PC/SAGA) | [20_Distributed_Transactions_Notes.md](20_Distributed_Transactions_Notes.md) |
-| 21 | Database indexing | ⚠️ Zoho note only – not readable automatically |
-| 22 | Concurrency control in distributed systems | ⚠️ Zoho note only |
-| 23 | Two-phase locking (2PL) | ⚠️ Zoho note only |
+| 21 | Database indexing | [21_Database_Indexing_Notes.md](21_Database_Indexing_Notes.md) (Zoho note) |
+| 22 | Concurrency control in distributed systems | [22_Concurrency_Control_Notes.md](22_Concurrency_Control_Notes.md) (Zoho note) |
+| 23 | Two-phase locking (2PL) | [23_Two_Phase_Locking_2PL_Notes.md](23_Two_Phase_Locking_2PL_Notes.md) (Zoho note) |
 | 24 | OAuth 2.0 | [24_OAuth_2.0_Notes.md](24_OAuth_2.0_Notes.md) (Drive PDF; Zoho copy unreadable) |
 | 25 | Symmetric & asymmetric encryption | [25_Symmetric_and_Asymmetric_Encryption_Notes.md](25_Symmetric_and_Asymmetric_Encryption_Notes.md) |
 | 26 | JWT explained | [26_JWT_Explained_Notes.md](26_JWT_Explained_Notes.md) |
 | 27 | Thundering herd | [27_Thundering_Herd_Notes.md](27_Thundering_Herd_Notes.md) |
 | 28 | API gateway (concepts) | [28_API_Gateway_Concepts_Notes.md](28_API_Gateway_Concepts_Notes.md) |
-| 29 | Service mesh | ⚠️ Zoho note only |
-| 30 | DNS | ⚠️ Zoho note only |
+| 29 | Service mesh | [29_Service_Mesh_Notes.md](29_Service_Mesh_Notes.md) (Zoho note) |
+| 30 | DNS | [30_DNS_Notes.md](30_DNS_Notes.md) (Zoho note) |
 | 31 | How many microservices | "Not applicable" in the source |
 | 32 | Common attacks with demo | [32_Common_Attacks_Notes.md](32_Common_Attacks_Notes.md) |
 | 33 | Dual write problem | [33_Dual_Write_Problem_Notes.md](33_Dual_Write_Problem_Notes.md) |
@@ -44,5 +44,5 @@ Notes made from the HLD links in *Unlock LLD & HLD* (original numbering). Most s
 | 40–41 | API gateway Part 1 & 2 (Spring Cloud Gateway) | [40_41_API_Gateway_Part1_Part2_Notes.md](40_41_API_Gateway_Part1_Part2_Notes.md) |
 
 **Notes on coverage**
-- The Zoho "typed" notes (#21, 22, 23, 29, 30 and the second copies for #19, 20, 24–26, 28, 33) are JavaScript-rendered pages; the automated fetch returned an empty shell. Open them in a browser (or export them) if you need them converted.
+- The Zoho "typed" notes for #21, 22, 23, 29 and 30 are now converted (read from the rendered page images). The second Zoho copies were compared with the Drive PDF notes: #20, 25, 26 and 28 had the same content (small fixes applied), #24 gained the extra API-call details (section 7), and #19's Zoho link no longer works (the page says the note was removed). #33 has no Zoho link.
 - Several handwritten pages are cropped at the scan edge, and a few diagrams are rough; places where a reading was uncertain are flagged inside the individual notes.

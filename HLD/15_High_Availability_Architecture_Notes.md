@@ -8,53 +8,6 @@ Source (handwritten, 6 pages): https://drive.google.com/file/d/1k7OUopYnC2fpEHDL
 
 ---
 
-<!-- simple-explanation -->
-## In simple words – high availability architecture
-
-### What is being asked?
-Interviewers phrase this in different ways, but they all mean the same: **"Design the system so it keeps working even when something breaks."**
-- *High availability* – e.g. **99.999 % uptime ("five nines")**, which allows only about 5 minutes of downtime per year.
-- *Resiliency* – the ability to recover from a failure.
-- *No single point of failure (SPOF)* – no one component whose failure takes everything down.
-
-### Why a single node isn't enough
-Imagine a load balancer, several application servers, and **one** primary database. You've made the app servers redundant, but if the database fails, **every read and write fails and the whole application is down**. The database is the single point of failure. The fix is to have **more than one database, in more than one place** (data centre).
-
-### Option 1 – Active-Passive
-- A company runs at least two data centres, say **DC1 in Mumbai** and **DC2 in Pune**.
-- The **primary (live) database** that accepts reads *and writes* sits in DC1. DC2 holds a **replica** that just copies the primary. Copying goes one way only: primary → replica.
-- Apps in DC2 can read from their local replica, but any **write** must travel to the primary in DC1.
-- DC2 is also called the **DR (Disaster Recovery)** site.
-- **If the primary fails**, you promote the replica to be the new primary and route traffic to DC2. No data is lost, and the SPOF is gone.
-
-Why only one primary? Databases like **Oracle, MySQL and PostgreSQL are not multi-master**: they allow writes on only one node.
-
-**Downsides**
-- **Wasted resources** – the replica sits mostly idle.
-- **Extra latency** after failover, because traffic now crosses to a farther data centre.
-- Failover is a step someone (or something) must trigger.
-
-### Option 2 – Active-Active
-- Both data centres have a live database that accepts **reads and writes**, and they **synchronise both ways**. This needs a **multi-master** database such as **Cassandra** (NoSQL).
-- Advantages: every database is fully used, you can handle **more traffic**, and if one data centre dies the other is already serving, so there is no promotion step.
-
-**Downsides: conflicts**
-- Two users may change **the same row at the same time** in different data centres. When the data syncs, which value wins?
-- A write on DC1 and a read on DC2 at nearly the same moment may return **stale data** because the sync hasn't arrived yet.
-- Handling these conflicts and keeping the data in sync is hard.
-
-### Quick comparison
-| | Active-Passive | Active-Active |
-|---|---|---|
-| Who accepts writes | only the primary | every data centre |
-| Copy direction | one way | both ways |
-| Idle resources | yes (replica) | no |
-| Main problem | latency and failover step | write conflicts, stale reads |
-
-(This ties back to the [CAP theorem](02_CAP_Theorem_Notes.md): active-active leans towards availability and has to settle consistency later.)
-<!-- simple-explanation -->
-
-
 ## 1. The question can be asked in many forms
 - Design **Data Resiliency** architecture. *(think "5 9's" – five nines)*
 - Design architecture to achieve **99.999 % availability.**
@@ -64,6 +17,13 @@ Why only one primary? Databases like **Oracle, MySQL and PostgreSQL are not mult
 **Resiliency** = *the capability to come out of a failure.*
 
 **Question:** what issue is there – why are all these goals **not achieved with a single node**, and how can we do it?
+
+<!-- isw:15-0 -->
+**In simple words**
+
+The same question can be asked in different ways: design a **data-resiliency** architecture (think "five nines"), design for **99.999 % availability**, design to **avoid a single point of failure**, or explain **active-passive vs active-active.** The notes define **resiliency as the capability to come out of a failure.** The question to answer is: why are these goals **not achieved with a single node**, and how can we achieve them?
+<!-- /isw:15-0 -->
+
 
 ---
 
@@ -93,6 +53,13 @@ graph TD
 ```
 - If the **DB goes down** (failure happens) – what happens now?
 - **Answer: the whole application is down.** The DB is a single point of failure.
+
+<!-- isw:15-1 -->
+**In simple words**
+
+The picture shows a client (mobile / PC), a **load balancer**, several applications (X, Y, Z) and **one primary DB.** If the **DB goes down** (the failure), reads and writes both fail, and the notes' answer is: **the whole application is down.** The single DB is the single point of failure.
+<!-- /isw:15-1 -->
+
 
 ---
 
@@ -141,6 +108,22 @@ graph LR
 1. **Latency add-on** – e.g. DC1 (Mumbai, primary) takes 1 s to process a request; once DB fails and traffic is rerouted to DC2 (Pune, DR, now primary) the cross-data-centre hop adds latency (DC2 ≈ 2 s).
 2. If DB failure happens, we must **route the traffic to the DR data centre** (a manual/automated failover step).
 
+<!-- isw:15-3 -->
+**In simple words**
+
+- **Every company has at least two data centres**, for example **DC1 in Mumbai** and **DC2 in Pune.**
+- The flow is client → load balancer → the apps in DC1 (and DC2). **Write (POST) and read (GET) requests go to the apps in DC1; the apps in DC2 only read.**
+- The **primary DB** (also called the **live DB / read-write DB**) is in DC1, and DC2 has a **replica** DB. **The sync is one-directional** (primary → replica). A **write request from DC2's apps is routed to the primary** in DC1. **DR = Disaster Recovery data centre** (DC2).
+- In active-passive, **out of two data centres (or even more) only one can be the primary / live / read-write DB; the others are replicas.**
+
+**Problem:** the resources are **not used well**, since DB2 is free. **Reason:** **Oracle, MySQL and PostgreSQL are not multi-master**; they can **write into only one primary DB**, so every write (POST) goes to the live DB.
+
+**How it avoids the single point of failure:** if the **primary DB goes down, we can shift from the primary to the replica and make the replica the primary.** The traffic of that data centre is routed to the disaster-recovery data centre, which is changed into the primary (read-write) DB.
+
+**Disadvantages:** (1) **Added latency,** for example DC1 (Mumbai, primary) takes 1 s for a request, and after a failure DC2 (Pune, now primary) takes about 2 s because of the extra hop between data centres. (2) When the DB fails, we must **route the traffic to the DR data centre.**
+<!-- /isw:15-3 -->
+
+
 ### ② Active-Active
 
 <!-- diagram:15-2 -->
@@ -175,6 +158,27 @@ graph LR
 - A **write** happens on DC1 and a **read** on DC2 **simultaneously, before the sync-up happens** → the read sees stale data.
 - **A whole lot of things go into synchronization – there are lots of difficulties in managing conflicts.**
 
+<!-- isw:15-2 -->
+**In simple words**
+
+With more than one node there are two types: **① Active-Passive** and **② Active-Active.**
+<!-- /isw:15-2 -->
+
+<!-- isw:15-4 -->
+**In simple words**
+
+- **Cassandra (or another NoSQL DB) supports multi-master.**
+- Both data centres, **DC1 (Mumbai) and DC2 (Pune),** have their own microservices and their own **primary / live DB.** The **sync is bidirectional**, and a **read or write can go to either data centre.**
+
+**Advantages:** **the DBs (data centres) are fully used**, more traffic can be handled **because both DBs accept reads and writes**, and every update in DC1 goes to DC2 and every update in DC2 goes to DC1.
+
+**Disadvantages (conflicts):** the **same row can be changed at the same time in both data centres**, and when they replicate to each other **there will be a conflict.** Also a **write on DC1 and a read on DC2 at the same moment, before the sync, gives stale data.** The notes sum it up: **a whole lot of things go into the synchronisation, and managing conflicts is difficult.**
+<!-- /isw:15-4 -->
+
+
+
+
+
 ---
 
 ## 4. Comparison
@@ -186,6 +190,13 @@ graph LR
 | Failover | promote replica / route traffic to DR DC | already serving – no promotion needed |
 | Typical DBs | Oracle, MySQL, PostgreSQL (not multi-master) | Cassandra / other NoSQL (multi-master) |
 | Main drawback | latency add-on + failover step | **write conflicts**, complex synchronization, stale reads |
+
+<!-- isw:15-5 -->
+**In simple words**
+
+The table puts the two side by side: in **active-passive** writes go to **one primary only**, replication is **one-directional**, the replica is idle (poor use), failover means promoting the replica, it fits **Oracle / MySQL / PostgreSQL**, and the main drawback is **added latency plus the failover step.** In **active-active** writes go to **any data centre**, replication is **bidirectional**, all DBs are used, no promotion is needed, it needs **Cassandra or another multi-master NoSQL DB**, and the main drawback is **write conflicts, complex synchronisation and stale reads.**
+<!-- /isw:15-5 -->
+
 
 ---
 

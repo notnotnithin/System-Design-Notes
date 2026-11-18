@@ -10,47 +10,6 @@ Resilience4j provides these mechanisms to build fault-tolerant microservices: **
 
 ---
 
-<!-- simple-explanation -->
-## In simple words – bulkhead (and time limiter)
-
-### The idea behind the name
-A ship's hull is divided into watertight compartments called **bulkheads**. If one compartment floods, the others stay dry and the ship doesn't sink. In software, a bulkhead **isolates resources** (threads, concurrent calls) per downstream service, so that one slow or failing dependency can't drain everything and sink the whole application.
-
-### Rate limiter vs bulkhead
-| | Rate Limiter | Bulkhead |
-|---|---|---|
-| Protects our app from… | **our clients** sending too much | **our downstream services** being slow or fragile |
-| Limits | requests **per time window** | requests **at the same time** (concurrency) / threads |
-Example: a rate limiter might say "4 requests per 5 seconds, the 5th gets rejected". A bulkhead says "only 3 calls to Product may be *in progress at once*".
-
-### Two problems, two bulkhead types
-**Problem 1 – the downstream can only handle a few concurrent calls.** Product is a tiny service that can serve only 3 requests at once. → **Semaphore bulkhead.**
-
-**Problem 2 – a slow downstream hogs all our threads.** The Order service has API 1 (calls Product, ~100 ms) and API 2 (calls Payment, ~5 s). A spike on API 2 makes threads wait 5 s each, so soon **no threads are left**, and even the fast API 1 stops working. → **Thread-pool bulkhead**: give each downstream its own small group of threads, so Payment can exhaust only *its* threads.
-
-### Semaphore bulkhead
-A **semaphore** is just a counter of "permits". Every call takes a permit and returns it when done. When the permits run out, extra calls are **rejected immediately or wait for a set time**.
-- Annotate with `@Bulkhead(name = "productService", type = Bulkhead.Type.SEMAPHORE, fallbackMethod = "productFallback")`.
-- Config: `maxConcurrentCalls=2` (only two at a time) and `maxWaitDuration=0` (fail at once; or `300ms`, `2s`, `1m` to wait a bit).
-- The call runs on the **caller's own thread**.
-
-### Thread-pool bulkhead
-Each downstream gets a **dedicated thread pool plus a waiting queue**. The call is submitted to that pool, and the method must return a `CompletableFuture<T>` (an async result).
-- Config example: `coreThreadPoolSize=3`, `maxThreadPoolSize=3`, `queueCapacity=2`. At most 3 run at once, 2 more can wait in the queue, and the **6th concurrent request is rejected** (so the fallback runs).
-- The fallback should return a friendly value ("Product Service is busy"); without one, the client gets a 500 error with `BulkheadFullException`.
-
-| | Semaphore | Thread pool |
-|---|---|---|
-| How it limits | counter of concurrent calls | its own threads + queue |
-| Runs on | caller's thread | the bulkhead's threads |
-| Return type | normal | `CompletableFuture` |
-| Best for | downstream has a low concurrency limit | a slow downstream might hog our threads |
-
-### Time limiter
-It stops an **asynchronous** call from waiting forever by cancelling it after a time limit. In Resilience4j it is designed for **async/reactive** code (`Mono`, `Flux`). For ordinary blocking clients (RestTemplate, Feign) you simply set **connect and read timeouts** on the client, for example in Feign: `connectTimeout=3000` and `readTimeout=5000` (ms). The reactive use is covered later with Spring WebFlux.
-<!-- simple-explanation -->
-
-
 ## 1. Rate Limiter vs Bulkhead
 
 <!-- diagram:37-0 -->
@@ -78,6 +37,15 @@ graph LR
   - Sudden spike on API 2 (calls need not be concurrent). Because Payment is slow, it **holds/blocks the thread for ~5 s**, so **all threads of Order service can get blocked by Payment alone**.
   - Now even the fast endpoint (API 1) becomes **unavailable** since no threads are left.
   - Solved by **Thread Pool Bulkhead**.
+
+<!-- isw:37-0 -->
+**In simple words**
+
+The comparison table says: the **rate limiter protects our application from our clients,** by limiting **how many requests we accept within a time window,** and it **never talks about concurrency.** The **bulkhead protects our application from our downstream services,** by controlling **how many concurrent requests can go to a downstream service** (or how many threads we allocate to it); it is exactly about concurrency.
+
+Examples: **rate limiter** (app = Order): the limit is 4 requests in 5 s; requests at the 1st, 2nd, 3rd and 4th second pass, and the request at the 5th second is rejected ("Too many requests, request limit is 4 in 5 sec"). **Bulkhead use-case 1:** *Product* is a small, light service that can handle only **3 concurrent requests,** which is solved by the **Semaphore Bulkhead.** **Use-case 2:** the Order service has two APIs: API 1 calls **Product** (about 100 ms, fast) and API 2 calls **Payment** (about 5 s, slow). A sudden spike hits API 2 (the calls need not be concurrent). Because Payment is slow it **holds the thread for about 5 s,** so **all of Order's threads can get blocked by Payment alone,** and even the fast API 1 becomes **unavailable** as no thread is left. This is solved by the **Thread Pool Bulkhead.**
+<!-- /isw:37-0 -->
+
 
 ---
 
@@ -173,6 +141,13 @@ resilience4j.bulkhead.instances.productService.maxWaitDuration=2s     # Wait 2 s
 resilience4j.bulkhead.instances.productService.maxWaitDuration=1m     # Wait 1 minute
 ```
 
+<!-- isw:37-1 -->
+**In simple words**
+
+It limits the **number of concurrent calls using a counter** (a Semaphore lock). If the limit is reached, further calls are **rejected immediately or blocked for a specific wait time.** The service method gets `@Bulkhead(name = "productService", type = Bulkhead.Type.SEMAPHORE, fallbackMethod = "productFallback")`, and the properties are **`maxConcurrentCalls=2`** (only 2 concurrent calls allowed) and **`maxWaitDuration=0`** (for further requests, if no thread is available, the request fails immediately). The `maxWaitDuration` format is `<number><unit>`: `0` rejects immediately, `300ms` waits 300 milliseconds, `2s` waits 2 seconds, `1m` waits 1 minute (units ms, s, m, h, d).
+<!-- /isw:37-1 -->
+
+
 ---
 
 ## 3. Thread Pool Bulkhead
@@ -253,6 +228,17 @@ A thread pool for `productService` is created with these settings.
 | Config prefix | `resilience4j.bulkhead` (`maxConcurrentCalls`, `maxWaitDuration`) | `resilience4j.thread-pool-bulkhead` (`coreThreadPoolSize`, `maxThreadPoolSize`, `queueCapacity`) |
 | Solves | downstream can only handle N concurrent requests | slow downstream hogging all our threads |
 
+<!-- isw:37-2 -->
+**In simple words**
+
+Here you **assign a dedicated thread pool for each downstream service,** and **only that pool** is used to call the downstream. The method returns a `CompletableFuture`; the comments in the notes explain that the AOP proxy **submits the method to the bulkhead's thread pool** and returns a `CompletableFuture` to the caller, and that `CompletableFuture.completedFuture(...)` inside only wraps the result and does not itself run anything in a pool. The fallback must also handle the exception (else the client gets a 500 with `BulkheadFullException`).
+
+The properties: **`coreThreadPoolSize=3`, `maxThreadPoolSize=3`, `queueCapacity=2`:** a maximum of 3 threads; **if all 3 are busy, a maximum of 2 more requests are put into the queue;** **from the 6th request onwards it starts rejecting.** In the test, invoking the API 6 times accepts the first 5 (3 running + 2 queued) and the 6th is rejected, so the fallback runs.
+
+The notes' comparison: the semaphore uses a **counter** on the **caller's thread** with normal return types and the `resilience4j.bulkhead` properties; the thread pool uses a **dedicated pool (+ queue)** per downstream with **`CompletableFuture<T>`** and the `resilience4j.thread-pool-bulkhead` properties. The semaphore **solves** "a downstream can only handle N concurrent requests"; the thread pool solves "a slow downstream hogging all our threads".
+<!-- /isw:37-2 -->
+
+
 ---
 
 ## 4. Time Limiter
@@ -266,6 +252,13 @@ feign.client.config.product-service.connectTimeout=3000
 feign.client.config.product-service.readTimeout=5000
 ```
 - Time Limiter has the same context but for **reactive calls** – to be covered when starting Spring WebFlux (reactive programming).
+
+<!-- isw:37-3 -->
+**In simple words**
+
+The Time Limiter **prevents an async call from hanging indefinitely.** In Resilience4j it is **non-blocking** and mainly designed for **asynchronous operations that return a reactive type** like `Mono` and `Flux`. The calls covered so far (RestTemplate, RestClient, FeignClient) are blocking, and for them we control timeouts directly, for example in Feign: `feign.client.config.product-service.connectTimeout=3000` and `readTimeout=5000`. The Time Limiter has the same context but for **reactive calls,** to be covered when Spring WebFlux starts.
+<!-- /isw:37-3 -->
+
 
 ---
 
