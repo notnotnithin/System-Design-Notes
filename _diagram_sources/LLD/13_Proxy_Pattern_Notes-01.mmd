@@ -1,0 +1,19 @@
+classDiagram
+  class EmployeeDao {
+    <<interface>>
+    +getEmployeeInfo() void
+    +createEmployee() void
+  }
+  class EmployeeDaoImpl {
+    +createEmployee() void
+  }
+  class EmployeeDaoProxy {
+    -EmployeeDao empDaoObj
+    -String clientRole
+    +createEmployee() void
+  }
+  class EmployeeDo {
+  }
+  EmployeeDao <|.. EmployeeDaoImpl
+  EmployeeDao <|.. EmployeeDaoProxy
+  EmployeeDaoProxy --> EmployeeDao

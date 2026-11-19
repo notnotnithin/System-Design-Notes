@@ -1,0 +1,6 @@
+graph LR
+  R1["Call 1"] --> S{"Semaphore: 2 permits"}
+  R2["Call 2"] --> S
+  R3["Call 3"] --> S
+  S -->|"permit available"| P["Product service"]
+  S -->|"no permit, maxWaitDuration 0"| F["Rejected immediately: fallback"]

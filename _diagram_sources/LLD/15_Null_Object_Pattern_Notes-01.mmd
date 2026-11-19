@@ -1,0 +1,33 @@
+classDiagram
+  class Bike {
+    -String model
+    -String color
+    +start() void
+    +stop() void
+  }
+  class Car {
+    -String model
+    -String color
+    +start() void
+    +stop() void
+  }
+  class Vehicle {
+    <<abstract>>
+    +start() void
+    +stop() void
+  }
+  class ProblemDemo {
+  }
+  class VehicleFactory {
+  }
+  class NullVehicle {
+    -String model
+    -String color
+    +start() void
+    +stop() void
+  }
+  class SolutionDemo {
+  }
+  Vehicle <|-- Bike
+  Vehicle <|-- Car
+  Vehicle <|-- NullVehicle

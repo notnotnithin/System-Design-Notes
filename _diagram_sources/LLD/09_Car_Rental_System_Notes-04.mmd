@@ -1,0 +1,11 @@
+sequenceDiagram
+  participant U as User
+  participant S as Store
+  participant B as BillManager
+  participant P as PaymentManager
+  U->>S: generateBill(reservationId, billingStrategy)
+  S->>B: generateBill(reservation)
+  B-->>U: Bill (days x daily rate)
+  U->>S: makePayment(bill, paymentStrategy, amount)
+  S->>P: makePayment(bill, amount)
+  P-->>U: Payment (UPI, CASH, ONLINE)

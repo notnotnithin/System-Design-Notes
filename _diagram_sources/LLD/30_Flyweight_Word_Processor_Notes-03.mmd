@@ -1,0 +1,24 @@
+classDiagram
+  class HumanoidRobot {
+    -String type
+    -Sprites body
+    +display() void
+  }
+  class IRobot {
+    <<interface>>
+    +display() void
+  }
+  class RoboticDog {
+    -String type
+    -Sprites body
+    +display() void
+  }
+  class RoboticFactory {
+    +createRobot() IRobot
+  }
+  class Sprites {
+  }
+  HumanoidRobot --> Sprites
+  IRobot <|.. HumanoidRobot
+  IRobot <|.. RoboticDog
+  RoboticDog --> Sprites

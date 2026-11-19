@@ -32,79 +32,14 @@ Instead of a big `if (couponA) ... if (couponB) ...` in the cart, each coupon **
 
 **Diagram – Coupon application**
 
-```mermaid
-classDiagram
-  class ShoppingCart {
-    +List~Product~ productList
-    +addToCart() void
-  }
-  class CouponDecorator {
-    <<abstract>>
-    +Product product
-    +int discountPercentage
-  }
-  class PercentageCouponDecorator {
-  }
-  class TypeCouponDecorator {
-    +List~ProductType~ eligibleTypes
-  }
-  class Item1 {
-  }
-  class Item2 {
-  }
-  class Item3 {
-  }
-  class Item4 {
-  }
-  class Product {
-    <<abstract>>
-    +String name
-    +double originalPrice
-    +ProductType type
-  }
-  class ProductType {
-    <<enumeration>>
-    FURNITURE
-    ELECTRONICS
-    CLOTHES
-    PHARMACY
-  }
-  CouponDecorator --> Product
-  CouponDecorator <|-- PercentageCouponDecorator
-  CouponDecorator <|-- TypeCouponDecorator
-  Product --> ProductType
-  Product <|-- CouponDecorator
-  Product <|-- Item1
-  Product <|-- Item2
-  Product <|-- Item3
-  Product <|-- Item4
-  ShoppingCart --> "*" Product
-```
+![Diagram](diagrams/35_Coupon_Shopping_Cart_Notes-01.png)
 
 ## Step 4 – How prices are calculated
 Each decorator asks the product it wraps for its price, then applies its own discount. Wrapping several decorators stacks the discounts.
 
-```mermaid
-graph LR
-  P["Office Chair (6000), FURNITURE"] --> D1["PercentageCoupon 10%: 6000 - 600 = 5400"]
-  D1 --> D2["TypeCoupon 5% (furniture is eligible): 5400 - 270 = 5130"]
-  D2 --> T["getPrice() returns 5130"]
-```
+![Diagram](diagrams/35_Coupon_Shopping_Cart_Notes-02.png)
 
-```mermaid
-sequenceDiagram
-  participant C as ShoppingCart
-  participant T as TypeCouponDecorator
-  participant P as PercentageCouponDecorator
-  participant I as Item (Office Chair)
-  C->>T: getPrice()
-  T->>P: getPrice()
-  P->>I: getPrice()
-  I-->>P: 6000
-  P-->>T: 5400 (10 percent off)
-  T->>T: furniture is eligible, take 5 percent off
-  T-->>C: 5130
-```
+![Diagram](diagrams/35_Coupon_Shopping_Cart_Notes-03.png)
 
 *Discount only for eligible product types*
 

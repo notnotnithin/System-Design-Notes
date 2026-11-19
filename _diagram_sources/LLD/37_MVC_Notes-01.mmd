@@ -1,0 +1,22 @@
+classDiagram
+  class BlogController {
+    -List~Blog~ blogs
+    -BlogView view
+    +addBlog() void
+    +updateBlog() void
+    +deleteBlog() void
+    +showBlog() void
+    +showAllBlogs() void
+  }
+  class Blog {
+    -String title
+    -String content
+    -String author
+    -Date createdAt
+  }
+  class BlogView {
+    +displayBlogDetails() void
+    +displayAllBlogs() void
+  }
+  BlogController --> "*" Blog
+  BlogController --> BlogView

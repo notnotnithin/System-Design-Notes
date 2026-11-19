@@ -1,0 +1,5 @@
+graph LR
+  C["Client"] --> G["API gateway"]
+  G -->|"/api/invoice"| I["Invoice microservice"]
+  G -->|"/api/order"| O["Order microservice"]
+  G -->|"/api/sales"| S["Sales microservice"]

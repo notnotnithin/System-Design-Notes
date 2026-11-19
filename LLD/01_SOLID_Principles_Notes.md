@@ -28,29 +28,7 @@ SOLID is a set of five habits that keep object-oriented code easy to change. Wit
 
 **Diagram – before and after**
 
-```mermaid
-classDiagram
-  class InvoiceBad {
-    +calculateTotal()
-    +saveToDB()
-    +printInvoice()
-  }
-  class Invoice {
-    -Marker marker
-    -int quantity
-    +calculateTotal()
-  }
-  class InvoiceDao {
-    -Invoice invoice
-    +saveToDB()
-  }
-  class InvoicePrinter {
-    -Invoice invoice
-    +print()
-  }
-  Invoice <-- InvoiceDao
-  Invoice <-- InvoicePrinter
-```
+![Diagram](diagrams/01_SOLID_Principles_Notes-01.png)
 
 *`InvoiceBad` stands for the original `Invoice` class that did three jobs.*
 
@@ -67,25 +45,7 @@ classDiagram
 
 **Diagram – extension without modification**
 
-```mermaid
-classDiagram
-  class InvoiceDao {
-    <<interface>>
-    +save()
-  }
-  class DatabaseInvoiceDao {
-    +save()
-  }
-  class FileInvoiceDao {
-    +save()
-  }
-  class MongoInvoiceDao {
-    +save()
-  }
-  InvoiceDao <|.. DatabaseInvoiceDao
-  InvoiceDao <|.. FileInvoiceDao
-  InvoiceDao <|.. MongoInvoiceDao
-```
+![Diagram](diagrams/01_SOLID_Principles_Notes-02.png)
 
 *`MongoInvoiceDao` is the "new feature": added without touching the other classes.*
 
@@ -121,22 +81,7 @@ public class DatabaseInvoiceDao implements InvoiceDao {
 
 **Diagram – before and after**
 
-```mermaid
-classDiagram
-  class Vehicle {
-    +getNumberOfWheels()
-  }
-  class EngineVehicle {
-    +hasEngine()
-  }
-  class Car
-  class MotorCycle
-  class Bicycle
-  Vehicle <|-- EngineVehicle
-  Vehicle <|-- Bicycle
-  EngineVehicle <|-- Car
-  EngineVehicle <|-- MotorCycle
-```
+![Diagram](diagrams/01_SOLID_Principles_Notes-03.png)
 
 **Rule of thumb:** if a child needs to throw "not supported" for a parent method, the hierarchy is wrong.
 
@@ -151,29 +96,7 @@ classDiagram
 
 **Diagram – small interfaces**
 
-```mermaid
-classDiagram
-  class ChefTasks {
-    <<interface>>
-    +prepareFood()
-    +decideMenu()
-  }
-  class WaiterTasks {
-    <<interface>>
-    +takeOrder()
-    +serveFoodAndDrinks()
-  }
-  class MaintenanceTasks {
-    <<interface>>
-    +cleanTheKitchen()
-    +reStockGroceries()
-  }
-  class Chef
-  class Waiter
-  ChefTasks <|.. Chef
-  WaiterTasks <|.. Waiter
-  MaintenanceTasks <|.. Waiter
-```
+![Diagram](diagrams/01_SOLID_Principles_Notes-04.png)
 
 **Benefit:** classes stay small and focused, and a change to one interface affects only its users.
 
@@ -188,29 +111,7 @@ classDiagram
 
 **Diagram – depend on interfaces**
 
-```mermaid
-classDiagram
-  class MacBook {
-    -Keyboard keyboard
-    -Mouse mouse
-  }
-  class Keyboard {
-    <<interface>>
-  }
-  class Mouse {
-    <<interface>>
-  }
-  class WiredKeyboard
-  class BluetoothKeyboard
-  class WiredMouse
-  class BluetoothMouse
-  MacBook --> Keyboard
-  MacBook --> Mouse
-  Keyboard <|.. WiredKeyboard
-  Keyboard <|.. BluetoothKeyboard
-  Mouse <|.. WiredMouse
-  Mouse <|.. BluetoothMouse
-```
+![Diagram](diagrams/01_SOLID_Principles_Notes-05.png)
 
 **Benefit:** you can swap implementations (also for tests) without touching the high-level class.
 

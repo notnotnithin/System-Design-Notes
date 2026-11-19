@@ -1,0 +1,18 @@
+sequenceDiagram
+  participant U as Resource owner (user)
+  participant C as Client (Instagram)
+  participant A as Authorization server (Gmail)
+  participant R as Resource server (Gmail data)
+  C->>A: 1 register the client
+  A-->>C: 2 client id and client secret
+  U->>C: 3 choose Sign in using Gmail
+  C->>U: 4 redirect to the authorization server
+  U->>A: 5 log in and give consent
+  A-->>C: 6 authorization code (via redirect URI)
+  C->>A: 7 exchange code (with client id and secret) for token
+  A-->>C: 8 access token (and refresh token)
+  C->>R: 9 request data with Bearer access token
+  R->>A: 10 validate the token
+  A-->>R: 11 valid or invalid
+  R-->>C: 12 data if valid, else 400 error
+  C-->>U: 13 sign-in successful or failed

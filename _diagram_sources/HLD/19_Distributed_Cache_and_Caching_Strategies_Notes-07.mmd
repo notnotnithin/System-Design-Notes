@@ -1,0 +1,11 @@
+sequenceDiagram
+  participant C as Client
+  participant S as Server
+  participant K as Cache
+  participant Q as Queue
+  participant D as DB
+  C->>S: write (POST)
+  S->>K: write into cache
+  S->>Q: push message
+  S-->>C: done (fast)
+  Q->>D: later: write into DB (retries if DB is down)

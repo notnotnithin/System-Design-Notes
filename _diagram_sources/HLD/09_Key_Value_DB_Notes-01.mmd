@@ -1,0 +1,7 @@
+graph LR
+  K["Key"] --> H["hash(key)"] --> R(("Ring"))
+  R --> S1["S1: keys 1-50"]
+  R --> S2["S2: keys 51-100"]
+  R --> S3["S3: next range"]
+  R --> S4["S4: next range"]
+  R -.- V["each server appears at several ring points: virtual nodes"]

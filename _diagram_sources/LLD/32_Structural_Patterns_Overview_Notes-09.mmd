@@ -1,0 +1,6 @@
+graph LR
+  W["I wrap an object"] --> Q1{"Do I change its interface?"}
+  Q1 -->|"yes"| AD["Adapter"]
+  Q1 -->|"no"| Q2{"Do I add new behaviour?"}
+  Q2 -->|"yes"| DE["Decorator"]
+  Q2 -->|"no, I control access"| PR["Proxy"]

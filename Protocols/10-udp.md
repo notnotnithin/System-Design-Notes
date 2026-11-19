@@ -12,10 +12,7 @@
 
 ### How the layers fit together (outer to inner)
 
-```mermaid
-graph LR
-  N1["Ethernet frame"] --> N2["IPv4 packet"] --> N3["UDP datagram (ports, length, checksum)"] --> N4["RTP header"] --> N5["Voice samples"]
-```
+![Diagram](diagrams/10-udp-01.png)
 
 ## In-depth explanation of the example (plain-language version)
 
@@ -126,22 +123,7 @@ Sound started with the very first packet (zero set-up time), each packet travell
 
 ### Sequence diagram
 
-```mermaid
-sequenceDiagram
-  participant P0 as Laptop 192.168.1.10
-  participant P1 as Media server 203.0.113.20
-  P0->>P1: 1. UDP: 50000 → 5004 Len=92
-  P0->>P1: 2. UDP: 50000 → 5004 Len=92
-  P0->>P1: 3. UDP: 50000 → 5004 Len=92
-  P0->>P1: 4. UDP: 50000 → 5004 Len=92
-  P0->>P1: 5. UDP: 50000 → 5004 Len=92
-  P0->>P1: 6. UDP: 50000 → 5004 Len=92
-  P0->>P1: 7. UDP: 50000 → 5004 Len=92 LOST
-  P0->>P1: 8. UDP: 50000 → 5004 Len=92
-  P1->>P0: 9. UDP: 5004 → 50000 Len=92
-  P1->>P0: 10. UDP: 5004 → 50000 Len=92
-  P1->>P0: 11. UDP: 5004 → 50000 Len=92
-```
+![Diagram](diagrams/10-udp-02.png)
 
 *The lesson's own sequence diagram:*
 

@@ -1,0 +1,21 @@
+sequenceDiagram
+  participant P0 as Laptop 192.168.1.10
+  participant P1 as IP camera 192.168.1.64
+  P0->>P1: 1. TCP: 52510 → 554 [SYN] Seq=0
+  P1->>P0: 2. TCP: 554 → 52510 [SYN, ACK] Seq=0 Ack=1
+  P0->>P1: 3. TCP: 52510 → 554 [ACK] Seq=1 Ack=1
+  P0->>P1: 4. RTSP: OPTIONS rtsp://192.168.1.64:554/stream1 RTSP/1.0
+  P1->>P0: 5. RTSP: Reply: RTSP/1.0 200 OK
+  P0->>P1: 6. RTSP: DESCRIBE rtsp://192.168.1.64:554/stream1 RTSP/1.0
+  P1->>P0: 7. RTSP: Reply: RTSP/1.0 401 Unauthorized
+  P0->>P1: 8. RTSP: DESCRIBE rtsp://192.168.1.64:554/stream1 RTSP/1.0
+  P1->>P0: 9. RTSP/SDP: Reply: RTSP/1.0 200 OK, with session description
+  P0->>P1: 10. RTSP: SETUP rtsp://192.168.1.64:554/stream1/trackID=1 RTSP/1.0
+  P1->>P0: 11. RTSP: Reply: RTSP/1.0 200 OK
+  P0->>P1: 12. RTSP: PLAY rtsp://192.168.1.64:554/stream1/ RTSP/1.0
+  P1->>P0: 13. RTSP: Reply: RTSP/1.0 200 OK
+  P1->>P0: 14. RTP: PT=H.264 (96), SSRC=0x5A1C3E7B, Seq=27493, Time=3725434208
+  P1->>P0: 15. RTP: PT=H.264 (96), SSRC=0x5A1C3E7B, Seq=27494, Time=3725434208
+  P1->>P0: 16. RTP: PT=H.264 (96), SSRC=0x5A1C3E7B, Seq=27495, Time=3725434208, Mark
+  P0->>P1: 17. RTSP: TEARDOWN rtsp://192.168.1.64:554/stream1/ RTSP/1.0
+  P1->>P0: 18. RTSP: Reply: RTSP/1.0 200 OK

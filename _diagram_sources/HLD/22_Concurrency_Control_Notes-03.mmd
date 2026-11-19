@@ -1,0 +1,6 @@
+flowchart TB
+    A[Creates Transaction] --> B["Read Row (unlocked too)"]
+    B --> C[Computation on fetched Row]
+    C --> D{Row Modified?}
+    D -- Yes --> R[Rollback] --> A
+    D -- No --> U[Update DB] --> CM[Commit]

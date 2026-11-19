@@ -1,0 +1,8 @@
+graph TD
+  K["128-bit key"] --> KE["Key expansion: 44 words = 11 round keys"]
+  PT["128-bit plain-text block"] --> ARK0["Add round key (W0 - W3)"]
+  KE --> ARK0
+  ARK0 --> R1["Round 1: SubBytes, ShiftRows, MixColumns, AddRoundKey"]
+  R1 --> R2["Rounds 2 to 9: same four steps"]
+  R2 --> R10["Round 10: SubBytes, ShiftRows, AddRoundKey"]
+  R10 --> CT["128-bit cipher-text block"]

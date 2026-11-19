@@ -1,0 +1,10 @@
+graph LR
+  subgraph PP["Point-to-point: each message consumed once"]
+    P1["Publisher"] --> Q1[["Queue"]]
+    Q1 --> C1["Consumer 1 or Consumer 2"]
+  end
+  subgraph PS["Pub/Sub: every subscriber gets a copy"]
+    P2["Publisher"] --> E{"Exchange"}
+    E --> QA[["Q1"]] --> CA["Consumer 1"]
+    E --> QB[["Q2"]] --> CB["Consumer 2"]
+  end

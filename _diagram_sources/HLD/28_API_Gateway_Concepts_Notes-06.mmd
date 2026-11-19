@@ -1,0 +1,10 @@
+graph TD
+  C["Client"] --> DNS["DNS: Route 53 / Traffic Manager, routes by region"]
+  DNS --> R1
+  DNS --> R2
+  subgraph R1["Region 1: Mumbai"]
+    G1["API gateway + service discovery"] --> LB1["Load balancers in AZ1, AZ2, AZ3"] --> M1["Invoice / Order instances"]
+  end
+  subgraph R2["Region 2: Bangalore"]
+    G2["API gateway + service discovery"] --> LB2["Load balancers in AZ1, AZ2"] --> M2["Invoice / Order instances"]
+  end

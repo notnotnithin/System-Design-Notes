@@ -1,0 +1,12 @@
+sequenceDiagram
+  participant S as Service
+  participant DB as Database
+  participant K as Message broker (Kafka)
+  Note over S,K: Failure 1
+  S->>K: publish event OK
+  S->>DB: write FAILS
+  Note over S,K: event published but data not saved
+  Note over S,K: Failure 2
+  S->>DB: write OK
+  S->>K: publish FAILS
+  Note over S,K: data saved but nobody is told

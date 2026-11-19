@@ -1,0 +1,5 @@
+graph LR
+  R["Router"] -->|"stage 1: transform, traffic to legacy"| L["Legacy app"]
+  R -->|"stage 2: co-exist, traffic to both"| L
+  R --> N["New (modern) app"]
+  R -->|"stage 3: eliminate, traffic only to modern"| N

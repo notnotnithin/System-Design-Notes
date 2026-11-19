@@ -1,0 +1,8 @@
+graph TD
+  N["New requests"] --> LB["Load balancer"]
+  RT["Retried requests (denied earlier)"] --> LB
+  LB --> T1["TS 1 + full queue"]:::bad
+  LB --> T2["TS 2 + full queue"]:::bad
+  LB --> T3["TS 3 + full queue"]:::bad
+  T1 -. "denied: clients retry at once" .-> RT
+  classDef bad fill:#fecaca,stroke:#b91c1c,color:#000

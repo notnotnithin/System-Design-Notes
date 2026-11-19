@@ -1,0 +1,11 @@
+sequenceDiagram
+  participant C as Client
+  participant A as Authorization server
+  participant DB as DB
+  participant R as Resource server
+  C->>A: 1 login with username and password
+  A->>DB: 2 create session id and save user info
+  A-->>C: 3 session id in a cookie
+  C->>R: 4 request with the cookie
+  R->>DB: 5 look up the session id and validate (extra latency)
+  R-->>C: 6 response

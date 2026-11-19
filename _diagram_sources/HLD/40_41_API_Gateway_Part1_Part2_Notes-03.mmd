@@ -1,0 +1,5 @@
+graph TB
+  C["Client"] --> DH["DispatcherHandler"] --> RM["RouteMappingHandler: finds route by predicate"]
+  RM --> GF["Global filters: pre logic"] --> RF["Route-specific filters: pre logic"]
+  RF --> RU["RouteToRequestUrlFilter (order 10000)"] --> NR["NettyRoutingFilter (last)"] --> MS["Microservice"]
+  MS -->|"response: post logic of each filter"| W["NettyWriteResponseFilter"] --> C

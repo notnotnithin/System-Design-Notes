@@ -1,0 +1,5 @@
+graph LR
+  RF["Re-filler adds tokens at a fixed interval"] --> B(("Bucket of tokens<br/>full: extra tokens overflow"))
+  R["Request"] --> B
+  B -->|"token available: take one"| A["Allowed"]
+  B -->|"no token"| X["Denied"]

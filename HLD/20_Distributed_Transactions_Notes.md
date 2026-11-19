@@ -49,14 +49,7 @@ A **local transaction** is written as: Begin → withdraw from A → deposit to 
 <!-- diagram:20-0 -->
 **Diagram – ACID is local to each database**
 
-```mermaid
-graph LR
-  A["Operation: place order"] --> O["Order service"] --> OD[("Order DB: its own ACID transaction")]
-  A --> I["Inventory service"] --> ID[("Inventory DB: its own ACID transaction")]
-  OD -.- X["no single transaction covers both databases"]:::bad
-  ID -.- X
-  classDef bad fill:#fecaca,stroke:#b91c1c,color:#000
-```
+![Diagram](diagrams/20_Distributed_Transactions_Notes-01.png)
 <!-- /diagram:20-0 -->
 
 
@@ -103,26 +96,7 @@ There are three ways: **2-Phase Commit** (very popular, **synchronous**), **3-Ph
 <!-- diagram:20-1 -->
 **Diagram – Two-phase commit**
 
-```mermaid
-sequenceDiagram
-  participant A as Application
-  participant TC as Transaction coordinator
-  participant P1 as Participant 1 (Order)
-  participant P2 as Participant 2 (Inventory)
-  A->>TC: perform operation
-  TC->>P1: update query (lock)
-  TC->>P2: update query (lock)
-  Note over TC,P2: Phase 1: prepare (vote)
-  TC->>P1: PREPARE
-  TC->>P2: PREPARE
-  P1-->>TC: OK
-  P2-->>TC: OK
-  Note over TC,P2: Phase 2: decision
-  TC->>P1: COMMIT (or ABORT if any NO or timeout)
-  TC->>P2: COMMIT
-  P1-->>TC: done
-  P2-->>TC: done
-```
+![Diagram](diagrams/20_Distributed_Transactions_Notes-02.png)
 <!-- /diagram:20-1 -->
 
 
@@ -174,18 +148,7 @@ Two things can fail: **the coordinator or a participant.** The message-loss case
 <!-- diagram:20-2 -->
 **Diagram – Three-phase commit adds a pre-commit step**
 
-```mermaid
-sequenceDiagram
-  participant TC as Coordinator
-  participant P as Participants
-  TC->>P: Phase 1: PREPARE
-  P-->>TC: OK
-  TC->>P: Phase 2: PRE-COMMIT (decision shared)
-  P-->>TC: acknowledge
-  TC->>P: Phase 3: COMMIT
-  P-->>TC: DONE
-  Note over TC,P: if the coordinator fails after pre-commit, participants already know the decision
-```
+![Diagram](diagrams/20_Distributed_Transactions_Notes-03.png)
 <!-- /diagram:20-2 -->
 
 
@@ -217,15 +180,7 @@ It is a **non-blocking** protocol with three phases: **1. Prepare** (same as 2PC
 <!-- diagram:20-3 -->
 **Diagram – SAGA: chain of local transactions and compensations**
 
-```mermaid
-graph LR
-  P1["P1 update + commit"] --> P2["P2"] --> P3["P3"] --> P4["P4"] --> P5["P5 fails"]:::bad
-  P5 -. "compensate" .-> P4
-  P4 -. "compensate" .-> P3
-  P3 -. "compensate" .-> P2
-  P2 -. "compensate" .-> P1
-  classDef bad fill:#fecaca,stroke:#b91c1c,color:#000
-```
+![Diagram](diagrams/20_Distributed_Transactions_Notes-04.png)
 <!-- /diagram:20-3 -->
 
 

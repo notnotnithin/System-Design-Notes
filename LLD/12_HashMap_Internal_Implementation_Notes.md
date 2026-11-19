@@ -16,24 +16,7 @@ A **hash map** stores **key → value** pairs and finds a value from its key in 
 
 ## The structure in the repo
 
-```mermaid
-classDiagram
-  class MyHashMap~K,V~ {
-    -int INITIAL_SIZE = 16
-    -int MAXIMUM_CAPACITY
-    ~Entry[] hashTable
-    +put(key, value)
-    +get(key) V
-    ~tableSizeFor(cap) int
-  }
-  class Entry~K,V~ {
-    ~K key
-    ~V value
-    ~Entry next
-  }
-  MyHashMap --> "*" Entry : buckets
-  Entry --> Entry : next (chain)
-```
+![Diagram](diagrams/12_HashMap_Internal_Implementation_Notes-01.png)
 
 - `hashTable` is the **array of buckets** (default size 16).
 - `Entry` is a node with a `key`, a `value` and a `next` pointer to the next entry in the same bucket.
@@ -41,32 +24,13 @@ classDiagram
 
 ## How a key goes into a bucket
 
-```mermaid
-graph LR
-  K["key = 8"] --> H["hashCode() = 8"]
-  H --> I["index = 8 % 8 = 0"]
-  I --> B0["bucket 0"]
-  subgraph T["hashTable (size 8)"]
-    B0 --> E1["Entry 8: you"] --> E2["Entry 16: next entry in the same bucket (collision)"]
-    B1["bucket 1"] --> F1["Entry 1: hi"] --> F2["Entry 9: friends"]
-    B2["bucket 2"] --> G1["Entry 2: my"] --> G2["Entry 10: ?"]
-  end
-```
+![Diagram](diagrams/12_HashMap_Internal_Implementation_Notes-02.png)
 
 *Keys 8 and 16 share bucket 0, 1 and 9 share bucket 1, and so on: those are chains.*
 
 ## put(key, value)
 
-```mermaid
-flowchart TD
-  A["put(key, value)"] --> B["index = key.hashCode() % table length"]
-  B --> C{"bucket empty?"}
-  C -->|"yes"| D["create an Entry and store it in the bucket"]
-  C -->|"no"| E["walk the chain"]
-  E --> F{"found the same key?"}
-  F -->|"yes"| G["replace its value"]
-  F -->|"no, end of chain"| H["append a new Entry at the end"]
-```
+![Diagram](diagrams/12_HashMap_Internal_Implementation_Notes-03.png)
 
 *put: find the bucket, then update or append*
 
@@ -99,19 +63,7 @@ public void put(K key, V value) {
 
 ## get(key)
 
-```mermaid
-sequenceDiagram
-  participant C as Client
-  participant M as MyHashMap
-  participant B as bucket chain
-  C->>M: get(8)
-  M->>M: index = 8 % 8 = 0
-  M->>B: start at the first Entry of bucket 0
-  loop while entry is not null
-    B->>B: key equals 8?
-  end
-  B-->>C: value "you" (or null if not found)
-```
+![Diagram](diagrams/12_HashMap_Internal_Implementation_Notes-04.png)
 
 *get: same index, then walk the chain*
 

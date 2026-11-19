@@ -1,0 +1,6 @@
+graph TD
+  C(("C<br/>Consistency")) ---|"CA"| A(("A<br/>Availability"))
+  A ---|"AP"| P(("P<br/>Partition tolerance"))
+  P ---|"CP"| C
+  X["All three together: not possible"]:::no
+  classDef no fill:#fecaca,stroke:#b91c1c,color:#000

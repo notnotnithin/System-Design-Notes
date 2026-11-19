@@ -22,72 +22,11 @@ A remote control with buttons for an air conditioner. If each button calls the A
 
 **Diagram – Remote control with undo**
 
-```mermaid
-classDiagram
-  class AirConditioner {
-    +boolean isOn
-    +int temperature
-    +turnOn() void
-    +turnOff() void
-  }
-  class ICommand {
-    <<interface>>
-    +execute() void
-    +undo() void
-  }
-  class RemoteController {
-    +ICommand command
-    +Stack~ICommand~ commandHistory
-    +pressButton() void
-    +undo() void
-  }
-  class SetTemperatureCommand {
-    -AirConditioner ac
-    -int newTemperature
-    -int previousTemperature
-    +execute() void
-    +undo() void
-  }
-  class TurnOffCommand {
-    -AirConditioner ac
-    -boolean previousState
-    +execute() void
-    +undo() void
-  }
-  class TurnOnCommand {
-    -AirConditioner ac
-    -boolean previousState
-    +execute() void
-    +undo() void
-  }
-  ICommand <|.. SetTemperatureCommand
-  ICommand <|.. TurnOffCommand
-  ICommand <|.. TurnOnCommand
-  RemoteController --> ICommand
-  SetTemperatureCommand --> AirConditioner
-  TurnOffCommand --> AirConditioner
-  TurnOnCommand --> AirConditioner
-```
+![Diagram](diagrams/31_Command_Undo_Redo_Notes-01.png)
 
 **Diagram – execute then undo**
 
-```mermaid
-sequenceDiagram
-  participant C as Client
-  participant R as RemoteController (invoker)
-  participant T as SetTemperatureCommand
-  participant A as AirConditioner (receiver)
-  C->>R: setCommand(new SetTemperatureCommand(ac, 24))
-  C->>R: pressButton()
-  R->>T: execute()
-  T->>T: remember previousTemperature (say 20)
-  T->>A: setTemperature(24)
-  R->>R: push command onto history
-  C->>R: undo()
-  R->>R: pop last command
-  R->>T: undo()
-  T->>A: setTemperature(20)
-```
+![Diagram](diagrams/31_Command_Undo_Redo_Notes-02.png)
 
 *Invoker with a history stack*
 
@@ -112,13 +51,7 @@ The code above keeps one stack (`commandHistory`) for **undo**. To add **redo**,
 - `redo()`: pop from the redo stack, call `execute()`, push back onto the undo stack.
 - Any *new* command clears the redo stack (the old future is no longer valid).
 
-```mermaid
-graph LR
-  E["execute(cmd)"] --> US["undo stack: push"]
-  US -->|"undo()"| RS["redo stack: push"]
-  RS -->|"redo()"| US
-  E -. "clears" .-> RS
-```
+![Diagram](diagrams/31_Command_Undo_Redo_Notes-03.png)
 
 This is how text editors implement Ctrl+Z / Ctrl+Y.
 

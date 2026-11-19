@@ -1,0 +1,11 @@
+sequenceDiagram
+  participant C as Client
+  participant S as Server
+  Note over C,S: Sequential: timeout then retry
+  C->>S: POST add item
+  S-->>C: no response (timeout)
+  C->>S: POST add item (duplicate)
+  Note over C,S: Parallel: both arrive together
+  C->>S: POST add item (original)
+  C->>S: POST add item (duplicate)
+  Note over S: only one of them may be processed

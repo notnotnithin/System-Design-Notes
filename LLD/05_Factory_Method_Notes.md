@@ -41,65 +41,11 @@ Code like `if (type == CIRCLE) shape = new Circle(); else if ...` is repeated in
 
 **Diagram – Shapes, simple factory and factory-method creators**
 
-```mermaid
-classDiagram
-  class Circle {
-    +computeArea() void
-    +draw() void
-  }
-  class Rectangle {
-    +computeArea() void
-    +draw() void
-  }
-  class Shape {
-    <<interface>>
-    +computeArea() void
-    +draw() void
-  }
-  class ShapeType {
-    <<enumeration>>
-    CIRCLE
-    RECTANGLE
-    SQUARE
-  }
-  class Square {
-    +computeArea() void
-    +draw() void
-  }
-  class CircleCreator {
-    +createShape() Shape
-  }
-  class FactoryMethodDemo {
-  }
-  class RectangleCreator {
-    +createShape() Shape
-  }
-  class ShapeFactory {
-    +createShape() Shape
-  }
-  class SquareCreator {
-    +createShape() Shape
-  }
-  Shape <|.. Circle
-  Shape <|.. Rectangle
-  Shape <|.. Square
-  ShapeFactory <|-- CircleCreator
-  ShapeFactory <|-- RectangleCreator
-  ShapeFactory <|-- SquareCreator
-```
+![Diagram](diagrams/05_Factory_Method_Notes-01.png)
 
 **Diagram – asking a creator for a shape**
 
-```mermaid
-sequenceDiagram
-  participant C as Client
-  participant F as CircleCreator (ShapeFactory)
-  participant S as Circle
-  C->>F: createShape()
-  F->>S: new Circle()
-  F-->>C: Shape
-  C->>S: computeArea() and draw()
-```
+![Diagram](diagrams/05_Factory_Method_Notes-02.png)
 
 ## Simple Factory vs Factory Method
 | | Simple Factory | Factory Method |

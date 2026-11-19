@@ -1,0 +1,87 @@
+classDiagram
+  class Building {
+    +List~Floor~ floors
+  }
+  class Door {
+    -DoorState doorState
+    +openDoor() void
+    +closeDoor() void
+  }
+  class ElevatorCar {
+    +int id
+    +int currentFloor
+    +int nextFloorStoppage
+    +showDisplay() void
+    +moveElevator() void
+  }
+  class ElevatorController {
+    +PriorityBlockingQueue~Integer~ upMinPQ
+    +PriorityBlockingQueue~Integer~ downMaxPQ
+    +ElevatorCar elevatorCar
+    +submitRequest() void
+    +run() void
+    +controlElevator() void
+  }
+  class ElevatorScheduler {
+    -List~ElevatorController~ controllers
+    -ElevatorSelectionStrategy strategy
+    +assignElevator() ElevatorController
+  }
+  class ElevatorSelectionStrategy {
+    <<interface>>
+    +selectElevator() ElevatorController
+  }
+  class ExternalButton {
+    -ExternalDispatcher dispatcher
+    +pressButton() void
+  }
+  class ExternalDispatcher {
+    +ElevatorScheduler scheduler
+    +submitExternalRequest() void
+  }
+  class Floor {
+    +int floorNumber
+    +ExternalButton upButton
+    +ExternalButton downButton
+    +pressUpButton() void
+    +pressDownButton() void
+  }
+  class InternalButton {
+    -ElevatorController controller
+    +pressButton() void
+  }
+  class InternalDispatcher {
+    -InternalDispatcher INSTANCE
+    +submitInternalRequest() void
+  }
+  class LeastBusyStrategy {
+    +selectElevator() ElevatorController
+  }
+  class NearestElevatorStrategy {
+    +selectElevator() ElevatorController
+  }
+  class DoorState {
+    <<enumeration>>
+    DOOR_OPEN
+    DOOR_CLOSED
+  }
+  class ElevatorDirection {
+    <<enumeration>>
+    UP
+    DOWN
+    IDLE
+    +DOWN, IDLE
+  }
+  Building --> "*" Floor
+  Door --> DoorState
+  ElevatorCar --> Door
+  ElevatorCar --> ElevatorDirection
+  ElevatorController --> ElevatorCar
+  ElevatorScheduler --> "*" ElevatorController
+  ElevatorScheduler --> ElevatorSelectionStrategy
+  ElevatorSelectionStrategy <|.. LeastBusyStrategy
+  ElevatorSelectionStrategy <|.. NearestElevatorStrategy
+  ExternalButton --> ExternalDispatcher
+  ExternalDispatcher --> ElevatorScheduler
+  Floor --> ExternalButton
+  InternalButton --> ElevatorController

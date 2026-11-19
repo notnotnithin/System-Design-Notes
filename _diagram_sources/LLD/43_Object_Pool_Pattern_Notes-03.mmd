@@ -1,0 +1,5 @@
+graph TB
+  A["Pool created: 5 connections free"] --> B["Request: borrow one (4 free, 1 in use)"]
+  B --> C["Request: all 5 in use, pool at MAX"]
+  C --> D["New request must wait or fail"]
+  B --> E["Release: connection goes back to free"]

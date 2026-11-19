@@ -1,0 +1,7 @@
+graph TD
+  C["Clients"] --> AG["Application gateway + rate limiter (token bucket)"]
+  AG -->|"allowed rate only"| LB["Load balancer"]
+  AG -->|"excess"| X["Rejected quickly: try again later"]
+  LB --> T1["TS1"]
+  LB --> T2["TS2"]
+  LB --> T3["TS3"]

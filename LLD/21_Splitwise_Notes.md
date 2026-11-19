@@ -34,125 +34,11 @@ Design an app where friends share expenses. Someone pays a bill, the app splits 
 
 **Diagram – Splitwise**
 
-```mermaid
-classDiagram
-  class Balance {
-    +double amountOwe
-    +double amountGetBack
-  }
-  class BalanceSheetController {
-    +updateUserExpenseBalanceSheet() void
-    +showBalanceSheetOfUser() void
-  }
-  class Expense {
-    +String expenseId
-    +String description
-    +double expenseAmount
-    +User paidByUser
-  }
-  class ExpenseController {
-    +BalanceSheetController balanceSheetController
-    +createExpense() Expense
-  }
-  class ExpenseSplitType {
-    <<enumeration>>
-    EQUAL
-    UNEQUAL
-    PERCENTAGE
-  }
-  class EqualExpenseSplit {
-    +validateSplitRequest() void
-  }
-  class ExpenseSplit {
-    <<interface>>
-    +validateSplitRequest() void
-  }
-  class PercentageExpenseSplit {
-    +validateSplitRequest() void
-  }
-  class Split {
-    +User user
-    +double amountOwe
-  }
-  class UnequalExpenseSplit {
-    +validateSplitRequest() void
-  }
-  class SplitFactory {
-  }
-  class Group {
-    +String groupId
-    +String groupName
-    +List~User~ groupMembers
-    +List~Expense~ expenseList
-    +addMember() void
-    +createExpense() Expense
-  }
-  class GroupController {
-    +List~Group~ groupList
-    +createNewGroup() void
-  }
-  class Splitwise {
-    +UserController userController
-    +GroupController groupController
-    +BalanceSheetController balanceSheetController
-    +demo() void
-    +setupUserAndGroup() void
-  }
-  class User {
-    +String userId
-    +String userName
-    +UserExpenseBalanceSheet userExpenseBalanceSheet
-  }
-  class UserController {
-    +List~User~ userList
-    +addUser() void
-  }
-  class UserExpenseBalanceSheet {
-    +Map~String,Balance~ userVsBalance
-    +double totalYourExpense
-    +double totalPayment
-    +double totalYouOwe
-  }
-  Expense --> ExpenseSplitType
-  Expense --> "*" Split
-  Expense --> User
-  ExpenseController --> BalanceSheetController
-  ExpenseSplit <|.. EqualExpenseSplit
-  ExpenseSplit <|.. PercentageExpenseSplit
-  ExpenseSplit <|.. UnequalExpenseSplit
-  Group --> "*" Expense
-  Group --> ExpenseController
-  Group --> "*" User
-  GroupController --> "*" Group
-  Split --> User
-  Splitwise --> BalanceSheetController
-  Splitwise --> GroupController
-  Splitwise --> UserController
-  User --> UserExpenseBalanceSheet
-  UserController --> "*" User
-  UserExpenseBalanceSheet --> "*" Balance
-```
+![Diagram](diagrams/21_Splitwise_Notes-01.png)
 
 ## Step 3 – Adding an expense
 
-```mermaid
-sequenceDiagram
-  participant U as User (payer)
-  participant G as Group
-  participant EC as ExpenseController
-  participant F as SplitFactory
-  participant V as ExpenseSplit (validator)
-  participant B as BalanceSheetController
-  U->>G: createExpense(id, description, amount, splits, splitType, paidBy)
-  G->>EC: createExpense(...)
-  EC->>F: get the validator for splitType
-  F-->>EC: EqualExpenseSplit / Unequal / Percentage
-  EC->>V: validateSplitRequest(splits, amount)
-  V-->>EC: ok (or throws)
-  EC->>EC: create the Expense
-  EC->>B: updateUserExpenseBalanceSheet(paidBy, splits, amount)
-  B->>B: update the payer's and every debtor's balance sheet
-```
+![Diagram](diagrams/21_Splitwise_Notes-02.png)
 
 ## Step 4 – Updating balances (a worked example)
 A paid ₹300 for dinner, split equally between A, B and C (₹100 each).
@@ -163,11 +49,7 @@ A paid ₹300 for dinner, split equally between A, B and C (₹100 each).
 | **B** | **owes** A +100; own expense +100 |
 | **C** | **owes** A +100; own expense +100 |
 
-```mermaid
-graph LR
-  B["B owes 100"] -->|"pays back"| A["A paid 300"]
-  C["C owes 100"] -->|"pays back"| A
-```
+![Diagram](diagrams/21_Splitwise_Notes-03.png)
 
 For each split, the controller updates **both sides**: the payer's `amountGetBack` against the debtor, and the debtor's `amountOwe` against the payer. A person's own share is only added to their personal expense total.
 

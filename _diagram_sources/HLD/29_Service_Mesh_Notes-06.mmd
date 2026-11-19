@@ -1,0 +1,5 @@
+flowchart LR
+    A[Microservice1 + client side LB] --> Z
+    subgraph B[Microservice2: Instance1]
+        Z[Authorization]
+    end

@@ -1,0 +1,14 @@
+sequenceDiagram
+  participant U as User
+  participant S as Store
+  participant R as ReservationManager
+  participant I as VehicleInventoryManager
+  U->>S: createReservation(vehicleId, user, from, to, type)
+  S->>R: createReservation(...)
+  R->>I: reserve(vehicleId, reservationId, from, to)
+  I->>I: lock this vehicle
+  I->>I: dates free? if not, return false
+  I->>I: add booking, status = BOOKED, unlock
+  I-->>R: true
+  R->>R: save Reservation (status SCHEDULED)
+  R-->>U: reservation

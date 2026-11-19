@@ -1,0 +1,21 @@
+classDiagram
+  class MacBook {
+    -Keyboard keyboard
+    -Mouse mouse
+  }
+  class Keyboard {
+    <<interface>>
+  }
+  class Mouse {
+    <<interface>>
+  }
+  class WiredKeyboard
+  class BluetoothKeyboard
+  class WiredMouse
+  class BluetoothMouse
+  MacBook --> Keyboard
+  MacBook --> Mouse
+  Keyboard <|.. WiredKeyboard
+  Keyboard <|.. BluetoothKeyboard
+  Mouse <|.. WiredMouse
+  Mouse <|.. BluetoothMouse

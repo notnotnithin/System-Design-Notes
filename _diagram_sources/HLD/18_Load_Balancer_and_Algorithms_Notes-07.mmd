@@ -1,0 +1,3 @@
+graph LR
+  LB["Load balancer: ratio = active connections / weight"] --> S1["Server 1: weight 10, 2 connections<br/>ratio 0.2: chosen"]
+  LB --> S2["Server 2: weight 1, 1 connection<br/>ratio 1.0"]

@@ -12,10 +12,7 @@
 
 ### How the layers fit together (outer to inner)
 
-```mermaid
-graph LR
-  N1["Ethernet frame"] --> N2["IPv4 packet"] --> N3["TCP port 80"] --> N4["HTTP request / response (plain text)"]
-```
+![Diagram](diagrams/01-http-01.png)
 
 ## In-depth explanation of the example (plain-language version)
 
@@ -197,19 +194,7 @@ The browser reads the HTML and paints the page on screen. The page will usually 
 
 ### Sequence diagram
 
-```mermaid
-sequenceDiagram
-  participant P0 as Laptop 192.168.1.10
-  participant P1 as DNS resolver 8.8.8.8
-  participant P2 as Web server 203.0.113.10
-  P0->>P1: 1. DNS: Standard query A www.example.com
-  P1->>P0: 2. DNS: Standard query response A 203.0.113.10
-  P0->>P2: 3. TCP: 52344 → 80 [SYN] Seq=0
-  P2->>P0: 4. TCP: 80 → 52344 [SYN, ACK] Seq=0 Ack=1
-  P0->>P2: 5. TCP: 52344 → 80 [ACK] Seq=1 Ack=1
-  P0->>P2: 6. HTTP: GET / HTTP/1.1
-  P2->>P0: 7. HTTP: HTTP/1.1 200 OK (text/html), 9 segments
-```
+![Diagram](diagrams/01-http-02.png)
 
 *The lesson's own sequence diagram:*
 

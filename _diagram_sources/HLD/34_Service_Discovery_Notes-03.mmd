@@ -1,0 +1,7 @@
+graph LR
+  E1["eureka-1 :8761"] <--> E2["eureka-2 :8762"]
+  E2 <--> E3["eureka-3 :8763"]
+  E3 <--> E1
+  C["Clients list all three URLs"] --> E1
+  C --> E2
+  C --> E3

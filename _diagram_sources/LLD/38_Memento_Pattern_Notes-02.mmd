@@ -1,0 +1,14 @@
+sequenceDiagram
+  participant C as Client
+  participant M as ConfigurationManager (caretaker)
+  participant A as ApplicationConfiguration (originator)
+  C->>M: saveState(config)
+  M->>A: save()
+  A-->>M: memento 1 (default theme, size 12)
+  M->>M: push memento 1
+  C->>A: change theme to dark, size to 16
+  C->>M: saveState(config)
+  M->>M: push memento 2
+  C->>M: undo(config)
+  M->>M: pop memento 2, peek memento 1
+  M->>A: restore(memento 1)

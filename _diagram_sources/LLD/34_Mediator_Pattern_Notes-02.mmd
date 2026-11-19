@@ -1,0 +1,11 @@
+sequenceDiagram
+  participant A as Bidder Alice
+  participant H as AuctionHouse (mediator)
+  participant B as Bidder Bob
+  participant C as Bidder Carol
+  A->>H: placeBid(500)
+  H->>H: 500 is higher than the current highest bid
+  H->>B: receiveBidNotification(500)
+  H->>C: receiveBidNotification(500)
+  B->>H: placeBid(450)
+  H->>H: too low, nobody is notified

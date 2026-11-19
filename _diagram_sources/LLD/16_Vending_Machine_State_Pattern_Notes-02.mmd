@@ -1,0 +1,10 @@
+stateDiagram-v2
+  [*] --> Idle
+  Idle --> HasMoney: click insert coin button
+  HasMoney --> HasMoney: insert coin
+  HasMoney --> Selection: click start product selection
+  HasMoney --> Idle: refund money
+  Selection --> Dispense: choose product (enough money)
+  Selection --> Selection: choose product (not enough money, error)
+  Selection --> Idle: refund money
+  Dispense --> Idle: dispense product and return change

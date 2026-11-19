@@ -1,0 +1,9 @@
+sequenceDiagram
+  participant A as Attacker
+  participant S as Site (stores comments)
+  participant V as Victim browser
+  A->>S: POST comment containing a script
+  V->>S: GET comments page
+  S-->>V: page with the stored script (not escaped)
+  V->>A: script runs and sends document.cookie (JSESSIONID)
+  A->>S: uses the stolen session

@@ -12,11 +12,7 @@
 
 ### How the layers fit together (outer to inner)
 
-```mermaid
-graph LR
-  N1["IPv4"] --> N2["UDP 53: DNS check"]
-  N3["IPv4"] --> N4["TCP port 80"] --> N5["HTTP GET /connecttest.txt"] --> N6["302 redirect to the login page"]
-```
+![Diagram](diagrams/26-captive-portal-01.png)
 
 ## In-depth explanation of the example (plain-language version)
 
@@ -141,31 +137,7 @@ Windows repeats the test. Now the firewall lets the connection through to the **
 
 ### Sequence diagram
 
-```mermaid
-sequenceDiagram
-  participant P0 as Laptop 192.168.1.10
-  participant P1 as Router 192.168.1.1
-  participant P2 as Test server 203.0.113.30
-  P0->>P1: 1. DNS: Standard query A www.msftconnecttest.com
-  P1->>P0: 2. DNS: Standard query response A 203.0.113.30
-  P0->>P2: 3. TCP: 52410 → 80 [SYN] Seq=0
-  P2->>P0: 4. TCP: 80 → 52410 [SYN, ACK] Seq=0 Ack=1
-  P0->>P2: 5. TCP: 52410 → 80 [ACK] Seq=1 Ack=1
-  P0->>P2: 6. HTTP: GET /connecttest.txt HTTP/1.1
-  P2->>P0: 7. HTTP: HTTP/1.1 302 Found
-  P0->>P1: 8. TCP: 52411 → 80 [SYN] Seq=0
-  P1->>P0: 9. TCP: 80 → 52411 [SYN, ACK] Seq=0 Ack=1
-  P0->>P1: 10. TCP: 52411 → 80 [ACK] Seq=1 Ack=1
-  P0->>P1: 11. HTTP: GET /login HTTP/1.1
-  P1->>P0: 12. HTTP: HTTP/1.1 200 OK (text/html), 2 segments
-  P0->>P1: 13. HTTP: POST /login HTTP/1.1 (application/x-www-form-urlencoded)
-  P1->>P0: 14. HTTP: HTTP/1.1 302 Found
-  P0->>P2: 15. TCP: 52412 → 80 [SYN] Seq=0
-  P2->>P0: 16. TCP: 80 → 52412 [SYN, ACK] Seq=0 Ack=1
-  P0->>P2: 17. TCP: 52412 → 80 [ACK] Seq=1 Ack=1
-  P0->>P2: 18. HTTP: GET /connecttest.txt HTTP/1.1
-  P2->>P0: 19. HTTP: HTTP/1.1 200 OK (text/plain)
-```
+![Diagram](diagrams/26-captive-portal-02.png)
 
 *The lesson's own sequence diagram:*
 

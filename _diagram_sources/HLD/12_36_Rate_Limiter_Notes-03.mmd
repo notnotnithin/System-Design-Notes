@@ -1,0 +1,4 @@
+graph LR
+  W1["Window 1 (0-10 s)<br/>5 requests at 9-10 s"] --> W2["Window 2 (10-20 s)<br/>5 requests at 10-11 s"]
+  W2 --> X["10 requests within about 2 seconds<br/>although the limit is 5 per 10 s"]:::bad
+  classDef bad fill:#fecaca,stroke:#b91c1c,color:#000

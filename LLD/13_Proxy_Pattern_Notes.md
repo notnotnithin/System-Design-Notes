@@ -21,43 +21,11 @@ An `EmployeeDao` can read, create, update and delete employees. Not everyone sho
 
 **Diagram – Employee DAO with a protection proxy**
 
-```mermaid
-classDiagram
-  class EmployeeDao {
-    <<interface>>
-    +getEmployeeInfo() void
-    +createEmployee() void
-  }
-  class EmployeeDaoImpl {
-    +createEmployee() void
-  }
-  class EmployeeDaoProxy {
-    -EmployeeDao empDaoObj
-    -String clientRole
-    +createEmployee() void
-  }
-  class EmployeeDo {
-  }
-  EmployeeDao <|.. EmployeeDaoImpl
-  EmployeeDao <|.. EmployeeDaoProxy
-  EmployeeDaoProxy --> EmployeeDao
-```
+![Diagram](diagrams/13_Proxy_Pattern_Notes-01.png)
 
 **Diagram – allowed and denied**
 
-```mermaid
-sequenceDiagram
-  participant C as Client (role USER)
-  participant P as EmployeeDaoProxy
-  participant R as EmployeeDaoImpl
-  C->>P: getEmployeeInfo(5)
-  P->>P: role USER is allowed
-  P->>R: getEmployeeInfo(5)
-  R-->>C: employee details
-  C->>P: createEmployee(obj)
-  P->>P: role USER is not ADMIN
-  P-->>C: RuntimeException: Access Denied
-```
+![Diagram](diagrams/13_Proxy_Pattern_Notes-02.png)
 
 *The proxy guards the real object*
 

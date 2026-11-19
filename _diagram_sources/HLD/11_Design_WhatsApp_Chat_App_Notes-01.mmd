@@ -1,0 +1,7 @@
+graph LR
+  subgraph P["Peer-to-peer: no history, no groups, not scalable"]
+    A["User A"] <--> B["User B"]
+  end
+  subgraph S["With a chat server"]
+    A2["User A"] <--> CS["Chat server<br/>history, groups, availability"] <--> B2["User B"]
+  end

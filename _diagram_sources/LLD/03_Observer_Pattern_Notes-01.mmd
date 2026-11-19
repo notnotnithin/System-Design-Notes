@@ -1,0 +1,39 @@
+classDiagram
+  class IphoneProductObservable {
+    -String productId
+    -String productName
+    -double price
+    -List~StockNotificationObserver~ stockObservers
+    -int stockQuantity
+    +addStockObserver() void
+    +removeStockObserver() void
+    +notifyStockObservers() void
+    +restock() void
+  }
+  class StockAvailabilityObservable {
+    <<interface>>
+    +addStockObserver() void
+    +removeStockObserver() void
+    +notifyStockObservers() void
+    +purchase() boolean
+  }
+  class EmailNotificationObserver {
+    -String userId
+    -String emailAddress
+    +update() void
+  }
+  class PushNotificationObserver {
+    -String userId
+    -String deviceToken
+    +update() void
+  }
+  class StockNotificationObserver {
+    <<interface>>
+    +update() void
+    +getNotificationMethod() String
+    +getUserId() String
+  }
+  IphoneProductObservable --> "*" StockNotificationObserver
+  StockAvailabilityObservable <|.. IphoneProductObservable
+  StockNotificationObserver <|.. EmailNotificationObserver
+  StockNotificationObserver <|.. PushNotificationObserver

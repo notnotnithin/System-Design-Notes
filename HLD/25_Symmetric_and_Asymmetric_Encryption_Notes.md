@@ -34,10 +34,7 @@ Encryption is **a process of converting readable data into text that is difficul
 <!-- diagram:25-0 -->
 **Diagram – Symmetric encryption: one shared key**
 
-```mermaid
-graph LR
-  PT1["Plain text"] --> E["Encrypt with key K = 5"] --> CT["Cipher text"] --> D["Decrypt with the same key K = 5"] --> PT2["Plain text"]
-```
+![Diagram](diagrams/25_Symmetric_and_Asymmetric_Encryption_Notes-01.png)
 <!-- /diagram:25-0 -->
 
 
@@ -82,12 +79,7 @@ In symmetric encryption **the same key is used for both encryption and decryptio
 <!-- diagram:25-1 -->
 **Diagram – Asymmetric encryption: public key locks, private key unlocks**
 
-```mermaid
-graph LR
-  S["Sender: plain text"] -->|"encrypt with the receiver's PUBLIC key"| CT["Cipher text"]
-  CT -->|"decrypt with the receiver's PRIVATE key"| R["Receiver: plain text"]
-  H["Hacker in the middle"] -. "cannot decrypt" .-> CT
-```
+![Diagram](diagrams/25_Symmetric_and_Asymmetric_Encryption_Notes-02.png)
 <!-- /diagram:25-1 -->
 
 
@@ -165,16 +157,7 @@ The original 128-bit key is the words **W0, W1, W2, W3.** The next words are bui
 <!-- diagram:25-2 -->
 **Diagram – AES-128 encryption flow**
 
-```mermaid
-graph TD
-  K["128-bit key"] --> KE["Key expansion: 44 words = 11 round keys"]
-  PT["128-bit plain-text block"] --> ARK0["Add round key (W0 - W3)"]
-  KE --> ARK0
-  ARK0 --> R1["Round 1: SubBytes, ShiftRows, MixColumns, AddRoundKey"]
-  R1 --> R2["Rounds 2 to 9: same four steps"]
-  R2 --> R10["Round 10: SubBytes, ShiftRows, AddRoundKey"]
-  R10 --> CT["128-bit cipher-text block"]
-```
+![Diagram](diagrams/25_Symmetric_and_Asymmetric_Encryption_Notes-03.png)
 <!-- /diagram:25-2 -->
 
 
@@ -232,17 +215,7 @@ Decryption does **the opposite:** the 128-bit cipher block goes through Add Roun
 <!-- diagram:25-3 -->
 **Diagram – Diffie-Hellman with the example numbers**
 
-```mermaid
-sequenceDiagram
-  participant S as Sender (private 4)
-  participant R as Receiver (private 5)
-  Note over S,R: public and agreed by both: prime P = 7, primitive root = 3
-  S->>R: public key = 3^4 mod 7 = 4
-  R->>S: public key = 3^5 mod 7 = 5
-  Note over S: secret = 5^4 mod 7 = 2
-  Note over R: secret = 4^5 mod 7 = 2
-  Note over S,R: both hold the same secret 2, used as the AES key
-```
+![Diagram](diagrams/25_Symmetric_and_Asymmetric_Encryption_Notes-04.png)
 <!-- /diagram:25-3 -->
 
 
@@ -287,23 +260,7 @@ sequenceDiagram
 <!-- diagram:25-4 -->
 **Diagram – Digital signature: sign and verify**
 
-```mermaid
-graph LR
-  subgraph SND["Sender"]
-    D["Plain data"] --> H1["Hash function"] --> HV["Hash"]
-    HV --> SG["Sign with the sender's PRIVATE key"] --> SIG["Signature"]
-  end
-  D --> OUT["Send data + signature"]
-  SIG --> OUT
-  subgraph RCV["Receiver"]
-    OUT --> VF["Verify signature with the sender's PUBLIC key, gives hash"]
-    OUT --> H2["Hash of the received data"]
-    VF --> EQ{"hashes equal?"}
-    H2 --> EQ
-    EQ -->|"yes"| OK["Authentic and unchanged"]
-    EQ -->|"no"| BAD["Reject"]
-  end
-```
+![Diagram](diagrams/25_Symmetric_and_Asymmetric_Encryption_Notes-05.png)
 <!-- /diagram:25-4 -->
 
 

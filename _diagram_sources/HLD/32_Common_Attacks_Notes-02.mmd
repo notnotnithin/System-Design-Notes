@@ -1,0 +1,9 @@
+sequenceDiagram
+  participant U as Victim (logged in)
+  participant B as Bank site
+  participant A as Attacker page
+  U->>B: logs in, browser keeps the session cookie
+  U->>A: opens the page with Claim My Money
+  A->>U: link to bank /transfer?amount=1000&to=attacker
+  U->>B: browser sends the request WITH the session cookie
+  B-->>U: transferred (it looks like a normal user request)

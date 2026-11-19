@@ -24,46 +24,11 @@ Sending money always follows the same flow: **validate → debit → calculate f
 
 **Diagram – Payment flow**
 
-```mermaid
-classDiagram
-  class BankTransfer {
-    +validateRequest() void
-    +debitAmount() void
-    +calculateFees() void
-    +creditAmount() void
-  }
-  class MerchantPayment {
-    +validateRequest() void
-    +debitAmount() void
-    +calculateFees() void
-    +creditAmount() void
-    +requiresOTPAuthentication() boolean
-  }
-  class PaymentFlow {
-    <<abstract>>
-    +validateRequest() void
-    +debitAmount() void
-    +calculateFees() void
-    +creditAmount() void
-    +sendMoney() void
-    +requiresOTPAuthentication() boolean
-  }
-  PaymentFlow <|-- BankTransfer
-  PaymentFlow <|-- MerchantPayment
-```
+![Diagram](diagrams/39_Template_Method_Pattern_Notes-01.png)
 
 **Diagram – the template in action**
 
-```mermaid
-sequenceDiagram
-  participant C as Client
-  participant M as MerchantPayment (PaymentFlow)
-  C->>M: sendMoney()
-  M->>M: validateRequest() (subclass)
-  M->>M: debitAmount() (subclass)
-  M->>M: calculateFees() (subclass)
-  M->>M: creditAmount() (subclass)
-```
+![Diagram](diagrams/39_Template_Method_Pattern_Notes-02.png)
 
 *The final template method fixes the order*
 

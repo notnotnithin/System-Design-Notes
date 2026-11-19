@@ -1,0 +1,9 @@
+flowchart TB
+    MS1[Microservice1] -- Give me B location --> SD[Service Discovery]
+    SD -- Instance1/2/3 url:port --> CLB
+    subgraph MS1box[Microservice1]
+        CLB[Client side Load Balance Capability]
+    end
+    CLB --> I1[Microservice2: Instance1]
+    CLB --> I2[Microservice2: Instance2]
+    CLB --> I3[Microservice2: Instance3]

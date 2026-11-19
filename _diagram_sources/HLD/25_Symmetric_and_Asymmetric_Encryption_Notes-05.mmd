@@ -1,0 +1,15 @@
+graph TB
+  subgraph SND["Sender"]
+    D["Plain data"] --> H1["Hash function"] --> HV["Hash"]
+    HV --> SG["Sign with the sender's PRIVATE key"] --> SIG["Signature"]
+  end
+  D --> OUT["Send data + signature"]
+  SIG --> OUT
+  subgraph RCV["Receiver"]
+    OUT --> VF["Verify signature with the sender's PUBLIC key, gives hash"]
+    OUT --> H2["Hash of the received data"]
+    VF --> EQ{"hashes equal?"}
+    H2 --> EQ
+    EQ -->|"yes"| OK["Authentic and unchanged"]
+    EQ -->|"no"| BAD["Reject"]
+  end

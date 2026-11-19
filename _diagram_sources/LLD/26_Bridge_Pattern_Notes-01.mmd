@@ -1,0 +1,35 @@
+classDiagram
+  class BreathingProcess {
+    <<interface>>
+    +breathe() void
+  }
+  class Dog {
+    +breathe() void
+  }
+  class Fish {
+    +breathe() void
+  }
+  class GillBreathing {
+    +breathe() void
+  }
+  class LivingThings {
+    <<abstract>>
+    +BreathingProcess breathingProcess
+    +breathe() void
+  }
+  class LungBreathing {
+    +breathe() void
+  }
+  class Photosynthesis {
+    +breathe() void
+  }
+  class Tree {
+    +breathe() void
+  }
+  BreathingProcess <|.. GillBreathing
+  BreathingProcess <|.. LungBreathing
+  BreathingProcess <|.. Photosynthesis
+  LivingThings --> BreathingProcess
+  LivingThings <|-- Dog
+  LivingThings <|-- Fish
+  LivingThings <|-- Tree

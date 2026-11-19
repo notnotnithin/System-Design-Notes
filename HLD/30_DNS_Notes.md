@@ -32,10 +32,7 @@ Source: Typed Zoho note – https://notebook.zohopublic.in/public/notes/9wn9oa7b
 
 ### Parts of a domain name
 
-```mermaid
-flowchart LR
-    A["www<br/>Sub-domain"] --- B["conceptandcoding<br/>Second-level domain"] --- C[".com<br/>Top-level domain"] --- D[". <br/>Root"]
-```
+![Diagram](diagrams/30_DNS_Notes-01.png)
 
 - `www.conceptandcoding.com.` is the **FQDN (Fully Qualified Domain Name)**.
 - `conceptandcoding.com` is the **domain name**.
@@ -47,23 +44,7 @@ flowchart LR
 
 The browser wants to talk to `www.conceptandcoding.com`.
 
-```mermaid
-sequenceDiagram
-    participant C as DNS Client (Stub Resolver)
-    participant R as DNS Resolver
-    participant Root as Root Domain (.)
-    participant TLD as TLD (.com)
-    participant Auth as Authoritative server (GoDaddy)
-    C->>C: 1. Check local cache
-    C->>R: 2. No record in local cache, pass the DNS query to the resolver
-    R->>Root: 3. What's the IP of www.conceptandcoding.com?
-    Root-->>R: 4. I don't have an answer, check with the .com TLD, here is its IP
-    R->>TLD: 5. Do you have the IP of www.conceptandcoding.com?
-    TLD-->>R: 6. I don't have an answer, check with the GoDaddy authoritative server, here is its IP
-    R->>Auth: 7. Do you have the IP of www.conceptandcoding.com?
-    Auth-->>R: 8. Yes, it's 172.87.34.56
-    R-->>C: 9. Here is the IP address: 172.87.34.56
-```
+![Diagram](diagrams/30_DNS_Notes-02.png)
 
 Points on the page:
 - If we want to use Google's public DNS resolver, its IP is **8.8.8.8**.
@@ -75,24 +56,7 @@ Points on the page:
 
 ## 6. Iterative approach
 
-```mermaid
-sequenceDiagram
-    participant C as DNS Client
-    participant LC as Local Cache
-    participant R as DNS Resolver
-    participant Root as Root Domain
-    participant TLD as TLD Domain
-    participant Auth as Authoritative Domain
-    C->>LC: 1. Check local cache
-    C->>R: 2. IP of conceptandcoding.com?
-    R-->>C: 3. Returns root domain server IP
-    C->>Root: 4. IP of conceptandcoding.com?
-    Root-->>C: 5. Returns TLD domain server IPs
-    C->>TLD: 6. IP of conceptandcoding.com?
-    TLD-->>C: 7. Returns authoritative domain server IPs
-    C->>Auth: 8. IP of conceptandcoding.com?
-    Auth-->>C: 9. IP address is 172.35.23.89
-```
+![Diagram](diagrams/30_DNS_Notes-03.png)
 
 - The DNS resolver "looks in its cache; if not found, returns the address of the root domain".
 
@@ -152,11 +116,7 @@ When a user applies for a domain like `conceptandcoding.com`:
 1. **GoDaddy (the registrar)** communicates with the respective **TLD registry**.
 2. The **.com registry (maintained by Verisign)** receives the request plus the **name servers of GoDaddy** that will be used to resolve requests for `conceptandcoding.com`.
 
-```mermaid
-flowchart LR
-    U[User applies for conceptandcoding.com] --> G[GoDaddy - Registrar]
-    G -->|request + GoDaddy name servers| V[.com Registry - Verisign]
-```
+![Diagram](diagrams/30_DNS_Notes-04.png)
 
 **In simple words:** the registrar tells the .com registry "this domain is mine, and these are the name servers that answer for it". That is how the TLD later knows whom to point to.
 
@@ -170,22 +130,7 @@ Example names: `conceptandcoding.com`, `mail.conceptandcoding.com`, `blog.concep
 - **If there is no zone,** only **one authoritative server** holds the DNS records (record name, IP address, TTL, etc.) and answers queries for **all** the sub-domains.
 - **But we can distribute the load** by creating more authoritative domain servers, just as load is distributed between TLD servers `.com`, `.au`. Instead of putting load on one server, the traffic is distributed.
 
-```mermaid
-flowchart TB
-    subgraph Zone1["Zone1 – Ns03.authoritativeDomainserver.com"]
-        A[conceptandcoding.com]
-        M[mail.conceptandcoding.com]
-    end
-    subgraph Zone2["Zone2 – Ns04.authoritativeDomainserver.com"]
-        B[blog.conceptandcoding.com]
-        US[us.blog.conceptandcoding.com]
-        AU[au.blog.conceptandcoding.com]
-    end
-    A --> B
-    A --> M
-    B --> US
-    B --> AU
-```
+![Diagram](diagrams/30_DNS_Notes-05.png)
 
 **In simple words:** a zone is a slice of the domain tree handled by its own name server. Here `conceptandcoding.com` and `mail` are looked after by one server (Zone1), while `blog` and its `us` / `au` children are looked after by another (Zone2), so one server is not overloaded.
 

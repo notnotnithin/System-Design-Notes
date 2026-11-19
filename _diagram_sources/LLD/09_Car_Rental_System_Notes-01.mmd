@@ -1,0 +1,153 @@
+classDiagram
+  class Bill {
+    -int billId
+    -int reservationId
+    -double totalBillAmount
+  }
+  class BillManager {
+    -BillingStrategy billingStrategy
+    -Map~Integer,Bill~ bills
+    +generateBill() Bill
+  }
+  class BillingStrategy {
+    <<interface>>
+    +generateBill() Bill
+  }
+  class DailyBillingStrategy {
+    +VehicleInventoryManager vehicleInventoryManager
+    -AtomicInteger billIdGenerator
+    +generateBill() Bill
+  }
+  class Location {
+    +int buildingNo
+    +String area
+    +String city
+  }
+  class Store {
+    -int storeId
+    -Location storeLocation
+    -VehicleInventoryManager inventory
+    +createReservation() Reservation
+    +cancelReservation() void
+    +startTrip() void
+  }
+  class User {
+    +int userId
+    +String userName
+    +String drivingLicenseNo
+  }
+  class VehicleRentalSystem {
+    +List~Store~ storeList
+    +List~User~ userList
+    +addStore() void
+    +addUser() void
+    +removeStore() void
+  }
+  class Payment {
+    -int paymentId
+    -int billId
+    -double amountPaid
+  }
+  class PaymentManager {
+    -PaymentStrategy paymentStrategy
+    -Map~Integer,Payment~ payments
+    +makePayment() Payment
+  }
+  class PaymentMode {
+    <<enumeration>>
+    CASH
+    ONLINE
+    UPI
+  }
+  class PaymentStrategy {
+    <<interface>>
+    +processPayment() Payment
+  }
+  class UPIPaymentStrategy {
+    -AtomicInteger paymentIdGenerator
+    +processPayment() Payment
+  }
+  class DateInterval {
+    -LocalDate from
+    -LocalDate to
+    +overlaps() boolean
+  }
+  class Vehicle {
+    -int vehicleID
+    -String vehicleNumber
+    -VehicleType vehicleType
+  }
+  class VehicleInventoryManager {
+    -ConcurrentMap~Integer,Vehicle~ vehicles
+    -ConcurrentMap~Integer,List~ vehicleBookingIds
+    -ConcurrentMap~Integer,ReentrantLock~ vehicleLocks
+    +addVehicle() void
+    +reserve() boolean
+    +release() void
+  }
+  class VehicleStatus {
+    <<enumeration>>
+    AVAILABLE
+    BOOKED
+    MAINTENANCE
+  }
+  class VehicleType {
+    <<enumeration>>
+    FOUR_WHEELER
+    TWO_WHEELER
+  }
+  class Reservation {
+    -int reservationId
+    -int vehicleId
+    -int userId
+  }
+  class ReservationManager {
+    -VehicleInventoryManager inventory
+    -ReservationRepository reservationRepository
+    -AtomicInteger reservationIdGenerator
+    +findByID() Optional~Reservation~
+    +createReservation() Reservation
+    +cancelReservation() void
+  }
+  class ReservationRepository {
+    -Map~Integer,Reservation~ reservations
+    +save() void
+    +findById() Optional~Reservation~
+    +remove() void
+  }
+  class ReservationStatus {
+    <<enumeration>>
+    SCHEDULED
+    IN_USE
+    COMPLETED
+    CANCELLED
+  }
+  class ReservationType {
+    <<enumeration>>
+    HOURLY
+    DAILY
+  }
+  BillManager --> "*" Bill
+  BillManager --> BillingStrategy
+  BillingStrategy <|.. DailyBillingStrategy
+  DailyBillingStrategy --> VehicleInventoryManager
+  Payment --> PaymentMode
+  PaymentManager --> "*" Payment
+  PaymentManager --> PaymentStrategy
+  PaymentStrategy <|.. UPIPaymentStrategy
+  Reservation --> ReservationStatus
+  Reservation --> ReservationType
+  ReservationManager --> ReservationRepository
+  ReservationManager --> VehicleInventoryManager
+  ReservationRepository --> "*" Reservation
+  Store --> BillManager
+  Store --> Location
+  Store --> PaymentManager
+  Store --> ReservationManager
+  Store --> VehicleInventoryManager
+  Vehicle --> VehicleStatus
+  Vehicle --> VehicleType
+  VehicleInventoryManager --> ReservationRepository
+  VehicleInventoryManager --> "*" Vehicle
+  VehicleRentalSystem --> "*" Store
+  VehicleRentalSystem --> "*" User

@@ -12,11 +12,7 @@
 
 ### How the layers fit together (outer to inner)
 
-```mermaid
-graph LR
-  N1["Set-up: IPv4"] --> N2["UDP 500 / 4500"] --> N3["IKEv2: IKE_SA_INIT, IKE_AUTH"]
-  N4["Data: IPv4"] --> N5["UDP 4500 (NAT-T)"] --> N6["ESP: SPI, sequence, encrypted inner packet, ICV"]
-```
+![Diagram](diagrams/38-ipsec-01.png)
 
 ## In-depth explanation of the example (plain-language version)
 
@@ -140,20 +136,7 @@ Four IKE messages agreed on the methods, found the router, proved both identitie
 
 ### Sequence diagram
 
-```mermaid
-sequenceDiagram
-  participant P0 as Laptop 192.168.1.10
-  participant P1 as VPN gateway 192.0.2.51
-  participant P2 as Web server 203.0.113.10
-  P0->>P1: 1. ISAKMP: IKE_SA_INIT MID=00 Initiator Request
-  P1->>P0: 2. ISAKMP: IKE_SA_INIT MID=00 Responder Response
-  P0->>P1: 3. ISAKMP: IKE_AUTH MID=01 Initiator Request
-  P1->>P0: 4. ISAKMP: IKE_AUTH MID=01 Responder Response
-  P0->>P1: 5. ESP: ESP (SPI=0xc5a1e7d2)
-  P1->>P2: 6. TCP: 52344 → 443 [SYN] Seq=0
-  P2->>P1: 7. TCP: 443 → 52344 [SYN, ACK] Seq=0 Ack=1
-  P1->>P0: 8. ESP: ESP (SPI=0x8b3f6a11)
-```
+![Diagram](diagrams/38-ipsec-02.png)
 
 *The lesson's own sequence diagram:*
 

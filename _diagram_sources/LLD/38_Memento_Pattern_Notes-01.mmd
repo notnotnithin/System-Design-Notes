@@ -1,0 +1,21 @@
+classDiagram
+  class ApplicationConfiguration {
+    -String theme
+    -int fontSize
+    -boolean notificationsEnabled
+    -String language
+    +save() ConfigurationMemento
+    +restore() void
+  }
+  class ConfigurationManager {
+    -Stack~ConfigurationMemento~ history
+    +saveState() void
+    +undo() void
+  }
+  class ConfigurationMemento {
+    -String theme
+    -int fontSize
+    -boolean notificationsEnabled
+    -String language
+  }
+  ConfigurationManager --> ConfigurationMemento

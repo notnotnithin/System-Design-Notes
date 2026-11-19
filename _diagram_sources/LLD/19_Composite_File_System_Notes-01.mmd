@@ -1,0 +1,19 @@
+classDiagram
+  class Directory {
+    +String directoryName
+    +List~FileSystemComponent~ children
+    +add() void
+    +remove() void
+    +printContents() void
+  }
+  class File {
+    +String fileName
+    +printContents() void
+  }
+  class FileSystemComponent {
+    <<interface>>
+    +printContents() void
+  }
+  Directory --> "*" FileSystemComponent
+  FileSystemComponent <|.. Directory
+  FileSystemComponent <|.. File

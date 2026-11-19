@@ -1,0 +1,4 @@
+graph LR
+  O["Order"] --> S1[("S1 DB: local Txn ACID")]
+  S1 -->|"touch"| S2[("S2 DB: local Txn ACID")]
+  S2 --> S3[("S3 DB: local Txn ACID")]

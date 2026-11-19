@@ -32,125 +32,13 @@ A building has **several elevators and several floors**. People press Up or Down
 
 **Diagram – Elevator system**
 
-```mermaid
-classDiagram
-  class Building {
-    +List~Floor~ floors
-  }
-  class Door {
-    -DoorState doorState
-    +openDoor() void
-    +closeDoor() void
-  }
-  class ElevatorCar {
-    +int id
-    +int currentFloor
-    +int nextFloorStoppage
-    +showDisplay() void
-    +moveElevator() void
-  }
-  class ElevatorController {
-    +PriorityBlockingQueue~Integer~ upMinPQ
-    +PriorityBlockingQueue~Integer~ downMaxPQ
-    +ElevatorCar elevatorCar
-    +submitRequest() void
-    +run() void
-    +controlElevator() void
-  }
-  class ElevatorScheduler {
-    -List~ElevatorController~ controllers
-    -ElevatorSelectionStrategy strategy
-    +assignElevator() ElevatorController
-  }
-  class ElevatorSelectionStrategy {
-    <<interface>>
-    +selectElevator() ElevatorController
-  }
-  class ExternalButton {
-    -ExternalDispatcher dispatcher
-    +pressButton() void
-  }
-  class ExternalDispatcher {
-    +ElevatorScheduler scheduler
-    +submitExternalRequest() void
-  }
-  class Floor {
-    +int floorNumber
-    +ExternalButton upButton
-    +ExternalButton downButton
-    +pressUpButton() void
-    +pressDownButton() void
-  }
-  class InternalButton {
-    -ElevatorController controller
-    +pressButton() void
-  }
-  class InternalDispatcher {
-    -InternalDispatcher INSTANCE
-    +submitInternalRequest() void
-  }
-  class LeastBusyStrategy {
-    +selectElevator() ElevatorController
-  }
-  class NearestElevatorStrategy {
-    +selectElevator() ElevatorController
-  }
-  class DoorState {
-    <<enumeration>>
-    DOOR_OPEN
-    DOOR_CLOSED
-  }
-  class ElevatorDirection {
-    <<enumeration>>
-    UP
-    DOWN
-    IDLE
-    +DOWN, IDLE
-  }
-  Building --> "*" Floor
-  Door --> DoorState
-  ElevatorCar --> Door
-  ElevatorCar --> ElevatorDirection
-  ElevatorController --> ElevatorCar
-  ElevatorScheduler --> "*" ElevatorController
-  ElevatorScheduler --> ElevatorSelectionStrategy
-  ElevatorSelectionStrategy <|.. LeastBusyStrategy
-  ElevatorSelectionStrategy <|.. NearestElevatorStrategy
-  ExternalButton --> ExternalDispatcher
-  ExternalDispatcher --> ElevatorScheduler
-  Floor --> ExternalButton
-  InternalButton --> ElevatorController
-```
+![Diagram](diagrams/08_Elevator_System_Notes-01.png)
 
 ## Step 3 – The two requests
 
-```mermaid
-sequenceDiagram
-  participant P as Person on floor 5
-  participant B as ExternalButton
-  participant D as ExternalDispatcher
-  participant S as ElevatorScheduler
-  participant ST as SelectionStrategy
-  participant C as ElevatorController (chosen)
-  P->>B: pressButton(5, UP)
-  B->>D: submitExternalRequest(5, UP)
-  D->>S: assignElevator(5, UP)
-  S->>ST: selectElevator(controllers, 5, UP)
-  ST-->>S: controller of elevator 2
-  S->>C: submitRequest(5)
-  C->>C: add floor 5 to its queue, wake up the elevator thread
-```
+![Diagram](diagrams/08_Elevator_System_Notes-02.png)
 
-```mermaid
-sequenceDiagram
-  participant P as Person inside elevator 2
-  participant IB as InternalButton
-  participant ID as InternalDispatcher
-  participant C as ElevatorController (elevator 2)
-  P->>IB: pressButton(9)
-  IB->>ID: submitInternalRequest(9, controller)
-  ID->>C: submitRequest(9)
-```
+![Diagram](diagrams/08_Elevator_System_Notes-03.png)
 
 ## Step 4 – Selection strategy
 When an external button is pressed we only know the **floor** and the **direction**. A strategy chooses a lift:
@@ -168,23 +56,9 @@ The related disk-scheduling ideas:
 - **SCAN:** go all the way to one end (the top floor) even with no request, then reverse.
 - **LOOK:** like SCAN, but **turn around as soon as there is no request further ahead**. This is the one used here.
 
-```mermaid
-flowchart TD
-  A["Controller thread starts"] --> B{"Both queues empty?"}
-  B -->|"yes"| S["direction = IDLE, wait() until a request arrives"] --> B
-  B -->|"no"| U["While upMinPQ not empty: poll the lowest floor, move there"]
-  U --> D["While downMaxPQ not empty: poll the highest floor, move there"]
-  D --> B
-```
+![Diagram](diagrams/08_Elevator_System_Notes-04.png)
 
-```mermaid
-graph LR
-  R["New request for floor f"] --> Q{"f is above the next stop?"}
-  Q -->|"yes"| UP["put in upMinPQ (min-heap)"]
-  Q -->|"no"| DOWN["put in downMaxPQ (max-heap)"]
-  UP --> W["notify(): wake the elevator thread"]
-  DOWN --> W
-```
+![Diagram](diagrams/08_Elevator_System_Notes-05.png)
 
 *Requests go to the right queue, and the sleeping lift is woken*
 

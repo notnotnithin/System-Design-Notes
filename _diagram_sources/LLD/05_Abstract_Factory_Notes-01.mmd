@@ -1,0 +1,51 @@
+classDiagram
+  class CarExterior {
+    <<interface>>
+    +addExteriorComponents() void
+  }
+  class CarFactory {
+    <<interface>>
+    +createInterior() CarInterior
+    +createExterior() CarExterior
+    +produceCompleteVehicle() void
+  }
+  class CarType {
+    <<enumeration>>
+    ECONOMY
+    LUXURY
+    PREMIUM
+  }
+  class CarFactoryProvider {
+  }
+  class CarInterior {
+    <<interface>>
+    +addInteriorComponents() void
+  }
+  class EconomyCarExterior {
+    +addExteriorComponents() void
+  }
+  class EconomyCarFactory {
+    -String brand
+    +createInterior() CarInterior
+    +createExterior() CarExterior
+  }
+  class EconomyCarInterior {
+    +addInteriorComponents() void
+  }
+  class LuxuryCarExterior {
+    +addExteriorComponents() void
+  }
+  class LuxuryCarFactory {
+    -String brand
+    +createInterior() CarInterior
+    +createExterior() CarExterior
+  }
+  class LuxuryCarInterior {
+    +addInteriorComponents() void
+  }
+  CarExterior <|.. EconomyCarExterior
+  CarExterior <|.. LuxuryCarExterior
+  CarFactory <|.. EconomyCarFactory
+  CarFactory <|.. LuxuryCarFactory
+  CarInterior <|.. EconomyCarInterior
+  CarInterior <|.. LuxuryCarInterior

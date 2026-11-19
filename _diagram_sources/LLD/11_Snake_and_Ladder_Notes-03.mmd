@@ -1,0 +1,12 @@
+sequenceDiagram
+  participant G as Game
+  participant P as Player
+  participant D as Dice
+  participant B as Board
+  G->>P: next turn
+  G->>D: rollDice()
+  D-->>G: 4
+  G->>G: new position = 12 + 4 = 16
+  G->>B: cell 16 has a snake to 6?
+  B-->>G: yes, end = 6
+  G->>P: currentPosition = 6

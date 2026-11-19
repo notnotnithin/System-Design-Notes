@@ -1,0 +1,11 @@
+graph LR
+  subgraph H["Horizontal sharding: split by rows"]
+    direction TB
+    T1["Table T1: rows 1-200"] --> HS1["Shard 1: A to P"]
+    T1 --> HS2["Shard 2: Q to Z"]
+  end
+  subgraph V["Vertical sharding: split by columns"]
+    direction TB
+    T2["Table: columns C1-C10"] --> VS1["Table with C1-C5"]
+    T2 --> VS2["Table with C6-C10"]
+  end

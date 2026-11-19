@@ -1,0 +1,4 @@
+graph LR
+  S["Sender: plain text"] -->|"encrypt with the receiver's PUBLIC key"| CT["Cipher text"]
+  CT -->|"decrypt with the receiver's PRIVATE key"| R["Receiver: plain text"]
+  H["Hacker in the middle"] -. "cannot decrypt" .-> CT

@@ -1,0 +1,33 @@
+classDiagram
+  class Board {
+    +Cell[][] cells
+  }
+  class Cell {
+    +Jump jump
+  }
+  class Dice {
+    +int diceCount
+    +int min
+    +int max
+    +rollDice() int
+  }
+  class Game {
+    +Board board
+    +Dice dice
+    +Deque~Player~ playersList
+    +Player winner
+    +startGame() void
+  }
+  class Jump {
+    +int start
+    +int end
+  }
+  class Player {
+    +String id
+    +int currentPosition
+  }
+  Board --> "*" Cell
+  Cell --> Jump
+  Game --> Board
+  Game --> Dice
+  Game --> Player

@@ -1,0 +1,7 @@
+graph LR
+  subgraph L4["L4 network LB: IP and TCP/UDP port, fast"]
+    R4["Request"] --> B4["LB looks at IP and port only"] --> S4["Server"]
+  end
+  subgraph L7["L7 application LB: header, cookie, data, caching"]
+    R7["Request"] --> B7["LB reads headers, session, cookies"] --> S7["Server chosen by content"]
+  end

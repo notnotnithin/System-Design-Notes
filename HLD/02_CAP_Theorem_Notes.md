@@ -41,12 +41,7 @@ The key rule is that **we cannot use all three together, we can only use two of 
 <!-- diagram:02-0 -->
 **Diagram – Three nodes with replicated data**
 
-```mermaid
-graph TD
-  A["Application A"] -->|"write a = 5"| B["DB node B (India)<br/>a: 4 to 5"]
-  A -->|"read query"| C["DB node C (US)<br/>a = 5 after replication"]
-  B <-->|"replication"| C
-```
+![Diagram](diagrams/02_CAP_Theorem_Notes-01.png)
 <!-- /diagram:02-0 -->
 
 
@@ -118,13 +113,7 @@ Take node B holding `a = 4`. The application writes the update `a = 5` to B. B c
 <!-- diagram:02-1 -->
 **Diagram – The system keeps working when the B–C link breaks**
 
-```mermaid
-graph TD
-  U["User / Application"] --> SYS
-  subgraph SYS["The system (hidden from the user)"]
-    B["Node B"] -. "link broken" .- C["Node C"]
-  end
-```
+![Diagram](diagrams/02_CAP_Theorem_Notes-02.png)
 <!-- /diagram:02-1 -->
 
 
@@ -151,14 +140,7 @@ So if B and C cannot talk to each other, the application can **still send its qu
 <!-- diagram:02-2 -->
 **Diagram – The CAP triangle: pick any two**
 
-```mermaid
-graph TD
-  C(("C<br/>Consistency")) ---|"CA"| A(("A<br/>Availability"))
-  A ---|"AP"| P(("P<br/>Partition tolerance"))
-  P ---|"CP"| C
-  X["All three together: not possible"]:::no
-  classDef no fill:#fecaca,stroke:#b91c1c,color:#000
-```
+![Diagram](diagrams/02_CAP_Theorem_Notes-03.png)
 <!-- /diagram:02-2 -->
 
 
@@ -183,15 +165,7 @@ The table says that **CA, CP and AP are each possible**, but **all three togethe
 <!-- diagram:02-3 -->
 **Diagram – During a partition C must choose: stale answer or no answer**
 
-```mermaid
-graph TD
-  W["Application writes a = 6"] --> B["Node B: a = 6"]
-  B -. "partition: replication blocked" .- C["Node C: still a = 5"]
-  Q["Read query"] --> C
-  C -->|"answers a = 5"| S["Stale data: Consistency is broken"]:::bad
-  C -->|"refuses to answer"| N["No response: Availability is broken"]:::bad
-  classDef bad fill:#fecaca,stroke:#b91c1c,color:#000
-```
+![Diagram](diagrams/02_CAP_Theorem_Notes-04.png)
 <!-- /diagram:02-3 -->
 
 

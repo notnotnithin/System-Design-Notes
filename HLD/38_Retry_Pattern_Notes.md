@@ -13,20 +13,7 @@ Source: https://drive.google.com/file/d/1F4e2EwjCfi11-q7RdujOqiPgt7oCbO7B/view?u
 <!-- diagram:38-0 -->
 **Diagram – Retry only the failed downstream call**
 
-```mermaid
-sequenceDiagram
-  participant C as Client
-  participant O as Order service
-  participant P as Product service
-  C->>O: request
-  O->>O: 90% of the work done
-  O->>P: call
-  P-->>O: transient failure (5xx / timeout)
-  Note over O: wait, then retry (no need to redo the 90%)
-  O->>P: retry
-  P-->>O: success
-  O-->>C: response
-```
+![Diagram](diagrams/38_Retry_Pattern_Notes-01.png)
 <!-- /diagram:38-0 -->
 
 
@@ -63,17 +50,7 @@ In a distributed system a call to a downstream service can fail because of **tra
 <!-- diagram:38-1 -->
 **Diagram – Should I retry?**
 
-```mermaid
-graph TD
-  E["Call failed"] --> Q1{"4xx client error?"}
-  Q1 -->|"yes"| N["Do not retry"]
-  Q1 -->|"no"| Q2{"5xx or 429?"}
-  Q2 -->|"yes"| Y["Retry (429: with a delay)"]
-  Q2 -->|"no"| Q3{"network error or timeout?"}
-  Q3 -->|"yes"| Q4{"endpoint idempotent?"}
-  Q4 -->|"yes"| Y
-  Q4 -->|"no"| N
-```
+![Diagram](diagrams/38_Retry_Pattern_Notes-02.png)
 <!-- /diagram:38-1 -->
 
 
@@ -117,10 +94,7 @@ The table: **200** success → no; **400** client error → no; **401** authenti
 <!-- diagram:38-2 -->
 **Diagram – Fixed interval: 2 s every time**
 
-```mermaid
-graph LR
-  A["original call"] --> W1["wait 2 s"] --> R1["retry 1"] --> W2["wait 2 s"] --> R2["retry 2"] --> W3["wait 2 s"] --> R3["retry 3"]
-```
+![Diagram](diagrams/38_Retry_Pattern_Notes-03.png)
 <!-- /diagram:38-2 -->
 
 
@@ -207,10 +181,7 @@ Retry after a **constant delay.** Example: total attempts = 4 (the original + 3 
 <!-- diagram:38-3 -->
 **Diagram – Exponential backoff: base x 2^n**
 
-```mermaid
-graph LR
-  A["original call"] --> W1["wait 100 ms"] --> R1["retry 1"] --> W2["wait 200 ms"] --> R2["retry 2"] --> W3["wait 400 ms"] --> R3["retry 3"]
-```
+![Diagram](diagrams/38_Retry_Pattern_Notes-04.png)
 <!-- /diagram:38-3 -->
 
 
@@ -261,10 +232,7 @@ The code is the same, only the config changes: `maxAttempts=4`, `waitDuration=1s
 <!-- diagram:38-4 -->
 **Diagram – Backoff with jitter: random wait up to the limit**
 
-```mermaid
-graph LR
-  A["original call"] --> W1["wait random(0, 100 ms)"] --> R1["retry 1"] --> W2["wait random(0, 200 ms)"] --> R2["retry 2"] --> W3["wait random(0, 400 ms)"] --> R3["retry 3"]
-```
+![Diagram](diagrams/38_Retry_Pattern_Notes-05.png)
 <!-- /diagram:38-4 -->
 
 

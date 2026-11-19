@@ -1,0 +1,13 @@
+sequenceDiagram
+  participant P0 as ::
+  participant P1 as ff02::1:ffb0:7c13
+  participant P2 as fe80::8d2e:4f61:a9b0:7c13
+  participant P3 as ff02::2
+  participant P4 as fe80::1
+  participant P5 as ff02::1
+  P0->>P1: 1. ICMPv6: Neighbor Solicitation for fe80::8d2e:4f61:a9b0:7c13
+  P2->>P3: 2. ICMPv6: Router Solicitation from 00:00:5e:00:53:10
+  P4->>P5: 3. ICMPv6: Router Advertisement from 00:00:5e:00:53:01
+  P0->>P1: 4. ICMPv6: Neighbor Solicitation for 2001:db8:1234:5678:8d2e:4f61:a9b0:7c13
+  P4->>P1: 5. ICMPv6: Neighbor Solicitation for 2001:db8:1234:5678:8d2e:4f61:a9b0:7c13...
+  P2->>P4: 6. ICMPv6: Neighbor Advertisement 2001:db8:1234:5678:8d2e:4f61:a9b0:7c13 (s...

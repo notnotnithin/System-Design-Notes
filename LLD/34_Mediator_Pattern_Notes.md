@@ -22,71 +22,13 @@ In an auction, every bidder would have to know every other bidder to announce ne
 
 **Diagram – Auction house**
 
-```mermaid
-classDiagram
-  class AuctionHouse {
-    -List~IColleague~ bidders
-    -String itemName
-    -double currentHighestBid
-    -IColleague currentHighestBidder
-    +registerBidder() void
-    +placeBid() void
-    +closeAuction() void
-  }
-  class AuctionMediator {
-    <<interface>>
-    +registerBidder() void
-    +placeBid() void
-    +closeAuction() void
-  }
-  class Bidder {
-    +String name
-    +AuctionMediator mediator
-    +placeBid() void
-    +receiveBidNotification() void
-  }
-  class IColleague {
-    <<interface>>
-    +placeBid() void
-    +receiveBidNotification() void
-    +getName() String
-  }
-  AuctionHouse --> IColleague
-  AuctionHouse --> "*" IColleague
-  AuctionMediator <|.. AuctionHouse
-  Bidder --> AuctionMediator
-  IColleague <|.. Bidder
-```
+![Diagram](diagrams/34_Mediator_Pattern_Notes-01.png)
 
 **Diagram – a new bid**
 
-```mermaid
-sequenceDiagram
-  participant A as Bidder Alice
-  participant H as AuctionHouse (mediator)
-  participant B as Bidder Bob
-  participant C as Bidder Carol
-  A->>H: placeBid(500)
-  H->>H: 500 is higher than the current highest bid
-  H->>B: receiveBidNotification(500)
-  H->>C: receiveBidNotification(500)
-  B->>H: placeBid(450)
-  H->>H: too low, nobody is notified
-```
+![Diagram](diagrams/34_Mediator_Pattern_Notes-02.png)
 
-```mermaid
-graph LR
-  subgraph W["Without a mediator: n x n links"]
-    a1["A"] --- b1["B"]
-    a1 --- c1["C"]
-    b1 --- c1
-  end
-  subgraph M["With a mediator: n links"]
-    a2["A"] --- m["Mediator"]
-    b2["B"] --- m
-    c2["C"] --- m
-  end
-```
+![Diagram](diagrams/34_Mediator_Pattern_Notes-03.png)
 
 *The mediator applies the rules and notifies*
 

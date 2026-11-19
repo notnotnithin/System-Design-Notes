@@ -1,0 +1,15 @@
+sequenceDiagram
+  participant P0 as Router / AP 00:00:5e:00:53:01
+  participant P1 as Broadcast
+  participant P2 as Laptop 00:00:5e:00:53:10
+  P0->>P1: 1. 802.11: Beacon, SSID "HomeNet"
+  P2->>P0: 2. 802.11: Authentication (SAE), Commit
+  P0->>P2: 3. 802.11: Authentication (SAE), Commit
+  P2->>P0: 4. 802.11: Authentication (SAE), Confirm
+  P0->>P2: 5. 802.11: Authentication (SAE), Confirm
+  P2->>P0: 6. 802.11: Association Request, SSID "HomeNet"
+  P0->>P2: 7. 802.11: Association Response, AID 1
+  P0->>P2: 8. EAPOL: Key (Message 1 of 4)
+  P2->>P0: 9. EAPOL: Key (Message 2 of 4)
+  P0->>P2: 10. EAPOL: Key (Message 3 of 4)
+  P2->>P0: 11. EAPOL: Key (Message 4 of 4)

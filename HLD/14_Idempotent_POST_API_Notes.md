@@ -51,19 +51,7 @@ Example operation: **adding an item into a cart** – `POST` followed by a dupli
 <!-- diagram:14-0 -->
 **Diagram – Sequential and parallel duplicates**
 
-```mermaid
-sequenceDiagram
-  participant C as Client
-  participant S as Server
-  Note over C,S: Sequential: timeout then retry
-  C->>S: POST add item
-  S-->>C: no response (timeout)
-  C->>S: POST add item (duplicate)
-  Note over C,S: Parallel: both arrive together
-  C->>S: POST add item (original)
-  C->>S: POST add item (duplicate)
-  Note over S: only one of them may be processed
-```
+![Diagram](diagrams/14_Idempotent_POST_API_Notes-01.png)
 <!-- /diagram:14-0 -->
 
 
@@ -95,17 +83,7 @@ Use an **Idempotency Key** – a **unique UUID**, appended/associated with the o
 <!-- diagram:14-1 -->
 **Diagram – Idempotency key flow**
 
-```mermaid
-graph TD
-  C["Client generates idempotency key IK1 and sets it in the request header"] --> V{"IK present in request?"}
-  V -->|"no"| E400["HTTP 400 validation error"]
-  V -->|"yes"| DB{"IK present in DB?"}
-  DB -->|"no"| INS["Insert IK1 with status Created, do the operation"]
-  INS --> OK["Mark IK1 Consumed, return HTTP 201"]
-  DB -->|"yes"| ST{"Status?"}
-  ST -->|"Created: still processing"| E409["HTTP 409 conflict"]
-  ST -->|"Consumed: already done"| E200["HTTP 200 with earlier result"]
-```
+![Diagram](diagrams/14_Idempotent_POST_API_Notes-02.png)
 <!-- /diagram:14-1 -->
 
 
@@ -144,19 +122,7 @@ The DB table is `| Key | Status |`, for example `IK1 | Created → Consumed`. *(
 <!-- diagram:14-2 -->
 **Diagram – Parallel duplicates: only one request wins**
 
-```mermaid
-sequenceDiagram
-  participant C as Client
-  participant S as Server
-  participant D as DB
-  C->>S: POST with IK1 (request 1)
-  C->>S: POST with IK1 (request 2)
-  S->>D: check and insert IK1 atomically (mutex or unique key)
-  D-->>S: request 1 wins: inserted as Created
-  D-->>S: request 2: key already present
-  S-->>C: request 1 processed, HTTP 201
-  S-->>C: request 2 gets 409 or 200, never processed twice
-```
+![Diagram](diagrams/14_Idempotent_POST_API_Notes-03.png)
 <!-- /diagram:14-2 -->
 
 

@@ -1,0 +1,11 @@
+sequenceDiagram
+  participant C as Client
+  participant M as MyHashMap
+  participant B as bucket chain
+  C->>M: get(8)
+  M->>M: index = 8 % 8 = 0
+  M->>B: start at the first Entry of bucket 0
+  loop while entry is not null
+    B->>B: key equals 8?
+  end
+  B-->>C: value "you" (or null if not found)

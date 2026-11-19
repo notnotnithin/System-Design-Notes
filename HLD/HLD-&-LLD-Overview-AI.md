@@ -28,12 +28,7 @@ hovernotes-id: doc_c821c11d-66ec-4e61-952d-bc10a13d00c2
 ![Low Level Design Roadmap overview](hover-notes-images/screenshot-01M7HVJSHF3CFNEXB6YSNVBRFY.png)
 [00:00:42](https://www.youtube.com/watch?v=rliSgjoOFTs&list=PL6W8uoQQ2c63W58rpNFDwdrBnq5G3EfT7&index=1&t=42s)
 
-```mermaid
-flowchart TD
-    A[OOP Fundamentals] --> B[SOLID Principles]
-    B --> C[Design Patterns]
-    C --> D[Interview Questions & Case Studies]
-```
+![Diagram](diagrams/HLD-_-LLD-Overview-AI-01.png)
 
 ### Teaching Methodology and Interview Preparation
 

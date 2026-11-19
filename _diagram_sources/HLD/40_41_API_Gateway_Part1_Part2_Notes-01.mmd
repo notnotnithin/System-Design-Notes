@@ -1,0 +1,5 @@
+graph LR
+  C["Client"] --> G["API gateway: routing, load balancing, auth, rate limit, resilience, transformation, monitoring"]
+  G -->|"/api/invoice"| I["Invoice MS"]
+  G -->|"/api/order"| O["Order MS"]
+  G -->|"/api/sales"| S["Sales MS"]

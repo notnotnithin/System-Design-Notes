@@ -1,0 +1,9 @@
+sequenceDiagram
+  participant T1 as Thread 1
+  participant T2 as Thread 2
+  participant S as Singleton
+  T1->>S: getInstance(): instance is null
+  T1->>S: lock, check again, create the object
+  T2->>S: getInstance(): waits on the lock
+  S-->>T1: the instance
+  S-->>T2: the same instance (second check finds it)

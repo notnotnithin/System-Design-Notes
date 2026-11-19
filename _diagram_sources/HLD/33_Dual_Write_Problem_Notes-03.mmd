@@ -1,0 +1,5 @@
+graph TB
+  A["User service: write only the event"] --> EV[("Event table")]
+  EV --> PO["Poller"] --> MB[["Message broker"]]
+  MB --> C["Other consumers"]
+  MB --> D["User service daemon: consumes its own event"] --> UT[("User table")]

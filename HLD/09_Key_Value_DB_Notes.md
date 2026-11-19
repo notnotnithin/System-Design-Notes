@@ -23,15 +23,7 @@ The lecture designs a key-value database like **DynamoDB**, which Amazon uses fo
 <!-- diagram:09-0 -->
 **Diagram – Partitioning with a ring and virtual nodes**
 
-```mermaid
-graph LR
-  K["Key"] --> H["hash(key)"] --> R(("Ring"))
-  R --> S1["S1: keys 1-50"]
-  R --> S2["S2: keys 51-100"]
-  R --> S3["S3: next range"]
-  R --> S4["S4: next range"]
-  R -.- V["each server appears at several ring points: virtual nodes"]
-```
+![Diagram](diagrams/09_Key_Value_DB_Notes-01.png)
 <!-- /diagram:09-0 -->
 
 
@@ -49,12 +41,7 @@ A simple map (person → cart list) **does not scale**: as users grow we cannot 
 <!-- diagram:09-1 -->
 **Diagram – Replication: coordinator and backups (preference list)**
 
-```mermaid
-graph LR
-  P["Put CAR-45"] --> S1["S1: coordinator"]
-  S1 -->|"async replicate"| S2["S2: backup"]
-  S1 -->|"async replicate"| S3["S3: backup"]
-```
+![Diagram](diagrams/09_Key_Value_DB_Notes-02.png)
 <!-- /diagram:09-1 -->
 
 
@@ -72,23 +59,7 @@ To avoid a single point of failure, the data is copied. In the example the key *
 <!-- diagram:09-2 -->
 **Diagram – Quorum: R + W > N**
 
-```mermaid
-sequenceDiagram
-  participant C as Client
-  participant LB as Load balancer
-  participant S1 as S1 coordinator
-  participant S2 as S2
-  participant S3 as S3
-  C->>LB: Put(CAR-45)
-  LB->>S1: route to coordinator
-  S1->>S2: replicate
-  S1->>S3: replicate
-  S2-->>S1: ack
-  S3-->>S1: ack
-  Note over S1: success once W replicas acknowledge
-  S1-->>C: done
-  Note over C,S3: Get is successful once R replicas respond. R + W > N
-```
+![Diagram](diagrams/09_Key_Value_DB_Notes-03.png)
 <!-- /diagram:09-2 -->
 
 
@@ -112,15 +83,7 @@ sequenceDiagram
 <!-- diagram:09-3 -->
 **Diagram – Versions with vector clocks**
 
-```mermaid
-graph TD
-  V1["v1: 45-CAR (1) on S1, S2, S3"] --> V2["v2: 45-CART (2) on S1, S2, S3"]
-  V2 --> V3["v3: 45-CARM (3) on S2, S3 while S1 is down"]
-  V2 --> V4["v4: 45-CARR (4) written concurrently on S3"]
-  V3 --> G["Get: coordinator sees conflicting versions"]
-  V4 --> G
-  G --> R["client or app resolves using the vector clocks"]
-```
+![Diagram](diagrams/09_Key_Value_DB_Notes-04.png)
 <!-- /diagram:09-3 -->
 
 

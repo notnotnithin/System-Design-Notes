@@ -65,21 +65,7 @@ With 100 rows split **by name range** (A–P to DB1 with 50 rows, Q–Z to DB2 w
 <!-- diagram:06-0 -->
 **Diagram – Mod hashing: adding a node moves almost every key**
 
-```mermaid
-graph LR
-  subgraph B["Before: f(key) % 3"]
-    direction TB
-    K1["Himanshu"] --> N1["N1"]
-    K2["Rahul"] --> N2["N2"]
-    K3["Shivam"] --> N3["N3"]
-  end
-  subgraph A["After adding N4: f(key) % 4"]
-    direction TB
-    K4["Himanshu"] --> M2["N2 (moved)"]
-    K5["Rahul"] --> M3["N3 (moved)"]
-    K6["Shivam"] --> M1["N1 (moved)"]
-  end
-```
+![Diagram](diagrams/06_Consistent_Hashing_Notes-01.png)
 <!-- /diagram:06-0 -->
 
 
@@ -118,24 +104,7 @@ The notes define the goal: in consistent hashing, **rebalancing happens when nod
 <!-- diagram:06-1 -->
 **Diagram – Ring with 12 slots (clockwise): keys go to the next server**
 
-```mermaid
-graph LR
-  n0(("0"))
-  n1(("1<br/>K1")):::key
-  n2(("2<br/>K2")):::key
-  n3(("3<br/>S1")):::srv
-  n4(("4<br/>K7")):::key
-  n5(("5"))
-  n6(("6<br/>K5")):::key
-  n7(("7<br/>S2")):::srv
-  n8(("8<br/>K6")):::key
-  n9(("9<br/>K3")):::key
-  n10(("10<br/>K4")):::key
-  n11(("11<br/>S3")):::srv
-  n0 --> n1 --> n2 --> n3 --> n4 --> n5 --> n6 --> n7 --> n8 --> n9 --> n10 --> n11 --> n0
-  classDef srv fill:#fde68a,stroke:#b45309,color:#000
-  classDef key fill:#dbeafe,stroke:#1d4ed8,color:#000
-```
+![Diagram](diagrams/06_Consistent_Hashing_Notes-02.png)
 <!-- /diagram:06-1 -->
 
 
@@ -166,24 +135,7 @@ The notes take a **virtual ring** with slots **0 to 11 (mod 12)**, read **clockw
 <!-- diagram:06-2 -->
 **Diagram – After adding S4 at slot 5 only K7 moves (S2 to S4)**
 
-```mermaid
-graph LR
-  n0(("0"))
-  n1(("1<br/>K1")):::key
-  n2(("2<br/>K2")):::key
-  n3(("3<br/>S1")):::srv
-  n4(("4<br/>K7")):::key
-  n5(("5<br/>S4")):::srv
-  n6(("6<br/>K5")):::key
-  n7(("7<br/>S2")):::srv
-  n8(("8<br/>K6")):::key
-  n9(("9<br/>K3")):::key
-  n10(("10<br/>K4")):::key
-  n11(("11<br/>S3")):::srv
-  n0 --> n1 --> n2 --> n3 --> n4 --> n5 --> n6 --> n7 --> n8 --> n9 --> n10 --> n11 --> n0
-  classDef srv fill:#fde68a,stroke:#b45309,color:#000
-  classDef key fill:#dbeafe,stroke:#1d4ed8,color:#000
-```
+![Diagram](diagrams/06_Consistent_Hashing_Notes-03.png)
 <!-- /diagram:06-2 -->
 
 
@@ -207,24 +159,7 @@ Now **S4 is added at slot 5.** Key K7 (slot 4) now finds S4 first, so only K7 mo
 <!-- diagram:06-3 -->
 **Diagram – Skewed servers: S1 takes almost all keys**
 
-```mermaid
-graph LR
-  n0(("0"))
-  n1(("1"))
-  n2(("2<br/>S1")):::srv
-  n3(("3<br/>S2")):::srv
-  n4(("4<br/>S3")):::srv
-  n5(("5<br/>K1")):::key
-  n6(("6<br/>K2")):::key
-  n7(("7<br/>K3")):::key
-  n8(("8<br/>K4")):::key
-  n9(("9<br/>K5")):::key
-  n10(("10<br/>K6")):::key
-  n11(("11"))
-  n0 --> n1 --> n2 --> n3 --> n4 --> n5 --> n6 --> n7 --> n8 --> n9 --> n10 --> n11 --> n0
-  classDef srv fill:#fde68a,stroke:#b45309,color:#000
-  classDef key fill:#dbeafe,stroke:#1d4ed8,color:#000
-```
+![Diagram](diagrams/06_Consistent_Hashing_Notes-04.png)
 <!-- /diagram:06-3 -->
 
 
@@ -236,17 +171,7 @@ graph LR
 <!-- diagram:06-4 -->
 **Diagram – Virtual nodes spread each server over the ring**
 
-```mermaid
-graph LR
-  S1["Server S1"] --- a1["slot 2"]
-  S1 --- a2["slot 8"]
-  S1 --- a3["slot 11"]
-  S2["Server S2"] --- b1["slot 3"]
-  S2 --- b2["slot 6"]
-  S2 --- b3["slot 10"]
-  S3["Server S3"] --- c1["slot 4"]
-  S3 --- c2["slot 9"]
-```
+![Diagram](diagrams/06_Consistent_Hashing_Notes-05.png)
 <!-- /diagram:06-4 -->
 
 

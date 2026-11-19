@@ -1,0 +1,9 @@
+graph TD
+  L["Login"] --> M["User-server mapping service<br/>ZooKeeper: user to server"]
+  UA["User A"] <-->|"WebSocket"| C1["Chat server 1"]
+  UB["User B"] <-->|"WebSocket"| C2["Chat server 2"]
+  C1 -.->|"which server holds B?"| M
+  C1 --> C2
+  C1 --> DB[("NoSQL DB: Cassandra")]
+  C2 --> DB
+  C1 --> P["Presence service: online / last seen"]

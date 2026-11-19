@@ -1,0 +1,4 @@
+flowchart LR
+    UA_Sender["User Agent (Sender)"] -->|Sends message| MTA_Client["MTA Client"]
+    MTA_Client -->|Passes to| MTA_Server["MTA Server"]
+    MTA_Server -->|Delivers to| UA_Receiver["User Agent (Receiver)"]

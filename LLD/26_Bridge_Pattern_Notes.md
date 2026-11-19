@@ -24,60 +24,11 @@ A `Dog` is created with `LungBreathing`, a `Fish` with `GillBreathing`. A new an
 
 **Diagram – Living things and breathing processes**
 
-```mermaid
-classDiagram
-  class BreathingProcess {
-    <<interface>>
-    +breathe() void
-  }
-  class Dog {
-    +breathe() void
-  }
-  class Fish {
-    +breathe() void
-  }
-  class GillBreathing {
-    +breathe() void
-  }
-  class LivingThings {
-    <<abstract>>
-    +BreathingProcess breathingProcess
-    +breathe() void
-  }
-  class LungBreathing {
-    +breathe() void
-  }
-  class Photosynthesis {
-    +breathe() void
-  }
-  class Tree {
-    +breathe() void
-  }
-  BreathingProcess <|.. GillBreathing
-  BreathingProcess <|.. LungBreathing
-  BreathingProcess <|.. Photosynthesis
-  LivingThings --> BreathingProcess
-  LivingThings <|-- Dog
-  LivingThings <|-- Fish
-  LivingThings <|-- Tree
-```
+![Diagram](diagrams/26_Bridge_Pattern_Notes-01.png)
 
 **Diagram – the two hierarchies and the bridge**
 
-```mermaid
-graph LR
-  subgraph A["Abstraction (what it is)"]
-    L["LivingThings"] --> D["Dog"]
-    L --> F["Fish"]
-    L --> T["Tree"]
-  end
-  subgraph I["Implementation (how it works)"]
-    B["BreathingProcess"] --> LU["LungBreathing"]
-    B --> G["GillBreathing"]
-    B --> P["Photosynthesis"]
-  end
-  L -. "has a (the bridge)" .-> B
-```
+![Diagram](diagrams/26_Bridge_Pattern_Notes-02.png)
 
 *The bridge is the field*
 

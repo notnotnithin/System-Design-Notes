@@ -1,0 +1,13 @@
+classDiagram
+    class BasePizza { <<abstract>> +cost() int }
+    class FarmhousePizza { +cost() int  "returns 200" }
+    class MargheritaPizza { +cost() int  "returns 100" }
+    class ToppingDecorator { <<abstract>> }
+    class ExtraCheese { +cost() int  "basePizza.cost + 10" }
+    class Mushroom { +cost() int  "basePizza.cost + 15" }
+    BasePizza <|-- FarmhousePizza
+    BasePizza <|-- MargheritaPizza
+    BasePizza <|-- ToppingDecorator
+    ToppingDecorator o-- BasePizza : has-a
+    ToppingDecorator <|-- ExtraCheese
+    ToppingDecorator <|-- Mushroom

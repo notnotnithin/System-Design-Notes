@@ -1,0 +1,13 @@
+sequenceDiagram
+  participant C as Client
+  participant S as Server
+  Note over C,S: Polling: keep asking
+  C->>S: any new message?
+  S-->>C: no
+  C->>S: any new message?
+  S-->>C: yes, message
+  Note over C,S: WebSocket: one persistent two-way connection
+  C->>S: handshake (upgrade)
+  S-->>C: connection open
+  S->>C: message pushed any time
+  C->>S: message sent any time

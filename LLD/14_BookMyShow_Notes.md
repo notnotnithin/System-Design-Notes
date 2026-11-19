@@ -33,145 +33,15 @@ Note the **Controller → Service** layering: controllers are the entry points; 
 
 **Diagram – BookMyShow**
 
-```mermaid
-classDiagram
-  class BookMyShowApp {
-    -TheatreController theatreController
-    -BookingController bookingController
-  }
-  class BookingController {
-    -BookingService bookingService
-    +createBooking() Booking
-  }
-  class TheatreController {
-    -TheatreService theatreService
-    +addTheatre() void
-  }
-  class Booking {
-    -UUID bookingId
-    -User user
-    -Show show
-    -List~Integer~ seats
-  }
-  class Movie {
-    -String name
-  }
-  class Payment {
-    -UUID paymentId
-    -PaymentStatus status
-  }
-  class Screen {
-    -int screenId
-    -List~Seat~ seats
-    -Map~LocalDate,List~ showsByDate
-    +addShow() void
-  }
-  class Seat {
-    -int seatId
-    -SeatCategory category
-  }
-  class Show {
-    -Movie movie
-    -LocalDate showDate
-    -LocalTime startTime
-    -Map~Integer,SeatStatus~ seatStatusMap
-    +lockSeats() boolean
-    +confirmSeats() void
-    +releaseSeats() void
-  }
-  class Theatre {
-    -String name
-    -City city
-    -List~Screen~ screens
-  }
-  class User {
-    -String userId
-    -String name
-  }
-  class City {
-    <<enumeration>>
-    BANGALORE
-    DELHI
-  }
-  class PaymentStatus {
-    <<enumeration>>
-    SUCCESS
-    FAILED
-  }
-  class SeatCategory {
-    <<enumeration>>
-    SILVER
-    GOLD
-    PLATINUM
-  }
-  class SeatStatus {
-    <<enumeration>>
-    AVAILABLE
-    LOCKED
-    BOOKED
-  }
-  class BookingService {
-    -Map~UUID,Booking~ bookings
-    +book() Booking
-  }
-  class TheatreService {
-    -Map~City,List~ cityTheatres
-    +addTheatre() void
-  }
-  BookMyShowApp --> BookingController
-  BookMyShowApp --> TheatreController
-  Booking --> Payment
-  Booking --> Show
-  Booking --> User
-  BookingController --> BookingService
-  BookingService --> "*" Booking
-  Payment --> PaymentStatus
-  Screen --> "*" Seat
-  Screen --> "*" Show
-  Seat --> SeatCategory
-  Show --> Movie
-  Show --> "*" SeatStatus
-  Theatre --> City
-  Theatre --> "*" Screen
-  TheatreController --> TheatreService
-  TheatreService --> "*" City
-  TheatreService --> "*" Theatre
-```
+![Diagram](diagrams/14_BookMyShow_Notes-01.png)
 
 ## Step 3 – Browse and book
 
-```mermaid
-sequenceDiagram
-  participant U as User
-  participant TC as TheatreController
-  participant BC as BookingController
-  participant BS as BookingService
-  participant S as Show
-  U->>TC: getMovies(city, date)
-  TC-->>U: movies
-  U->>TC: getTheatres(city, movie, date)
-  TC-->>U: theatres
-  U->>TC: getShows(movie, date, theatre)
-  TC-->>U: shows
-  U->>BC: createBooking(user, show, seats)
-  BC->>BS: book(user, show, seats)
-  BS->>S: lockSeats(seats)
-  S-->>BS: true
-  BS->>BS: payment
-  BS->>S: confirmSeats(seats)
-  BS-->>U: Booking
-```
+![Diagram](diagrams/14_BookMyShow_Notes-02.png)
 
 ## Step 4 – Seat state
 
-```mermaid
-stateDiagram-v2
-  [*] --> AVAILABLE
-  AVAILABLE --> LOCKED: lockSeats
-  LOCKED --> BOOKED: payment success, confirmSeats
-  LOCKED --> AVAILABLE: payment failed, releaseSeats
-  BOOKED --> [*]
-```
+![Diagram](diagrams/14_BookMyShow_Notes-03.png)
 
 ## Step 5 – Concurrency: booking the same seat twice
 `Show.lockSeats(seatIds)` must be **all-or-nothing**: either every requested seat is locked for this user or none is. It works in four phases:
@@ -180,15 +50,7 @@ stateDiagram-v2
 3. **Mark** all seats `LOCKED`.
 4. **Release** the per-seat locks in `finally`.
 
-```mermaid
-flowchart TD
-  A["lockSeats(seatIds)"] --> B["Sort seat ids (avoid deadlock)"]
-  B --> C["Phase 1: lock each seat's ReentrantLock in order"]
-  C --> D{"Phase 2: all seats AVAILABLE?"}
-  D -->|"no"| X["return false (finally: unlock all)"]
-  D -->|"yes"| E["Phase 3: mark all seats LOCKED"]
-  E --> F["return true (finally: unlock all)"]
-```
+![Diagram](diagrams/14_BookMyShow_Notes-04.png)
 
 *Atomic multi-seat locking*
 

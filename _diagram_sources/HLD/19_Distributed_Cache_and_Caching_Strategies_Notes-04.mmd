@@ -1,0 +1,13 @@
+sequenceDiagram
+  participant A as Application
+  participant K as Cache library
+  participant D as DB
+  A->>K: read
+  alt cache hit
+    K-->>A: data
+  else cache miss
+    K->>D: cache fetches from DB
+    D-->>K: data
+    K->>K: store
+    K-->>A: data
+  end

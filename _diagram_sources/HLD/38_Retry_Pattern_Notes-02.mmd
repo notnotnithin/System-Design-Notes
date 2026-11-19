@@ -1,0 +1,9 @@
+graph TD
+  E["Call failed"] --> Q1{"4xx client error?"}
+  Q1 -->|"yes"| N["Do not retry"]
+  Q1 -->|"no"| Q2{"5xx or 429?"}
+  Q2 -->|"yes"| Y["Retry (429: with a delay)"]
+  Q2 -->|"no"| Q3{"network error or timeout?"}
+  Q3 -->|"yes"| Q4{"endpoint idempotent?"}
+  Q4 -->|"yes"| Y
+  Q4 -->|"no"| N

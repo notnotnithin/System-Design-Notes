@@ -33,114 +33,15 @@ Design a system like a calendar and room-booking tool. An organiser invites peop
 
 **Diagram – Meeting scheduler**
 
-```mermaid
-classDiagram
-  class Calendar {
-    -Map~TimeInterval,Meeting~ meetings
-    +addMeeting() void
-    +removeMeeting() void
-  }
-  class Meeting {
-    -String meetingId
-    -String subject
-    -TimeInterval timeInterval
-    -User organizer
-  }
-  class MeetingRoom {
-    -int id
-    -String name
-    -int capacity
-    -List~TimeInterval~ bookedSlots
-    +viewCalendar() void
-    +addBookedSlot() void
-    +removeBookedSlot() void
-  }
-  class MeetingScheduler {
-    -List~MeetingRoom~ allMeetingRooms
-    +scheduleMeeting() Meeting
-    +cancelMeeting() void
-    +addMeetingRoom() void
-  }
-  class Notification {
-    -int notificationId
-    -String message
-    +sendMeetingInviteNotification() void
-    +sendCancelMeetingNotification() void
-  }
-  class ParticipantResponse {
-    <<enumeration>>
-    ACCEPTED
-    DECLINED
-    TENTATIVE
-    NOT_RESPONDED
-  }
-  class ParticipantType {
-    <<enumeration>>
-    ORGANIZER
-    ATTENDEE
-  }
-  class TimeInterval {
-    -LocalDateTime startTime
-    -LocalDateTime endTime
-    +overlapsWith() boolean
-  }
-  class User {
-    -String name
-    -String email
-    -Calendar calendar
-    -ParticipantType participantType
-    +viewCalendar() void
-    +respondToInvitation() void
-  }
-  Calendar --> "*" Meeting
-  Calendar --> "*" TimeInterval
-  Meeting --> MeetingRoom
-  Meeting --> "*" ParticipantResponse
-  Meeting --> TimeInterval
-  Meeting --> User
-  Meeting --> "*" User
-  MeetingRoom --> Calendar
-  MeetingRoom --> "*" TimeInterval
-  MeetingScheduler --> "*" MeetingRoom
-  User --> Calendar
-  User --> ParticipantType
-```
+![Diagram](diagrams/44_Meeting_Scheduler_Notes-01.png)
 
 ## Step 3 – Scheduling a meeting
 
-```mermaid
-sequenceDiagram
-  participant O as Organiser
-  participant S as MeetingScheduler
-  participant R as MeetingRoom
-  participant N as Notification
-  O->>S: scheduleMeeting(organiser, participants, subject, timeInterval)
-  S->>R: find a room: isAvailableFor(interval, capacity = number of participants)
-  R-->>S: room (or none: stop and return null)
-  S->>S: create the Meeting
-  S->>S: add it to the organiser's and every participant's Calendar
-  S->>R: bookSlot (add the interval to the room's booked slots and calendar)
-  S->>N: send invites to all participants
-  N-->>O: invites sent
-```
+![Diagram](diagrams/44_Meeting_Scheduler_Notes-02.png)
 
-```mermaid
-sequenceDiagram
-  participant U as Participant
-  participant M as Meeting
-  U->>M: respondToInvitation(ACCEPTED / DECLINED / TENTATIVE)
-  M->>M: update attendees map: user to response
-```
+![Diagram](diagrams/44_Meeting_Scheduler_Notes-03.png)
 
-```mermaid
-stateDiagram-v2
-  [*] --> NOT_RESPONDED: invite sent
-  NOT_RESPONDED --> ACCEPTED
-  NOT_RESPONDED --> DECLINED
-  NOT_RESPONDED --> TENTATIVE
-  TENTATIVE --> ACCEPTED
-  TENTATIVE --> DECLINED
-```
+![Diagram](diagrams/44_Meeting_Scheduler_Notes-04.png)
 
 *Find a room, create the meeting, book, notify*
 
@@ -176,12 +77,7 @@ public Meeting scheduleMeeting(User organiser, Map<User, ParticipantResponse> pa
 ## Step 4 – Time overlap (the key logic)
 Two intervals **overlap** unless one ends before the other starts. A room is free for a new meeting only if it has **no booked slot that overlaps** the new interval, and its capacity is at least the number of participants.
 
-```mermaid
-graph LR
-  A["Existing: 10:00 to 11:00"] --> Q{"new interval overlaps?"}
-  Q -->|"new 09:00 to 10:00 (touches, treated as overlap in the code)"| X["Conflict"]
-  Q -->|"new 11:30 to 12:30"| OK["No overlap: room is free"]
-```
+![Diagram](diagrams/44_Meeting_Scheduler_Notes-05.png)
 
 *Overlap test*
 

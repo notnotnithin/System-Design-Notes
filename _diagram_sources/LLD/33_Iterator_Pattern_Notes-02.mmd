@@ -1,0 +1,14 @@
+sequenceDiagram
+  participant C as Client
+  participant L as Library
+  participant I as LibraryIterator
+  C->>L: createIterator()
+  L-->>C: iterator (position 0)
+  loop while hasNext()
+    C->>I: hasNext()
+    I-->>C: true
+    C->>I: next()
+    I-->>C: book at position, then position + 1
+  end
+  C->>I: hasNext()
+  I-->>C: false (end)

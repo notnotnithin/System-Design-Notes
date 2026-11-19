@@ -12,10 +12,7 @@
 
 ### How the layers fit together (outer to inner)
 
-```mermaid
-graph LR
-  N1["IPv4"] --> N2["TCP port 1935"] --> N3["RTMP chunks"] --> N4["AMF commands, audio, video"]
-```
+![Diagram](diagrams/07-rtmp-01.png)
 
 ## In-depth explanation of the example (plain-language version)
 
@@ -143,27 +140,7 @@ After about 30 minutes, OBS sends `FCUnpublish` and `deleteStream`. The server c
 
 ### Sequence diagram
 
-```mermaid
-sequenceDiagram
-  participant P0 as Laptop 192.168.1.10
-  participant P1 as Web server 203.0.113.10
-  P0->>P1: 1. TCP: 52630 → 1935 [SYN] Seq=0
-  P1->>P0: 2. TCP: 1935 → 52630 [SYN, ACK] Seq=0 Ack=1
-  P0->>P1: 3. TCP: 52630 → 1935 [ACK] Seq=1 Ack=1
-  P0->>P1: 4. RTMP: Handshake C0+C1, 2 segments
-  P1->>P0: 5. RTMP: Handshake S0+S1+S2, 3 segments
-  P0->>P1: 6. RTMP: Handshake C2, 2 segments
-  P0->>P1: 7. RTMP: Set Chunk Size 4096|connect('live')
-  P1->>P0: 8. RTMP: Window Ack Size|Set Peer Bandwidth|Set Chunk Size|_result()
-  P0->>P1: 9. RTMP: releaseStream()|FCPublish()|createStream()
-  P1->>P0: 10. RTMP: _result()
-  P0->>P1: 11. RTMP: publish('live_29481_xk3Qe7')
-  P1->>P0: 12. RTMP: onStatus('NetStream.Publish.Start')
-  P0->>P1: 13. RTMP: @setDataFrame()|Video Data|Audio Data
-  P0->>P1: 14. RTMP: Video Data, 21 segments
-  P0->>P1: 15. RTMP: FCUnpublish()|deleteStream()
-  P1->>P0: 16. RTMP: onStatus('NetStream.Unpublish.Success')
-```
+![Diagram](diagrams/07-rtmp-02.png)
 
 *The lesson's own sequence diagram:*
 

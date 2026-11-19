@@ -77,13 +77,7 @@ After you come up with the data, you estimate the **number of servers, the RAM a
 <!-- diagram:08-0 -->
 **Diagram – Estimation flow for the Facebook example**
 
-```mermaid
-graph LR
-  U["1 billion users<br/>DAU 25% = 250 M"] --> Q["Traffic<br/>250 M x 7 queries / 100,000 s<br/>about 18 K QPS"]
-  U --> ST["Storage per day<br/>posts 250 GB + images 8 TB<br/>5 years: 500 TB + 16 PB"]
-  U --> CA["Cache RAM<br/>250 M x 3 KB = 750 GB<br/>about 10 machines"]
-  Q --> SV["App servers<br/>18 K / 100 per server<br/>about 180 servers"]
-```
+![Diagram](diagrams/08_Back_of_the_Envelope_Estimation_Notes-01.png)
 <!-- /diagram:08-0 -->
 
 

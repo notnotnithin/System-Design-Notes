@@ -30,41 +30,7 @@ Design the Snake and Ladder board game. Players take turns, roll a dice and move
 
 **Diagram – Snake and Ladder**
 
-```mermaid
-classDiagram
-  class Board {
-    +Cell[][] cells
-  }
-  class Cell {
-    +Jump jump
-  }
-  class Dice {
-    +int diceCount
-    +int min
-    +int max
-    +rollDice() int
-  }
-  class Game {
-    +Board board
-    +Dice dice
-    +Deque~Player~ playersList
-    +Player winner
-    +startGame() void
-  }
-  class Jump {
-    +int start
-    +int end
-  }
-  class Player {
-    +String id
-    +int currentPosition
-  }
-  Board --> "*" Cell
-  Cell --> Jump
-  Game --> Board
-  Game --> Dice
-  Game --> Player
-```
+![Diagram](diagrams/11_Snake_and_Ladder_Notes-01.png)
 
 ## Step 3 – Game flow
 1. `initializeGame()`: build the board, dice and players.
@@ -73,34 +39,9 @@ classDiagram
 4. `jumpCheck()`: if the new cell has a snake or ladder that **starts** there, move to its **end**.
 5. Save the position. If it reaches the last cell, this player wins.
 
-```mermaid
-flowchart TD
-  A["findPlayerTurn(): take next player, put at the back"] --> B["rollDice()"]
-  B --> C["newPosition = current + dice"]
-  C --> D{"Cell has a snake or ladder?"}
-  D -->|"yes"| E["newPosition = end of the jump"]
-  D -->|"no"| F["keep newPosition"]
-  E --> G["save position"]
-  F --> G
-  G --> H{"Reached the last cell?"}
-  H -->|"yes"| W["Winner found, game over"]
-  H -->|"no"| A
-```
+![Diagram](diagrams/11_Snake_and_Ladder_Notes-02.png)
 
-```mermaid
-sequenceDiagram
-  participant G as Game
-  participant P as Player
-  participant D as Dice
-  participant B as Board
-  G->>P: next turn
-  G->>D: rollDice()
-  D-->>G: 4
-  G->>G: new position = 12 + 4 = 16
-  G->>B: cell 16 has a snake to 6?
-  B-->>G: yes, end = 6
-  G->>P: currentPosition = 6
-```
+![Diagram](diagrams/11_Snake_and_Ladder_Notes-03.png)
 
 *The game loop*
 

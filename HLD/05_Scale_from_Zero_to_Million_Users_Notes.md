@@ -31,10 +31,7 @@ The notes list nine steps in the order in which a system grows. Each step adds o
 <!-- diagram:05-0 -->
 **Diagram – Step 1: single server**
 
-```mermaid
-graph LR
-  C["Client: web, mobile"] <--> S["Server: application + database on one machine"]
-```
+![Diagram](diagrams/05_Scale_from_Zero_to_Million_Users_Notes-01.png)
 <!-- /diagram:05-0 -->
 
 
@@ -52,10 +49,7 @@ In the simplest setup the **client** (web or mobile) talks to **one server**, an
 <!-- diagram:05-1 -->
 **Diagram – Step 2: separate application and database servers**
 
-```mermaid
-graph LR
-  C["Client"] <--> A["Application server (mid tier)"] <--> D[("DB server (data tier)")]
-```
+![Diagram](diagrams/05_Scale_from_Zero_to_Million_Users_Notes-02.png)
 <!-- /diagram:05-1 -->
 
 
@@ -73,16 +67,7 @@ The application and the database are moved to **separate servers**: the client t
 <!-- diagram:05-2 -->
 **Diagram – Step 3: load balancer and several app servers**
 
-```mermaid
-graph LR
-  C["Client"] <--> LB["Load balancer"]
-  LB --> A1["App S1"]
-  LB --> A2["App S2"]
-  LB --> A3["App S3"]
-  A1 --> D[("DB server")]
-  A2 --> D
-  A3 --> D
-```
+![Diagram](diagrams/05_Scale_from_Zero_to_Million_Users_Notes-03.png)
 <!-- /diagram:05-2 -->
 
 
@@ -110,14 +95,7 @@ Now there are **several app servers (S1, S2, S3)** and a **load balancer** in fr
 <!-- diagram:05-3 -->
 **Diagram – Step 4: master–slave replication**
 
-```mermaid
-graph LR
-  A["App servers"] -->|"writes"| M[("Master DB")]
-  M -->|"replication"| S1[("Slave DB 1")]
-  M -->|"replication"| S2[("Slave DB 2")]
-  A -->|"reads"| S1
-  A -->|"reads"| S2
-```
+![Diagram](diagrams/05_Scale_from_Zero_to_Million_Users_Notes-04.png)
 <!-- /diagram:05-3 -->
 
 
@@ -141,13 +119,7 @@ The notes use **replication to handle failure**: there is a **master DB** and on
 <!-- diagram:05-4 -->
 **Diagram – Step 5: cache in front of the database**
 
-```mermaid
-graph LR
-  A["App server"] -->|"1 check cache"| C[("Cache: Redis")]
-  C -->|"hit: return data"| A
-  C -->|"miss"| A
-  A -->|"2 read DB, then fill cache"| D[("Database")]
-```
+![Diagram](diagrams/05_Scale_from_Zero_to_Million_Users_Notes-05.png)
 <!-- /diagram:05-4 -->
 
 
@@ -170,12 +142,7 @@ The reasoning in the notes: every time the application server talks to the DB it
 <!-- diagram:05-5 -->
 **Diagram – Step 6: CDN serves static content near the user**
 
-```mermaid
-graph LR
-  U["User in USA"] --> CU["CDN node USA"]
-  CU -->|"not found: try nearest other CDN"| CI["CDN node India"]
-  CI -->|"not found"| O["Origin server (static data cached afterwards)"]
-```
+![Diagram](diagrams/05_Scale_from_Zero_to_Million_Users_Notes-06.png)
 <!-- /diagram:05-5 -->
 
 
@@ -203,23 +170,7 @@ The notes first say: **a CDN does caching, but not everything that does caching 
 <!-- diagram:05-6 -->
 **Diagram – Step 7: two data centres with replication**
 
-```mermaid
-graph TD
-  C["Client"] --> CDN["CDN"] --> LB["Load balancer"]
-  subgraph IN["India data centre"]
-    IA["App S1 - S3"] --> IC[("Cache")]
-    IA --> IM[["MQ"]]
-    IA --> ID[("Master DB with Slave DB")]
-  end
-  subgraph US["USA data centre"]
-    UA["App S1 - S3"] --> UC[("Cache")]
-    UA --> UM[["MQ"]]
-    UA --> UD[("Master DB with Slave DB")]
-  end
-  LB --> IA
-  LB --> UA
-  ID <-->|"replication between data centres"| UD
-```
+![Diagram](diagrams/05_Scale_from_Zero_to_Million_Users_Notes-07.png)
 <!-- /diagram:05-6 -->
 
 
@@ -250,14 +201,7 @@ Here the system runs in **two data centres** (an India DC and a USA DC), each wi
 <!-- diagram:05-7 -->
 **Diagram – Producer, exchange, queues, subscribers**
 
-```mermaid
-graph LR
-  P["Producer"] -->|"routing key"| E{"Exchange"}
-  E -->|"binding"| Q1["Queue Q1"] --> S1["Subscriber 1"]
-  E -->|"binding"| Q2["Queue Q2"] --> S2["Subscriber 2"]
-  E -->|"binding"| Q3["Queue Q3"] --> S3["Subscriber 3"]
-  E -.- T["Direct: routing key = binding key. Fan-out: copy to all queues. Topic: wildcard match"]
-```
+![Diagram](diagrams/05_Scale_from_Zero_to_Million_Users_Notes-08.png)
 <!-- /diagram:05-7 -->
 
 
@@ -306,19 +250,7 @@ Vertical scaling means **adding more power to the existing DB server: more CPU a
 <!-- diagram:05-8 -->
 **Diagram – Sharding by rows and by columns**
 
-```mermaid
-graph LR
-  subgraph H["Horizontal sharding: split by rows"]
-    direction TB
-    T1["Table T1: rows 1-200"] --> HS1["Shard 1: A to P"]
-    T1 --> HS2["Shard 2: Q to Z"]
-  end
-  subgraph V["Vertical sharding: split by columns"]
-    direction TB
-    T2["Table: columns C1-C10"] --> VS1["Table with C1-C5"]
-    T2 --> VS2["Table with C6-C10"]
-  end
-```
+![Diagram](diagrams/05_Scale_from_Zero_to_Million_Users_Notes-09.png)
 <!-- /diagram:05-8 -->
 
 

@@ -1,0 +1,15 @@
+sequenceDiagram
+  participant C as Client
+  participant LB as Load balancer
+  participant S1 as S1 coordinator
+  participant S2 as S2
+  participant S3 as S3
+  C->>LB: Put(CAR-45)
+  LB->>S1: route to coordinator
+  S1->>S2: replicate
+  S1->>S3: replicate
+  S2-->>S1: ack
+  S3-->>S1: ack
+  Note over S1: success once W replicas acknowledge
+  S1-->>C: done
+  Note over C,S3: Get is successful once R replicas respond. R + W > N

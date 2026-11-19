@@ -1,0 +1,12 @@
+graph LR
+  P["Producer"] -->|"hash(key)"| T
+  subgraph T["Topic A on the Kafka cluster"]
+    P0["Partition P0: offsets 0,1,2,3"]
+    P1["Partition P1: offsets 0,1,2"]
+  end
+  subgraph G["Consumer group A"]
+    C1["Consumer 1"]
+    C2["Consumer 2"]
+  end
+  P0 --> C1
+  P1 --> C2

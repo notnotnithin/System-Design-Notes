@@ -1,0 +1,10 @@
+flowchart TD
+  A["Take the first player from the queue"] --> B{"Any free cell?"}
+  B -->|"no"| D["DRAW: game over"]
+  B -->|"yes"| C["Read row, column"]
+  C --> E{"Valid empty cell?"}
+  E -->|"no"| F["Put player back at the FRONT, try again"] --> A
+  E -->|"yes"| G["Place piece, put player at the BACK"]
+  G --> H{"Winning move?"}
+  H -->|"yes"| W["WIN: announce winner"]
+  H -->|"no"| A

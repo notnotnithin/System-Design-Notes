@@ -1,0 +1,88 @@
+classDiagram
+  class Board {
+    +Cell[][] cells
+  }
+  class Cell {
+    -Piece piece
+    -Position position
+  }
+  class Game {
+    -Player player1
+    -Player player2
+    -Board board
+    +playMove() boolean
+    +displayMovesHistory() void
+    +display() void
+  }
+  class Move {
+    -Player player
+    -Cell start
+    -Cell end
+  }
+  class Player {
+    -String name
+    -PieceColour playingSide
+  }
+  class Position {
+    -int row
+    -int col
+  }
+  class GameStatus {
+    <<enumeration>>
+    IN_PROGRESS
+    BLACK_WIN
+    WHITE_WIN
+    DRAW
+    RESIGNATION
+  }
+  class PieceColour {
+    <<enumeration>>
+    WHITE
+    BLACK
+  }
+  class PieceType {
+    <<enumeration>>
+    KING
+    QUEEN
+    BISHOP
+    KNIGHT
+    ROOK
+    PAWN
+  }
+  class Bishop {
+  }
+  class King {
+  }
+  class Knight {
+  }
+  class Pawn {
+  }
+  class Piece {
+    <<abstract>>
+    -PieceColour colour
+    -boolean isCaptured
+    -PieceType pieceType
+  }
+  class Queen {
+  }
+  class Rook {
+  }
+  Board --> "*" Cell
+  Cell --> Piece
+  Cell --> Position
+  Game --> Board
+  Game --> GameStatus
+  Game --> "*" Move
+  Game --> Player
+  Move --> Cell
+  Move --> Piece
+  Move --> Player
+  Piece --> PieceColour
+  Piece --> PieceType
+  Piece <|-- Bishop
+  Piece <|-- King
+  Piece <|-- Knight
+  Piece <|-- Pawn
+  Piece <|-- Queen
+  Piece <|-- Rook
+  Player --> PieceColour

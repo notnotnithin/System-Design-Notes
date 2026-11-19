@@ -1,0 +1,4 @@
+graph LR
+  O["Order service"] --> CB{"Circuit breaker"}
+  CB -->|"closed: calls pass"| P["Product service"]
+  CB -->|"open: fail immediately"| F["Fallback"]

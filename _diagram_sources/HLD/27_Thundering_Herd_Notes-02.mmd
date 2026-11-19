@@ -1,0 +1,2 @@
+graph LR
+  F["Request fails"] --> W1["wait 200 ms"] --> R1["retry 1 fails"] --> W2["wait 400 ms"] --> R2["retry 2 fails"] --> W3["wait 800 ms"] --> R3["retry 3"]

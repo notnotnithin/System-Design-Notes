@@ -1,0 +1,10 @@
+sequenceDiagram
+  participant C as Client
+  participant P as CarFactoryProvider
+  participant F as LuxuryCarFactory
+  C->>P: getFactory(LUXURY, brand)
+  P-->>C: LuxuryCarFactory
+  C->>F: produceCompleteVehicle()
+  F->>F: createInterior() gives LuxuryCarInterior
+  F->>F: createExterior() gives LuxuryCarExterior
+  F-->>C: complete luxury car

@@ -1,0 +1,4 @@
+graph LR
+  F["Frontend: https://sub.localhost:9090"] -->|"request to a different origin"| S["Server: https://localhost:8080"]
+  S -->|"allowed only if Access-Control-Allow-Origin lists the frontend"| F
+  S -. "otherwise the browser blocks the call" .- F

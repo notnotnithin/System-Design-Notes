@@ -1,0 +1,13 @@
+sequenceDiagram
+  participant S1 as S1 Order
+  participant S2 as S2 Inventory
+  participant S3 as S3 Payment
+  S1->>S1: update own DB
+  S1->>S2: event
+  S2->>S2: update own DB
+  S2->>S3: event
+  S3->>S3: payment fails
+  S3-->>S2: failure event
+  S2-->>S2: rollback
+  S2-->>S1: failure event
+  S1-->>S1: rollback

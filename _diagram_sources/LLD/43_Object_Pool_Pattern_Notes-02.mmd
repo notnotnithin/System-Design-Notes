@@ -1,0 +1,13 @@
+sequenceDiagram
+  participant C as Client
+  participant P as DBConnectionPoolManager
+  participant F as free list
+  participant U as in-use list
+  C->>P: getDBConnection()
+  P->>F: take a connection
+  P->>U: add it
+  P-->>C: connection
+  C->>C: run queries
+  C->>P: releaseDBConnection(conn)
+  P->>U: remove it
+  P->>F: add it back

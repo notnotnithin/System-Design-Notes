@@ -1,0 +1,5 @@
+sequenceDiagram
+    participant A as Microservice1 (A)
+    participant SD as Service Discovery
+    A->>SD: Give me Microservice B location
+    SD-->>A: Instance1: url:port, Instance2: url:port, Instance3: url:port

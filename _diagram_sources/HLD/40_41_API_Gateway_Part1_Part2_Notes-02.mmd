@@ -1,0 +1,7 @@
+graph LR
+  C["Client"] --> G["API gateway :8083"]
+  G -->|"lb://product-service"| P["Product service instances"]
+  G -->|"lb://order-service"| O["Order service instances"]
+  G -.->|"fetch instances"| E["Eureka server :8761"]
+  P -.->|"register"| E
+  O -.->|"register"| E

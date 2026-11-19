@@ -1,0 +1,9 @@
+graph LR
+  M["Move at (row, column)"] --> R["Check the whole row"]
+  M --> C["Check the whole column"]
+  M --> D1["Check the main diagonal (if on it)"]
+  M --> D2["Check the other diagonal (if on it)"]
+  R --> W["All same piece means WIN"]
+  C --> W
+  D1 --> W
+  D2 --> W

@@ -70,10 +70,7 @@ The graph on the page plots **number of locks (y) against time (x)**: the line *
 - The scheduler **deletes the edge whenever a lock is released** by the transaction that was making another wait.
 - The scheduler **looks for a cycle in the WFG** to identify a deadlock.
 
-```mermaid
-flowchart LR
-    T1 --> T2 --> T3 --> T4 --> T5 --> T1
-```
+![Diagram](diagrams/23_Two_Phase_Locking_2PL_Notes-01.png)
 (The page's example: T1 → T2 → T3 → T4 → T5 → back to T1 is a **deadlock**.)
 
 - When a deadlock is identified, a transaction is **chosen from the cycle in the WFG to be ABORTED (such transactions are called the victim).**

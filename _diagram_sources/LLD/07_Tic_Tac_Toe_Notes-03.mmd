@@ -1,0 +1,11 @@
+sequenceDiagram
+  participant G as TicTacToeGame
+  participant P as Player (current)
+  participant B as Board
+  G->>P: remove from the front of the queue
+  G->>B: getFreeCells()
+  G->>P: ask for row, column
+  G->>B: addPiece(row, column, piece)
+  B-->>G: true (valid)
+  G->>G: players.addLast(player)
+  G->>G: checkForWinner(row, column, pieceType)

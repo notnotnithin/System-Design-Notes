@@ -1,0 +1,14 @@
+sequenceDiagram
+  participant M as Match
+  participant I as InningDetails
+  participant O as OverDetails
+  participant B as BallDetails
+  M->>M: toss(teamA, teamB)
+  M->>I: start(runsToWin)
+  loop each over, up to matchType.noOfOvers()
+    I->>I: bowlingTeam.chooseNextBowler(maxOversPerBowler)
+    I->>O: startOver(battingTeam, bowlingTeam, runsToWin)
+    loop each ball
+      O->>B: startBallDelivery(battingTeam, bowlingTeam, over)
+    end
+  end

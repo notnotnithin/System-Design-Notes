@@ -12,11 +12,7 @@
 
 ### How the layers fit together (outer to inner)
 
-```mermaid
-graph LR
-  N1["Ethernet (multicast MAC)"] --> N2["IPv4 packet (protocol 2)"] --> N3["IGMP: query, report, leave"]
-  N4["Stream: IPv4 to group address"] --> N5["UDP"] --> N6["MPEG transport stream"]
-```
+![Diagram](diagrams/19-igmp-01.png)
 
 ## In-depth explanation of the example (plain-language version)
 
@@ -150,43 +146,7 @@ The laptop closes VLC and sends **Leave Group**. Others might still be watching,
 
 ### Sequence diagram
 
-```mermaid
-sequenceDiagram
-  participant P0 as TV box 192.168.1.30
-  participant P1 as 233.252.0.1
-  participant P2 as Router (public side) 198.51.100.7
-  participant P3 as TV server 203.0.113.80
-  participant P4 as Laptop 192.168.1.10
-  participant P5 as Router 192.168.1.1
-  participant P6 as 224.0.0.1
-  participant P7 as 224.0.0.2
-  P0->>P1: 1. IGMPv2: Membership Report group 233.252.0.1
-  P0->>P1: 2. IGMPv2: Membership Report group 233.252.0.1
-  P2->>P1: 3. IGMPv2: Membership Report group 233.252.0.1
-  P3->>P1: 4. MPEG TS: 5000 → 1234 Len=1316, 7 TS packets (video PID 256)
-  P3->>P1: 5. MPEG TS: 5000 → 1234 Len=1316, 7 TS packets (video PID 256)
-  P3->>P1: 6. MPEG TS: 5000 → 1234 Len=1316, 7 TS packets (video PID 256)
-  P4->>P1: 7. IGMPv2: Membership Report group 233.252.0.1
-  P4->>P1: 8. IGMPv2: Membership Report group 233.252.0.1
-  P3->>P1: 9. MPEG TS: 5000 → 1234 Len=1316, 7 TS packets (video PID 256)
-  P3->>P1: 10. MPEG TS: 5000 → 1234 Len=1316, 7 TS packets (video PID 256)
-  P3->>P1: 11. MPEG TS: 5000 → 1234 Len=1316, 7 TS packets (video PID 256)
-  P3->>P1: 12. MPEG TS: 5000 → 1234 Len=1316, 7 TS packets (video PID 256)
-  P5->>P6: 13. IGMPv2: Membership Query, general
-  P5->>P6: 14. IGMPv2: Membership Query, general
-  P5->>P6: 15. IGMPv2: Membership Query, general
-  P0->>P1: 16. IGMPv2: Membership Report group 233.252.0.1
-  P0->>P1: 17. IGMPv2: Membership Report group 233.252.0.1
-  P4->>P1: 18. IGMPv2: Membership Report group 233.252.0.1
-  P4->>P1: 19. IGMPv2: Membership Report group 233.252.0.1
-  P4->>P7: 20. IGMPv2: Leave Group 233.252.0.1
-  P4->>P7: 21. IGMPv2: Leave Group 233.252.0.1
-  P5->>P1: 22. IGMPv2: Membership Query, specific for group 233.252.0.1
-  P5->>P1: 23. IGMPv2: Membership Query, specific for group 233.252.0.1
-  P5->>P1: 24. IGMPv2: Membership Query, specific for group 233.252.0.1
-  P0->>P1: 25. IGMPv2: Membership Report group 233.252.0.1
-  P0->>P1: 26. IGMPv2: Membership Report group 233.252.0.1
-```
+![Diagram](diagrams/19-igmp-02.png)
 
 *The lesson's own sequence diagram:*
 

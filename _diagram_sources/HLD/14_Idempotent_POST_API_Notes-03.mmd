@@ -1,0 +1,11 @@
+sequenceDiagram
+  participant C as Client
+  participant S as Server
+  participant D as DB
+  C->>S: POST with IK1 (request 1)
+  C->>S: POST with IK1 (request 2)
+  S->>D: check and insert IK1 atomically (mutex or unique key)
+  D-->>S: request 1 wins: inserted as Created
+  D-->>S: request 2: key already present
+  S-->>C: request 1 processed, HTTP 201
+  S-->>C: request 2 gets 409 or 200, never processed twice

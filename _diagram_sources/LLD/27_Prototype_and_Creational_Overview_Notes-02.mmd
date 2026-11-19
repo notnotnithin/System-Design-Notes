@@ -1,0 +1,15 @@
+classDiagram
+  class Student {
+    +int id
+    +String name
+    +String branch
+    +boolean inHighSchool
+    -int rollNo
+    +clone() StudentPrototype
+    +printDetails() void
+  }
+  class StudentPrototype {
+    <<interface>>
+    +clone() StudentPrototype
+  }
+  StudentPrototype <|.. Student

@@ -1,0 +1,3 @@
+graph LR
+  N1["Laptop to AP: 802.11"] --> N2["EAPOL"] --> N3["EAP-TLS"]
+  N4["AP to server: IPv4"] --> N5["UDP port 1812"] --> N6["RADIUS Access-Request / Challenge / Accept"] --> N7["EAP message"]

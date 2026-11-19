@@ -1,0 +1,15 @@
+sequenceDiagram
+  participant C as Client (ECommerceApp)
+  participant F as OrderFacade
+  participant I as InventoryService
+  participant P as PaymentService
+  participant S as ShippingService
+  participant N as NotificationService
+  C->>F: placeOrder(productId, paymentMethod)
+  F->>I: checkStock(productId)
+  I-->>F: in stock
+  F->>P: makePayment(paymentMethod)
+  P-->>F: paid
+  F->>S: shipProduct(productId)
+  F->>N: sendConfirmation(productId)
+  F-->>C: order placed

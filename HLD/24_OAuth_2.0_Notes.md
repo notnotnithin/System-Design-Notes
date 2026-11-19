@@ -33,13 +33,7 @@ The notes' example is **"Sign in with Gmail":** a user on the *XYZ website* clic
 <!-- diagram:24-0 -->
 **Diagram – The four roles in "Sign in with Gmail"**
 
-```mermaid
-graph LR
-  RO["Resource owner<br/>the user (Himanshu)"] -->|"uses"| CL["Client<br/>Instagram / Facebook"]
-  CL <-->|"redirect, authorization code, access token"| AS["Authorization server<br/>Gmail login and consent"]
-  CL -->|"access token"| RS["Resource server<br/>Gmail data: name, DOB"]
-  RS -.->|"validates the token"| AS
-```
+![Diagram](diagrams/24_OAuth_2.0_Notes-01.png)
 <!-- /diagram:24-0 -->
 
 
@@ -81,26 +75,7 @@ A grant type is the **mechanism a client uses to get an Access Token.** The note
 <!-- diagram:24-1 -->
 **Diagram – Authorization code flow**
 
-```mermaid
-sequenceDiagram
-  participant U as Resource owner (user)
-  participant C as Client (Instagram)
-  participant A as Authorization server (Gmail)
-  participant R as Resource server (Gmail data)
-  C->>A: 1 register the client
-  A-->>C: 2 client id and client secret
-  U->>C: 3 choose Sign in using Gmail
-  C->>U: 4 redirect to the authorization server
-  U->>A: 5 log in and give consent
-  A-->>C: 6 authorization code (via redirect URI)
-  C->>A: 7 exchange code (with client id and secret) for token
-  A-->>C: 8 access token (and refresh token)
-  C->>R: 9 request data with Bearer access token
-  R->>A: 10 validate the token
-  A-->>R: 11 valid or invalid
-  R-->>C: 12 data if valid, else 400 error
-  C-->>U: 13 sign-in successful or failed
-```
+![Diagram](diagrams/24_OAuth_2.0_Notes-02.png)
 <!-- /diagram:24-1 -->
 
 
@@ -299,14 +274,7 @@ GET /token?
 ```
 Response: `access_token`, `token_type = Bearer`, `expires_in = 3600`. **No refresh token is required, and there is no authorization call either.**
 
-```mermaid
-flowchart TB
-    G[Grant type] --> AC["Authorization Code: authorize call + token call, gets refresh token"]
-    G --> IM["Implicit: authorize call returns the token directly, NO refresh token"]
-    G --> RO["Password (ROPC): one token call with username + password, no authorize call"]
-    G --> CC["Client Credentials: one token call with client id + secret, no authorize call, no refresh token"]
-    G --> RT["Refresh Token: token call with refresh_token to get new tokens"]
-```
+![Diagram](diagrams/24_OAuth_2.0_Notes-03.png)
 
 **In simple words:** the Authorization Code flow has two steps (get a code, then swap it for a token). The implicit flow skips the swap and hands the token straight back (so there is no refresh token). The password flow sends the user's own username and password in one call. Client credentials is for app-to-app calls with no user at all. The refresh grant just trades an old refresh token for new tokens.
 

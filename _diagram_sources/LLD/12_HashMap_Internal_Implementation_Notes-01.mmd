@@ -1,0 +1,16 @@
+classDiagram
+  class MyHashMap~K,V~ {
+    -int INITIAL_SIZE = 16
+    -int MAXIMUM_CAPACITY
+    ~Entry[] hashTable
+    +put(key, value)
+    +get(key) V
+    ~tableSizeFor(cap) int
+  }
+  class Entry~K,V~ {
+    ~K key
+    ~V value
+    ~Entry next
+  }
+  MyHashMap --> "*" Entry : buckets
+  Entry --> Entry : next (chain)

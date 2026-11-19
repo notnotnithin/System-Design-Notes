@@ -21,51 +21,11 @@ A logger must route messages by level: `DEBUG`, `INFO`, `ERROR`, `FATAL`. With o
 
 **Diagram – Log processors chain**
 
-```mermaid
-classDiagram
-  class DebugLogProcessor {
-    +write() void
-  }
-  class ErrorLogProcessor {
-    +write() void
-  }
-  class FatalLogProcessor {
-    +write() void
-  }
-  class InfoLogProcessor {
-    +write() void
-  }
-  class LogProcessor {
-    <<abstract>>
-    +int level
-    +LogProcessor nextLoggerProcessor
-    +logMessage() void
-    +write() void
-  }
-  class LoggerDemo {
-  }
-  LogProcessor <|-- DebugLogProcessor
-  LogProcessor <|-- ErrorLogProcessor
-  LogProcessor <|-- FatalLogProcessor
-  LogProcessor <|-- InfoLogProcessor
-```
+![Diagram](diagrams/10_Chain_of_Responsibility_Notes-01.png)
 
 **Diagram – a message travelling the chain**
 
-```mermaid
-sequenceDiagram
-  participant C as Client
-  participant D as DebugLogProcessor
-  participant I as InfoLogProcessor
-  participant E as ErrorLogProcessor
-  C->>D: logMessage(ERROR, "disk full")
-  D->>D: level is DEBUG, not my level
-  D->>I: pass on
-  I->>I: level is INFO, not my level
-  I->>E: pass on
-  E->>E: level matches
-  E->>E: write("disk full")
-```
+![Diagram](diagrams/10_Chain_of_Responsibility_Notes-02.png)
 
 *Handle it or pass it on*
 

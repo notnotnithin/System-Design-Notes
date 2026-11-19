@@ -1,0 +1,13 @@
+sequenceDiagram
+  participant P0 as Laptop 00:00:5e:00:53:10
+  participant P1 as Broadcast
+  participant P2 as Router / AP 00:00:5e:00:53:01
+  participant P3 as Laptop 192.168.1.10
+  participant P4 as Web server 203.0.113.10
+  participant P5 as Router (public side) 198.51.100.7
+  P0->>P1: 1. ARP: Who has 192.168.1.1? Tell 192.168.1.10
+  P2->>P0: 2. ARP: 192.168.1.1 is at 00:00:5e:00:53:01
+  P3->>P4: 3. TCP: TTL 128 · 52344 → 443 [SYN]
+  P5->>P4: 4. TCP: TTL 127 · 40112 → 443 [SYN] (after NAT)
+  P4->>P5: 5. TCP: TTL 64 · 443 → 40112 [SYN, ACK]
+  P4->>P3: 6. TCP: TTL 52 · 443 → 52344 [SYN, ACK] (after NAT)

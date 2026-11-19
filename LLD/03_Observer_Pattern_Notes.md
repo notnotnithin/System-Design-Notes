@@ -22,64 +22,11 @@ An e-commerce app wants a **"Notify me when back in stock"** feature. Without th
 
 **Diagram – Notify-me (back in stock) example**
 
-```mermaid
-classDiagram
-  class IphoneProductObservable {
-    -String productId
-    -String productName
-    -double price
-    -List~StockNotificationObserver~ stockObservers
-    -int stockQuantity
-    +addStockObserver() void
-    +removeStockObserver() void
-    +notifyStockObservers() void
-    +restock() void
-  }
-  class StockAvailabilityObservable {
-    <<interface>>
-    +addStockObserver() void
-    +removeStockObserver() void
-    +notifyStockObservers() void
-    +purchase() boolean
-  }
-  class EmailNotificationObserver {
-    -String userId
-    -String emailAddress
-    +update() void
-  }
-  class PushNotificationObserver {
-    -String userId
-    -String deviceToken
-    +update() void
-  }
-  class StockNotificationObserver {
-    <<interface>>
-    +update() void
-    +getNotificationMethod() String
-    +getUserId() String
-  }
-  IphoneProductObservable --> "*" StockNotificationObserver
-  StockAvailabilityObservable <|.. IphoneProductObservable
-  StockNotificationObserver <|.. EmailNotificationObserver
-  StockNotificationObserver <|.. PushNotificationObserver
-```
+![Diagram](diagrams/03_Observer_Pattern_Notes-01.png)
 
 **Diagram – what happens on restock**
 
-```mermaid
-sequenceDiagram
-  participant U1 as EmailObserver
-  participant U2 as PushObserver
-  participant P as IphoneProductObservable
-  U1->>P: addStockObserver(this)
-  U2->>P: addStockObserver(this)
-  Note over P: stock is 0
-  P->>P: restock(10)
-  P->>U1: update()
-  U1->>U1: sendEmail()
-  P->>U2: update()
-  U2->>U2: sendPushNotification()
-```
+![Diagram](diagrams/03_Observer_Pattern_Notes-02.png)
 
 *Restock tells every observer*
 
@@ -105,44 +52,7 @@ public boolean purchase(int quantity) {
 
 **Diagram – Weather station example**
 
-```mermaid
-classDiagram
-  class WeatherObservable {
-    <<interface>>
-    +addObserver() void
-    +removeObserver() void
-    +notifyObservers() void
-  }
-  class WeatherStation {
-    -List~WeatherObserver~ observers
-    -float temperature
-    -float humidity
-    -float pressure
-    +addObserver() void
-    +removeObserver() void
-    +notifyObservers() void
-  }
-  class CurrentConditionsDisplay {
-    -WeatherObservable weatherStation
-    +update() void
-    +display() void
-  }
-  class ForecastDisplay {
-    -WeatherObservable weatherStation
-    +update() void
-    +display() void
-  }
-  class WeatherObserver {
-    <<interface>>
-    +update() void
-  }
-  CurrentConditionsDisplay --> WeatherObservable
-  ForecastDisplay --> WeatherObservable
-  WeatherObservable <|.. WeatherStation
-  WeatherObserver <|.. CurrentConditionsDisplay
-  WeatherObserver <|.. ForecastDisplay
-  WeatherStation --> "*" WeatherObserver
-```
+![Diagram](diagrams/03_Observer_Pattern_Notes-03.png)
 
 ## Two styles
 - **Push:** the observable sends the new data inside `update(data)`.

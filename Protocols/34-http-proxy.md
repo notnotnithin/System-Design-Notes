@@ -12,10 +12,7 @@
 
 ### How the layers fit together (outer to inner)
 
-```mermaid
-graph LR
-  N1["IPv4"] --> N2["TCP port 8080 (proxy)"] --> N3["HTTP: GET with full URL, or CONNECT"] --> N4["Tunnel: TLS end to end"]
-```
+![Diagram](diagrams/34-http-proxy-01.png)
 
 ## In-depth explanation of the example (plain-language version)
 
@@ -147,29 +144,7 @@ The proxy copies bytes both ways until one side closes. (Some company proxies do
 
 ### Sequence diagram
 
-```mermaid
-sequenceDiagram
-  participant P0 as Laptop 192.168.1.10
-  participant P1 as Proxy 192.0.2.80
-  participant P2 as Web server 203.0.113.10
-  P0->>P1: 1. TCP: 52370 → 8080 [SYN] Seq=0
-  P1->>P0: 2. TCP: 8080 → 52370 [SYN, ACK] Seq=0 Ack=1
-  P0->>P1: 3. TCP: 52370 → 8080 [ACK] Seq=1 Ack=1
-  P0->>P1: 4. HTTP: GET http://www.example.com/ HTTP/1.1
-  P1->>P2: 5. TCP: 40210 → 80 [SYN] Seq=0
-  P2->>P1: 6. TCP: 80 → 40210 [SYN, ACK] Seq=0 Ack=1
-  P1->>P2: 7. TCP: 40210 → 80 [ACK] Seq=1 Ack=1
-  P1->>P2: 8. HTTP: GET / HTTP/1.1
-  P2->>P1: 9. HTTP: HTTP/1.1 200 OK (text/html), 9 segments
-  P1->>P0: 10. HTTP: HTTP/1.1 200 OK (text/html), 9 segments
-  P0->>P1: 11. HTTP: CONNECT www.example.com:443 HTTP/1.1
-  P1->>P2: 12. TCP: 40214 → 443 [SYN] Seq=0
-  P2->>P1: 13. TCP: 443 → 40214 [SYN, ACK] Seq=0 Ack=1
-  P1->>P2: 14. TCP: 40214 → 443 [ACK] Seq=1 Ack=1
-  P1->>P0: 15. HTTP: HTTP/1.1 200 Connection established
-  P0->>P1: 16. TLSv1.3: Client Hello (SNI=www.example.com)
-  P1->>P2: 17. TLSv1.3: Client Hello (SNI=www.example.com)
-```
+![Diagram](diagrams/34-http-proxy-02.png)
 
 *The lesson's own sequence diagram:*
 

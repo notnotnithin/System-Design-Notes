@@ -1,0 +1,17 @@
+sequenceDiagram
+  participant U as User
+  participant A as ATM
+  participant S as Current state
+  U->>A: insert card
+  A->>S: IdleState.insertCard()
+  S->>A: move to HasCardState
+  U->>A: enter PIN
+  A->>S: HasCardState.authenticatePin()
+  S->>A: PIN ok, move to SelectOperationState
+  U->>A: choose CASH_WITHDRAWAL
+  S->>A: move to CashWithdrawalState
+  U->>A: withdraw 2700
+  A->>S: CashWithdrawalState.cashWithdrawal(2700)
+  S->>S: check ATM balance and bank balance
+  S->>S: deduct and start the note chain
+  S->>A: exit: return card, back to IdleState

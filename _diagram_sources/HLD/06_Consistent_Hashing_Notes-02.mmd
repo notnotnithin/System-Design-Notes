@@ -1,0 +1,16 @@
+graph LR
+  n0(("0"))
+  n1(("1<br/>K1")):::key
+  n2(("2<br/>K2")):::key
+  n3(("3<br/>S1")):::srv
+  n4(("4<br/>K7")):::key
+  n5(("5"))
+  n6(("6<br/>K5")):::key
+  n7(("7<br/>S2")):::srv
+  n8(("8<br/>K6")):::key
+  n9(("9<br/>K3")):::key
+  n10(("10<br/>K4")):::key
+  n11(("11<br/>S3")):::srv
+  n0 --> n1 --> n2 --> n3 --> n4 --> n5 --> n6 --> n7 --> n8 --> n9 --> n10 --> n11 --> n0
+  classDef srv fill:#fde68a,stroke:#b45309,color:#000
+  classDef key fill:#dbeafe,stroke:#1d4ed8,color:#000

@@ -1,0 +1,7 @@
+classDiagram
+    class EmployeeDao { <<interface>> +create() }
+    class EmployeeDaoImpl { +create() "row creation logic" }
+    class EmployeeDaoProxy { +create() "if ADMIN call real create, else throw exception" }
+    EmployeeDao <|.. EmployeeDaoImpl
+    EmployeeDao <|.. EmployeeDaoProxy
+    EmployeeDaoProxy o-- EmployeeDaoImpl : has-a

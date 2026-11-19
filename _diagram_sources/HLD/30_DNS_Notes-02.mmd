@@ -1,0 +1,15 @@
+sequenceDiagram
+    participant C as DNS Client (Stub Resolver)
+    participant R as DNS Resolver
+    participant Root as Root Domain (.)
+    participant TLD as TLD (.com)
+    participant Auth as Authoritative server (GoDaddy)
+    C->>C: 1. Check local cache
+    C->>R: 2. No record in local cache, pass the DNS query to the resolver
+    R->>Root: 3. What's the IP of www.conceptandcoding.com?
+    Root-->>R: 4. I don't have an answer, check with the .com TLD, here is its IP
+    R->>TLD: 5. Do you have the IP of www.conceptandcoding.com?
+    TLD-->>R: 6. I don't have an answer, check with the GoDaddy authoritative server, here is its IP
+    R->>Auth: 7. Do you have the IP of www.conceptandcoding.com?
+    Auth-->>R: 8. Yes, it's 172.87.34.56
+    R-->>C: 9. Here is the IP address: 172.87.34.56

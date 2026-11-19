@@ -22,70 +22,11 @@ A hotel has `StandardRoom`, `DeluxeRoom` and `SuiteRoom`. We need operations suc
 
 **Diagram – Hotel rooms and visitors**
 
-```mermaid
-classDiagram
-  class DeluxeRoom {
-    -String roomNumber
-    -boolean hasJacuzzi
-    +accept() void
-    +hasJacuzzi() boolean
-  }
-  class IRoom {
-    <<interface>>
-    +accept() void
-  }
-  class StandardRoom {
-    -String roomNumber
-    +accept() void
-  }
-  class SuiteRoom {
-    -String roomNumber
-    -int numberOfRooms
-    +accept() void
-  }
-  class HousekeepingVisitor {
-    +visitStandardRoom() void
-    +visitDeluxeRoom() void
-    +visitSuiteRoom() void
-  }
-  class IRoomVisitor {
-    <<interface>>
-    +visitStandardRoom() void
-    +visitDeluxeRoom() void
-    +visitSuiteRoom() void
-  }
-  class PricingVisitor {
-    -double totalRevenue
-    +visitStandardRoom() void
-    +visitDeluxeRoom() void
-    +visitSuiteRoom() void
-  }
-  class RoomServiceVisitor {
-    -String orderDetails
-    +visitStandardRoom() void
-    +visitDeluxeRoom() void
-    +visitSuiteRoom() void
-  }
-  IRoom <|.. DeluxeRoom
-  IRoom <|.. StandardRoom
-  IRoom <|.. SuiteRoom
-  IRoomVisitor <|.. HousekeepingVisitor
-  IRoomVisitor <|.. PricingVisitor
-  IRoomVisitor <|.. RoomServiceVisitor
-```
+![Diagram](diagrams/36_Visitor_Pattern_Notes-01.png)
 
 **Diagram – a visit (double dispatch)**
 
-```mermaid
-sequenceDiagram
-  participant C as Client
-  participant R as DeluxeRoom
-  participant V as PricingVisitor
-  C->>R: accept(pricingVisitor)
-  R->>V: visitDeluxeRoom(this)
-  V->>V: calculate price for a deluxe room, add to total revenue
-  V-->>C: done
-```
+![Diagram](diagrams/36_Visitor_Pattern_Notes-02.png)
 
 The **first dispatch** picks `accept` by the room type; the **second dispatch** (inside `accept`) picks the visitor method by the room type again, so the visitor gets the exact room type without any `instanceof` checks.
 

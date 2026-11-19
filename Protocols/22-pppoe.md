@@ -12,11 +12,7 @@
 
 ### How the layers fit together (outer to inner)
 
-```mermaid
-graph LR
-  N1["Ethernet type 0x8863: Discovery"] --> N2["PADI, PADO, PADR, PADS"]
-  N3["Ethernet type 0x8864: Session"] --> N4["PPPoE header"] --> N5["PPP: LCP, CHAP, IPCP"] --> N6["IPv4 packets"]
-```
+![Diagram](diagrams/22-pppoe-01.png)
 
 ## In-depth explanation of the example (plain-language version)
 
@@ -148,34 +144,7 @@ The laptop opens a website. The router **translates** the private address to its
 
 ### Sequence diagram
 
-```mermaid
-sequenceDiagram
-  participant P0 as Home router 00:00:5e:00:53:02
-  participant P1 as Broadcast
-  participant P2 as BNG 00:00:5e:00:53:fe
-  participant P3 as Laptop 192.168.1.10
-  participant P4 as Web server 203.0.113.10
-  participant P5 as Router (public side) 198.51.100.7
-  P0->>P1: 1. PPPoED: Active Discovery Initiation (PADI)
-  P2->>P0: 2. PPPoED: Active Discovery Offer (PADO) AC-Name='bng-1.example.net'
-  P0->>P2: 3. PPPoED: Active Discovery Request (PADR)
-  P2->>P0: 4. PPPoED: Active Discovery Session-confirmation (PADS)
-  P0->>P2: 5. PPP LCP: Configuration Request
-  P2->>P0: 6. PPP LCP: Configuration Ack
-  P2->>P0: 7. PPP LCP: Configuration Request
-  P0->>P2: 8. PPP LCP: Configuration Ack
-  P2->>P0: 9. PPP CHAP: Challenge (NAME='bng-1.example.net')
-  P0->>P2: 10. PPP CHAP: Response (NAME='alex@fibre.example')
-  P2->>P0: 11. PPP CHAP: Success (MESSAGE='Welcome')
-  P2->>P0: 12. PPP IPCP: Configuration Request (IP 198.51.100.1)
-  P0->>P2: 13. PPP IPCP: Configuration Ack (IP 198.51.100.1)
-  P0->>P2: 14. PPP IPCP: Configuration Request (IP 0.0.0.0)
-  P2->>P0: 15. PPP IPCP: Configuration Nak (IP 198.51.100.7)
-  P0->>P2: 16. PPP IPCP: Configuration Request (IP 198.51.100.7)
-  P2->>P0: 17. PPP IPCP: Configuration Ack (IP 198.51.100.7)
-  P3->>P4: 18. TCP: 52344 → 443 [SYN] MSS=1460
-  P5->>P4: 19. TCP: PPPoE 0x2f1c · 40112 → 443 [SYN] MSS=1452
-```
+![Diagram](diagrams/22-pppoe-02.png)
 
 *The lesson's own sequence diagram:*
 

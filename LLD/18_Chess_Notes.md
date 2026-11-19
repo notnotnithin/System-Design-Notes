@@ -33,132 +33,13 @@ Design a two-player chess game: an 8×8 board, six kinds of pieces with differen
 
 **Diagram – Chess**
 
-```mermaid
-classDiagram
-  class Board {
-    +Cell[][] cells
-  }
-  class Cell {
-    -Piece piece
-    -Position position
-  }
-  class Game {
-    -Player player1
-    -Player player2
-    -Board board
-    +playMove() boolean
-    +displayMovesHistory() void
-    +display() void
-  }
-  class Move {
-    -Player player
-    -Cell start
-    -Cell end
-  }
-  class Player {
-    -String name
-    -PieceColour playingSide
-  }
-  class Position {
-    -int row
-    -int col
-  }
-  class GameStatus {
-    <<enumeration>>
-    IN_PROGRESS
-    BLACK_WIN
-    WHITE_WIN
-    DRAW
-    RESIGNATION
-  }
-  class PieceColour {
-    <<enumeration>>
-    WHITE
-    BLACK
-  }
-  class PieceType {
-    <<enumeration>>
-    KING
-    QUEEN
-    BISHOP
-    KNIGHT
-    ROOK
-    PAWN
-  }
-  class Bishop {
-  }
-  class King {
-  }
-  class Knight {
-  }
-  class Pawn {
-  }
-  class Piece {
-    <<abstract>>
-    -PieceColour colour
-    -boolean isCaptured
-    -PieceType pieceType
-  }
-  class Queen {
-  }
-  class Rook {
-  }
-  Board --> "*" Cell
-  Cell --> Piece
-  Cell --> Position
-  Game --> Board
-  Game --> GameStatus
-  Game --> "*" Move
-  Game --> Player
-  Move --> Cell
-  Move --> Piece
-  Move --> Player
-  Piece --> PieceColour
-  Piece --> PieceType
-  Piece <|-- Bishop
-  Piece <|-- King
-  Piece <|-- Knight
-  Piece <|-- Pawn
-  Piece <|-- Queen
-  Piece <|-- Rook
-  Player --> PieceColour
-```
+![Diagram](diagrams/18_Chess_Notes-01.png)
 
 ## Step 3 – Playing a move
 
-```mermaid
-flowchart TD
-  A["playMove(player, start, end)"] --> B["Find the start and end cells, build a Move"]
-  B --> C{"Is there a piece on the start cell?"}
-  C -->|"no"| X["return false"]
-  C -->|"yes"| D{"Is it the player's own colour?"}
-  D -->|"no"| X
-  D -->|"yes"| E{"piece.isValidMove(board, start, end)?"}
-  E -->|"no"| X
-  E -->|"yes"| F{"Opponent piece on the end cell?"}
-  F -->|"yes"| G["mark it captured, record pieceKilled"]
-  F -->|"no"| H["just move"]
-  G --> H
-  H --> I["place the piece on the end cell, empty the start cell, add the move to history"]
-  I --> J{"Captured piece is a King?"}
-  J -->|"yes"| K["status = WHITE_WIN or BLACK_WIN"]
-  J -->|"no"| L["switch the turn to the other player"]
-```
+![Diagram](diagrams/18_Chess_Notes-02.png)
 
-```mermaid
-sequenceDiagram
-  participant P as Player
-  participant G as Game
-  participant B as Board
-  participant K as Knight (Piece)
-  P->>G: playMove(player, (0,1), (2,2))
-  G->>B: getCell(start), getCell(end)
-  G->>K: isValidMove(board, start, end)
-  K-->>G: true (an L-shape)
-  G->>G: move the piece, save Move in history
-  G->>G: switch turn
-  G-->>P: true
-```
+![Diagram](diagrams/18_Chess_Notes-03.png)
 
 *Validate with the piece, then move*
 

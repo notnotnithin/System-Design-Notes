@@ -1,0 +1,15 @@
+sequenceDiagram
+  participant C as Client
+  participant R as RemoteController (invoker)
+  participant T as SetTemperatureCommand
+  participant A as AirConditioner (receiver)
+  C->>R: setCommand(new SetTemperatureCommand(ac, 24))
+  C->>R: pressButton()
+  R->>T: execute()
+  T->>T: remember previousTemperature (say 20)
+  T->>A: setTemperature(24)
+  R->>R: push command onto history
+  C->>R: undo()
+  R->>R: pop last command
+  R->>T: undo()
+  T->>A: setTemperature(20)

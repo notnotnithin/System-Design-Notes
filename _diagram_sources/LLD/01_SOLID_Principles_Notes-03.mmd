@@ -1,0 +1,14 @@
+classDiagram
+  class Vehicle {
+    +getNumberOfWheels()
+  }
+  class EngineVehicle {
+    +hasEngine()
+  }
+  class Car
+  class MotorCycle
+  class Bicycle
+  Vehicle <|-- EngineVehicle
+  Vehicle <|-- Bicycle
+  EngineVehicle <|-- Car
+  EngineVehicle <|-- MotorCycle

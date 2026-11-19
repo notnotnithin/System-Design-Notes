@@ -12,11 +12,7 @@
 
 ### How the layers fit together (outer to inner)
 
-```mermaid
-graph LR
-  N1["Signalling: TCP"] --> N2["TLS"] --> N3["WebSocket"] --> N4["JSON offer / answer (SDP)"]
-  N5["Media: IPv4"] --> N6["UDP"] --> N7["STUN, DTLS key exchange"] --> N8["SRTP audio and video"]
-```
+![Diagram](diagrams/04-webrtc-01.png)
 
 ## In-depth explanation of the example (plain-language version)
 
@@ -160,33 +156,7 @@ Over that direct path, the two browsers run a security handshake (**DTLS**, whic
 
 ### Sequence diagram
 
-```mermaid
-sequenceDiagram
-  participant P0 as Laptop 192.168.1.10
-  participant P1 as Web server 203.0.113.10
-  participant P2 as STUN server 192.0.2.19
-  participant P3 as 198.51.100.200
-  P0->>P1: 1. TLSv1.3: Application Data (WebSocket: join)
-  P1->>P0: 2. TLSv1.3: Application Data (WebSocket: peer)
-  P0->>P2: 3. STUN: Binding Request
-  P2->>P0: 4. STUN: Binding Success Response XOR-MAPPED-ADDRESS: 198.51.100.7:61022
-  P0->>P1: 5. TLSv1.3: Application Data (WebSocket: offer), 4 segments
-  P1->>P3: 6. TLSv1.3: Application Data (WebSocket: offer), 4 segments
-  P3->>P1: 7. TLSv1.3: Application Data (WebSocket: answer), 3 segments
-  P1->>P0: 8. TLSv1.3: Application Data (WebSocket: answer), 3 segments
-  P0->>P3: 9. STUN: Binding Request user: q7Rz:Hk2w
-  P3->>P0: 10. STUN: Binding Success Response XOR-MAPPED-ADDRESS: 198.51.100.7:61022
-  P3->>P0: 11. DTLSv1.2: Client Hello
-  P0->>P3: 12. DTLSv1.2: Server Hello, Certificate, Key Exchange, Cert Request, Hello ...
-  P3->>P0: 13. DTLSv1.2: Certificate, Key Exchange, Cert Verify, Change Cipher Spec, F...
-  P0->>P3: 14. DTLSv1.2: Change Cipher Spec, Finished
-  P0->>P3: 15. SRTP: PT=111, SSRC=0x5D2E81A4, Seq=9021, Time=416820
-  P0->>P3: 16. SRTP: PT=111, SSRC=0x5D2E81A4, Seq=9022, Time=417780
-  P0->>P3: 17. SRTP: PT=111, SSRC=0x5D2E81A4, Seq=9023, Time=418740
-  P3->>P0: 18. SRTP: PT=96, SSRC=0x1B7C3F90, Seq=30117, Time=2286000
-  P3->>P0: 19. SRTP: PT=96, SSRC=0x1B7C3F90, Seq=30118, Time=2286000
-  P3->>P0: 20. SRTP: PT=96, SSRC=0x1B7C3F90, Seq=30119, Time=2286000, Mark
-```
+![Diagram](diagrams/04-webrtc-02.png)
 
 *The lesson's own sequence diagram:*
 

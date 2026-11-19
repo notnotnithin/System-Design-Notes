@@ -1,0 +1,6 @@
+flowchart TD
+  A["Controller thread starts"] --> B{"Both queues empty?"}
+  B -->|"yes"| S["direction = IDLE, wait() until a request arrives"] --> B
+  B -->|"no"| U["While upMinPQ not empty: poll the lowest floor, move there"]
+  U --> D["While downMaxPQ not empty: poll the highest floor, move there"]
+  D --> B

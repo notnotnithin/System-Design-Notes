@@ -12,10 +12,7 @@
 
 ### How the layers fit together (outer to inner)
 
-```mermaid
-graph LR
-  N1["IPv4"] --> N2["TCP port 993"] --> N3["TLS"] --> N4["IMAP: tagged commands, untagged data, IDLE"]
-```
+![Diagram](diagrams/29-imap-01.png)
 
 ## In-depth explanation of the example (plain-language version)
 
@@ -134,29 +131,7 @@ IMAP normally answers only when asked, so an app would have to keep checking. **
 
 ### Sequence diagram
 
-```mermaid
-sequenceDiagram
-  participant P0 as Laptop 192.168.1.10
-  participant P1 as imap.example.org 198.51.100.143
-  P0->>P1: 1. TCP: 53140 → 993 [SYN] Seq=0
-  P1->>P0: 2. TCP: 993 → 53140 [SYN, ACK] Seq=0 Ack=1
-  P0->>P1: 3. TCP: 53140 → 993 [ACK] Seq=1 Ack=1
-  P0->>P1: 4. TLSv1.3: Client Hello (SNI=imap.example.org)
-  P1->>P0: 5. TLSv1.3: Server Hello + encrypted handshake, 2 segments
-  P0->>P1: 6. TLSv1.3: Change Cipher Spec, Finished (encrypted)
-  P1->>P0: 7. IMAP (TLS): * OK [CAPABILITY …] Service ready
-  P0->>P1: 8. IMAP (TLS): a1 LOGIN (user and password)
-  P1->>P0: 9. IMAP (TLS): a1 OK LOGIN completed
-  P0->>P1: 10. IMAP (TLS): a2 SELECT INBOX
-  P1->>P0: 11. IMAP (TLS): * 2 EXISTS … a2 OK [READ-WRITE] SELECT completed
-  P0->>P1: 12. IMAP (TLS): a3 FETCH 2 BODY[]
-  P1->>P0: 13. IMAP (TLS): * 2 FETCH (FLAGS (\Seen) BODY[] …), 3 segments
-  P0->>P1: 14. IMAP (TLS): a4 IDLE
-  P1->>P0: 15. IMAP (TLS): + idling
-  P1->>P0: 16. IMAP (TLS): * 3 EXISTS, * 1 RECENT
-  P0->>P1: 17. IMAP (TLS): DONE
-  P1->>P0: 18. IMAP (TLS): a4 OK IDLE terminated
-```
+![Diagram](diagrams/29-imap-02.png)
 
 *The lesson's own sequence diagram:*
 

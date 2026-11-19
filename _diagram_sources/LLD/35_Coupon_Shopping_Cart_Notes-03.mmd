@@ -1,0 +1,12 @@
+sequenceDiagram
+  participant C as ShoppingCart
+  participant T as TypeCouponDecorator
+  participant P as PercentageCouponDecorator
+  participant I as Item (Office Chair)
+  C->>T: getPrice()
+  T->>P: getPrice()
+  P->>I: getPrice()
+  I-->>P: 6000
+  P-->>T: 5400 (10 percent off)
+  T->>T: furniture is eligible, take 5 percent off
+  T-->>C: 5130

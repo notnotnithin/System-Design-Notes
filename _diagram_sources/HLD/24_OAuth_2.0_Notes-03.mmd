@@ -1,0 +1,6 @@
+flowchart LR
+    G[Grant type] --> AC["Authorization Code: authorize call + token call, gets refresh token"]
+    G --> IM["Implicit: authorize call returns the token directly, NO refresh token"]
+    G --> RO["Password (ROPC): one token call with username + password, no authorize call"]
+    G --> CC["Client Credentials: one token call with client id + secret, no authorize call, no refresh token"]
+    G --> RT["Refresh Token: token call with refresh_token to get new tokens"]

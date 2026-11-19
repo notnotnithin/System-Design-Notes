@@ -1,0 +1,15 @@
+sequenceDiagram
+  participant C as Client
+  participant S as Server
+  participant K as Cache
+  participant D as DB
+  C->>S: GET
+  S->>K: read
+  alt cache hit
+    K-->>S: data
+  else cache miss
+    S->>D: read from DB
+    D-->>S: data
+    S->>K: write into cache
+  end
+  S-->>C: response

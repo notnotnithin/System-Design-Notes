@@ -15,18 +15,7 @@ Source: https://drive.google.com/file/d/1uERH11qv6xWBvwHc0BoOJlnn89IzWt95/view?u
 <!-- diagram:35-0 -->
 **Diagram – Server-side versus client-side load balancer**
 
-```mermaid
-graph LR
-  subgraph SS["Server-side: Nginx / ELB"]
-    C1["Clients"] --> LB["Central load balancer"] --> A1["Instance 1"]
-    LB --> A2["Instance 2"]
-  end
-  subgraph CS["Client-side: inside the caller"]
-    O["Order service<br/>with load-balancer library"] --> P1["Product instance 1"]
-    O --> P2["Product instance 2"]
-    O -.->|"instance list"| D["Service discovery"]
-  end
-```
+![Diagram](diagrams/35_Client_Side_Load_Balancer_Notes-01.png)
 <!-- /diagram:35-0 -->
 
 
@@ -97,19 +86,7 @@ After service discovery is set up, with RestTemplate we get the list of instance
 <!-- diagram:35-1 -->
 **Diagram – What @LoadBalanced does on a call**
 
-```mermaid
-sequenceDiagram
-  participant O as Order service (RestTemplate @LoadBalanced)
-  participant L as Spring Cloud LoadBalancer
-  participant D as Service discovery
-  participant P as Product instance
-  O->>L: GET http://product-service/products/1
-  L->>D: instances of product-service
-  D-->>L: instance list
-  L->>L: apply algorithm (round robin by default)
-  L->>P: call the chosen instance
-  P-->>O: response
-```
+![Diagram](diagrams/35_Client_Side_Load_Balancer_Notes-02.png)
 <!-- /diagram:35-1 -->
 
 
@@ -231,11 +208,7 @@ To use Random for product-service: add **`@LoadBalancerClient(name = "product-se
 <!-- diagram:35-2 -->
 **Diagram – Per-service algorithm and a default**
 
-```mermaid
-graph LR
-  O["Order service"] -->|"product-service"| R["RandomLoadBalancer"]
-  O -->|"all other services"| RR["RoundRobinLoadBalancer (default config)"]
-```
+![Diagram](diagrams/35_Client_Side_Load_Balancer_Notes-03.png)
 <!-- /diagram:35-2 -->
 
 

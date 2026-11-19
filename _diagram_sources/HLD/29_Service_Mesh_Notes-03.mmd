@@ -1,0 +1,5 @@
+sequenceDiagram
+    participant A as Microservice1 (A)
+    participant SD as Service Discovery
+    A->>SD: Give me Microservice B location
+    SD-->>A: Location of Microservice B Application Load Balancer

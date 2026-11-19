@@ -1,0 +1,10 @@
+graph LR
+  subgraph CS["Client-server: HTTP, FTP, SMTP"]
+    B["Browser"] <-->|"Request / Response"| W["Web server"]
+  end
+  subgraph WS["WebSocket: chat apps"]
+    C1["Client"] <-->|"one persistent two-way connection"| S1["Server"]
+  end
+  subgraph P2P["Peer-to-peer: WebRTC"]
+    PA["Peer A"] <-->|"direct"| PB["Peer B"]
+  end

@@ -1,0 +1,12 @@
+sequenceDiagram
+  participant P as Player
+  participant G as Game
+  participant B as Board
+  participant K as Knight (Piece)
+  P->>G: playMove(player, (0,1), (2,2))
+  G->>B: getCell(start), getCell(end)
+  G->>K: isValidMove(board, start, end)
+  K-->>G: true (an L-shape)
+  G->>G: move the piece, save Move in history
+  G->>G: switch turn
+  G-->>P: true

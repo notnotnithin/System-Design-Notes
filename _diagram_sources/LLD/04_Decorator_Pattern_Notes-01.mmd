@@ -1,0 +1,36 @@
+classDiagram
+  class BasePizza {
+    <<interface>>
+    +getDescription() String
+    +getCost() double
+  }
+  class ChickenDominator {
+  }
+  class ExtraCheeseTopping {
+  }
+  class Farmhouse {
+  }
+  class MushroomTopping {
+  }
+  class PepperoniTopping {
+  }
+  class PlainPizza {
+  }
+  class TandooriPaneerDelight {
+  }
+  class ToppingDecorator {
+    <<abstract>>
+    +BasePizza pizza
+  }
+  class VeggiesTopping {
+  }
+  BasePizza <|.. ChickenDominator
+  BasePizza <|.. Farmhouse
+  BasePizza <|.. PlainPizza
+  BasePizza <|.. TandooriPaneerDelight
+  BasePizza <|.. ToppingDecorator
+  ToppingDecorator --> BasePizza
+  ToppingDecorator <|-- ExtraCheeseTopping
+  ToppingDecorator <|-- MushroomTopping
+  ToppingDecorator <|-- PepperoniTopping
+  ToppingDecorator <|-- VeggiesTopping

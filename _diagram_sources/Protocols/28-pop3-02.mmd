@@ -1,0 +1,24 @@
+sequenceDiagram
+  participant P0 as Laptop 192.168.1.10
+  participant P1 as pop.example.org 198.51.100.110
+  P0->>P1: 1. TCP: 53010 → 995 [SYN] Seq=0
+  P1->>P0: 2. TCP: 995 → 53010 [SYN, ACK] Seq=0 Ack=1
+  P0->>P1: 3. TCP: 53010 → 995 [ACK] Seq=1 Ack=1
+  P0->>P1: 4. TLSv1.3: Client Hello (SNI=pop.example.org)
+  P1->>P0: 5. TLSv1.3: Server Hello + encrypted handshake, 2 segments
+  P0->>P1: 6. TLSv1.3: Change Cipher Spec, Finished (encrypted)
+  P1->>P0: 7. POP (TLS): +OK Dovecot ready.
+  P0->>P1: 8. POP (TLS): USER bob
+  P1->>P0: 9. POP (TLS): +OK
+  P0->>P1: 10. POP (TLS): PASS (password)
+  P1->>P0: 11. POP (TLS): +OK Logged in.
+  P0->>P1: 12. POP (TLS): STAT
+  P1->>P0: 13. POP (TLS): +OK 2 5120
+  P0->>P1: 14. POP (TLS): LIST
+  P1->>P0: 15. POP (TLS): +OK 2 messages: 1 1904, 2 3216
+  P0->>P1: 16. POP (TLS): RETR 1
+  P1->>P0: 17. POP (TLS): +OK 1904 octets, message, “.” (2 segments)
+  P0->>P1: 18. POP (TLS): DELE 1
+  P1->>P0: 19. POP (TLS): +OK Marked to be deleted.
+  P0->>P1: 20. POP (TLS): QUIT
+  P1->>P0: 21. POP (TLS): +OK Logging out, messages deleted.

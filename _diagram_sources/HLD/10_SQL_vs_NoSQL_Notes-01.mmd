@@ -1,0 +1,5 @@
+graph LR
+  subgraph SRV["One server: DB Employee"]
+    E["Table 1: Employee<br/>id, name, dept"] --- S["Table 2: Salary"]
+    E --- AD["Table 3: Address"]
+  end

@@ -1,0 +1,8 @@
+sequenceDiagram
+  participant P as Person inside elevator 2
+  participant IB as InternalButton
+  participant ID as InternalDispatcher
+  participant C as ElevatorController (elevator 2)
+  P->>IB: pressButton(9)
+  IB->>ID: submitInternalRequest(9, controller)
+  ID->>C: submitRequest(9)

@@ -1,0 +1,4 @@
+graph LR
+  T["API traffic"] --> C["Controller"]
+  C -->|"traffic goes down over time"| M["Monolith"]
+  C -->|"0, then 20, then 60, then 100"| MS["Microservices (S1, S2, ...)"]

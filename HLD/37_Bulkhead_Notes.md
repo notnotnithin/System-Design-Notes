@@ -15,11 +15,7 @@ Resilience4j provides these mechanisms to build fault-tolerant microservices: **
 <!-- diagram:37-0 -->
 **Diagram – Rate limiter protects from clients, bulkhead from downstream**
 
-```mermaid
-graph LR
-  C["Clients"] -->|"rate limiter: requests per time window"| O["Order service"]
-  O -->|"bulkhead: concurrent calls and threads"| P["Product / Payment services"]
-```
+![Diagram](diagrams/37_Bulkhead_Notes-01.png)
 <!-- /diagram:37-0 -->
 
 
@@ -54,14 +50,7 @@ Examples: **rate limiter** (app = Order): the limit is 4 requests in 5 s; reques
 <!-- diagram:37-1 -->
 **Diagram – Semaphore bulkhead: maxConcurrentCalls = 2**
 
-```mermaid
-graph LR
-  R1["Call 1"] --> S{"Semaphore: 2 permits"}
-  R2["Call 2"] --> S
-  R3["Call 3"] --> S
-  S -->|"permit available"| P["Product service"]
-  S -->|"no permit, maxWaitDuration 0"| F["Rejected immediately: fallback"]
-```
+![Diagram](diagrams/37_Bulkhead_Notes-02.png)
 <!-- /diagram:37-1 -->
 
 
@@ -155,16 +144,7 @@ It limits the **number of concurrent calls using a counter** (a Semaphore lock).
 <!-- diagram:37-2 -->
 **Diagram – Thread-pool bulkhead: 3 threads + queue of 2**
 
-```mermaid
-graph LR
-  R["6 concurrent requests"] --> TP
-  subgraph TP["Dedicated pool for productService"]
-    T["3 threads running"]
-    Q["Queue: 2 waiting"]
-  end
-  TP --> P["Product service"]
-  R -->|"6th request: pool and queue full"| F["Rejected: fallback"]
-```
+![Diagram](diagrams/37_Bulkhead_Notes-03.png)
 <!-- /diagram:37-2 -->
 
 

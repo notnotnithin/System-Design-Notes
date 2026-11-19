@@ -13,20 +13,7 @@ Source: https://drive.google.com/file/d/11DAZgXFoArZ17xVLhkIxTYQtUYAJNnr-/view?u
 <!-- diagram:34-0 -->
 **Diagram – Hardcoded URL versus service discovery**
 
-```mermaid
-graph LR
-  subgraph HC["Hardcoded URL"]
-    O1["Order service"] -->|"http://localhost:8082"| P1["Product instance 1 only"]
-  end
-  subgraph SD["With Eureka"]
-    O2["Order service"] -->|"where is product-service?"| E["Eureka server: the phone book"]
-    E -->|"instance list"| O2
-    O2 --> PA["Product instance 1"]
-    O2 --> PB["Product instance 2"]
-    PA -->|"register + heartbeat"| E
-    PB -->|"register + heartbeat"| E
-  end
-```
+![Diagram](diagrams/34_Service_Discovery_Notes-01.png)
 <!-- /diagram:34-0 -->
 
 
@@ -248,17 +235,7 @@ Order now calls Product in two possible ways, shown below.
 <!-- diagram:34-1 -->
 **Diagram – Registration, heartbeat and eviction**
 
-```mermaid
-sequenceDiagram
-  participant C as Eureka client (Product service)
-  participant S as Eureka server
-  C->>S: register (name, IP, port, status)
-  loop every 30 s (default)
-    C->>S: heartbeat (lease renewal)
-  end
-  Note over S: no heartbeat for 90 s (default): instance removed
-  C->>S: de-register on graceful shutdown: marked DOWN
-```
+![Diagram](diagrams/34_Service_Discovery_Notes-02.png)
 <!-- /diagram:34-1 -->
 
 
@@ -325,15 +302,7 @@ The client properties: **`lease-renewal-interval-in-seconds`** (after this many 
 <!-- diagram:34-2 -->
 **Diagram – Three-node Eureka cluster**
 
-```mermaid
-graph LR
-  E1["eureka-1 :8761"] <--> E2["eureka-2 :8762"]
-  E2 <--> E3["eureka-3 :8763"]
-  E3 <--> E1
-  C["Clients list all three URLs"] --> E1
-  C --> E2
-  C --> E3
-```
+![Diagram](diagrams/34_Service_Discovery_Notes-03.png)
 <!-- /diagram:34-2 -->
 
 
@@ -371,17 +340,7 @@ Yes, a **single Eureka server is a single point of failure.** Usually a **3-node
 <!-- diagram:34-3 -->
 **Diagram – The client caches the registry locally**
 
-```mermaid
-sequenceDiagram
-  participant O as Order service
-  participant E as Eureka server
-  participant P as Product service
-  O->>E: at startup: fetch registry (cached locally)
-  loop every 30 s
-    O->>E: refresh the local copy
-  end
-  O->>P: normal calls use the local copy (no extra hop)
-```
+![Diagram](diagrams/34_Service_Discovery_Notes-04.png)
 <!-- /diagram:34-3 -->
 
 

@@ -31,178 +31,13 @@ Design an Amazon-style product delivery system with **warehouses and inventory**
 
 **Diagram – Order management**
 
-```mermaid
-classDiagram
-  class Address {
-    +int pinCode
-    +String city
-    +String state
-  }
-  class CardPaymentMode {
-    +makePayment() boolean
-  }
-  class Cart {
-    +Map~Integer,Integer~ productCategoryIdVsCountMap
-    +addItemInCart() void
-    +removeItemFromCart() void
-    +emptyCart() void
-  }
-  class Inventory {
-    +List~ProductCategory~ productCategoryList
-    +addCategory() void
-    +addProduct() void
-    +removeItems() void
-  }
-  class Invoice {
-    +int totalItemPrice
-    +int totalTax
-    +int totalFinalPrice
-    +generateInvoice() void
-  }
-  class Main {
-  }
-  class NearestWarehouseSelectionStrategy {
-    +selectWarehouse() Warehouse
-  }
-  class Order {
-    +User user
-    +Address deliveryAddress
-    +Map~Integer,Integer~ productCategoryAndCountMap
-    +checkout() void
-    +makePayment() boolean
-    +generateOrderInvoice() void
-  }
-  class OrderController {
-    +List~Order~ orderList
-    +Map~Integer,List~ userIDVsOrders
-    +createNewOrder() Order
-    +removeOrder() void
-  }
-  class OrderStatus {
-    <<enumeration>>
-    DELIVERED
-    CANCELLED
-    RETURNED
-    UNDELIVERED
-    +RETURNED, UNDELIVERED
-  }
-  class Payment {
-    +PaymentMode paymentMode
-    +makePayment() boolean
-  }
-  class PaymentMode {
-    <<interface>>
-    +makePayment() boolean
-  }
-  class Product {
-    +int productId
-    +String productName
-  }
-  class ProductCategory {
-    +int productCategoryId
-    +String categoryName
-    +List~Product~ products
-    +addProduct() void
-    +removeProduct() void
-  }
-  class ProductDeliverySystem {
-    +UserController userController
-    +WarehouseController warehouseController
-    +OrderController orderController
-    +addProductToCart() void
-    +placeOrder() Order
-    +checkout() void
-  }
-  class UPIPaymentMode {
-    +makePayment() boolean
-  }
-  class User {
-    +int userId
-    +String userName
-    +Address address
-  }
-  class UserController {
-    +List~User~ userList
-    +addUser() void
-    +removeUser() void
-  }
-  class Warehouse {
-    +Inventory inventory
-    +Address address
-    +removeItemFromInventory() void
-    +addItemToInventory() void
-  }
-  class WarehouseController {
-    +List~Warehouse~ warehouseList
-    +WarehouseSelectionStrategy warehouseSelectionStrategy
-    +addNewWarehouse() void
-    +removeWarehouse() void
-    +selectWarehouse() Warehouse
-  }
-  class WarehouseSelectionStrategy {
-    <<abstract>>
-    +selectWarehouse() Warehouse
-  }
-  Inventory --> "*" ProductCategory
-  Order --> Address
-  Order --> Invoice
-  Order --> OrderStatus
-  Order --> Payment
-  Order --> User
-  Order --> Warehouse
-  OrderController --> "*" Order
-  Payment --> PaymentMode
-  PaymentMode <|.. CardPaymentMode
-  PaymentMode <|.. UPIPaymentMode
-  ProductCategory --> "*" Product
-  ProductDeliverySystem --> OrderController
-  ProductDeliverySystem --> UserController
-  ProductDeliverySystem --> WarehouseController
-  User --> Address
-  User --> Cart
-  UserController --> "*" User
-  Warehouse --> Address
-  Warehouse --> Inventory
-  WarehouseController --> "*" Warehouse
-  WarehouseController --> WarehouseSelectionStrategy
-  WarehouseSelectionStrategy <|-- NearestWarehouseSelectionStrategy
-```
+![Diagram](diagrams/29_Inventory_Order_Management_Notes-01.png)
 
 ## Step 3 – The order flow
 
-```mermaid
-sequenceDiagram
-  participant U as User
-  participant S as ProductDeliverySystem
-  participant WC as WarehouseController
-  participant OC as OrderController
-  participant O as Order
-  participant W as Warehouse
-  U->>S: addProductToCart(user, product, count)
-  S->>S: Cart.addItemInCart(categoryId, count)
-  U->>S: placeOrder(user, warehouse)
-  S->>WC: selectWarehouse(strategy)
-  WC-->>S: nearest warehouse
-  S->>OC: createNewOrder(user, warehouse)
-  OC-->>S: Order
-  U->>S: checkout(order)
-  S->>O: checkout()
-  O->>W: removeItemFromInventory(products and counts)
-  W->>W: Inventory.removeItems(...)
-  O->>O: makePayment(paymentMode)
-  O->>O: generateOrderInvoice()
-  O-->>U: invoice and order status
-```
+![Diagram](diagrams/29_Inventory_Order_Management_Notes-02.png)
 
-```mermaid
-stateDiagram-v2
-  [*] --> Placed
-  Placed --> Paid: payment success
-  Paid --> DELIVERED
-  Placed --> CANCELLED
-  DELIVERED --> RETURNED
-  Paid --> UNDELIVERED: delivery failed
-```
+![Diagram](diagrams/29_Inventory_Order_Management_Notes-03.png)
 
 *The enum `OrderStatus` has `DELIVERED`, `CANCELLED`, `RETURNED`, `UNDELIVERED`. The earlier states in the diagram are the natural flow around them.*
 
@@ -212,23 +47,7 @@ stateDiagram-v2
 
 **Payment (Strategy).** `PaymentMode.makePayment()` is implemented by `UPIPaymentMode` and `CardPaymentMode`; `Payment` holds one and calls it.
 
-```mermaid
-classDiagram
-  class WarehouseSelectionStrategy {
-    <<abstract>>
-    +selectWarehouse(list) Warehouse
-  }
-  class NearestWarehouseSelectionStrategy
-  class PaymentMode {
-    <<interface>>
-    +makePayment() boolean
-  }
-  class UPIPaymentMode
-  class CardPaymentMode
-  WarehouseSelectionStrategy <|-- NearestWarehouseSelectionStrategy
-  PaymentMode <|.. UPIPaymentMode
-  PaymentMode <|.. CardPaymentMode
-```
+![Diagram](diagrams/29_Inventory_Order_Management_Notes-04.png)
 
 ## Design points to mention
 - **Facade:** `ProductDeliverySystem` gives callers one entry point ([Facade](25_Facade_Pattern_Notes.md)).

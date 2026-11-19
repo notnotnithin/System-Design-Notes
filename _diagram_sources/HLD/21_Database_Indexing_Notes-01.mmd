@@ -1,0 +1,7 @@
+flowchart TB
+    subgraph P["Data Page – PageID: 1 (8 KB)"]
+        H["Header (96 B): PageNo, free space, checksum"]
+        D["Data records (8060 B): Row1, Row2, Row3, Row4, Row5 ..."]
+        O["Offset array (36 B): slots point to the rows"]
+    end
+    O -. pointer .-> D

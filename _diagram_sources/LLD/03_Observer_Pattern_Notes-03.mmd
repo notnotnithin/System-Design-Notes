@@ -1,0 +1,36 @@
+classDiagram
+  class WeatherObservable {
+    <<interface>>
+    +addObserver() void
+    +removeObserver() void
+    +notifyObservers() void
+  }
+  class WeatherStation {
+    -List~WeatherObserver~ observers
+    -float temperature
+    -float humidity
+    -float pressure
+    +addObserver() void
+    +removeObserver() void
+    +notifyObservers() void
+  }
+  class CurrentConditionsDisplay {
+    -WeatherObservable weatherStation
+    +update() void
+    +display() void
+  }
+  class ForecastDisplay {
+    -WeatherObservable weatherStation
+    +update() void
+    +display() void
+  }
+  class WeatherObserver {
+    <<interface>>
+    +update() void
+  }
+  CurrentConditionsDisplay --> WeatherObservable
+  ForecastDisplay --> WeatherObservable
+  WeatherObservable <|.. WeatherStation
+  WeatherObserver <|.. CurrentConditionsDisplay
+  WeatherObserver <|.. ForecastDisplay
+  WeatherStation --> "*" WeatherObserver

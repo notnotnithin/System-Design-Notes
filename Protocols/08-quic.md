@@ -12,10 +12,7 @@
 
 ### How the layers fit together (outer to inner)
 
-```mermaid
-graph LR
-  N1["IPv4"] --> N2["UDP port 443"] --> N3["QUIC packets and streams"] --> N4["TLS 1.3 (inside CRYPTO frames)"] --> N5["HTTP/3 frames"]
-```
+![Diagram](diagrams/08-quic-01.png)
 
 ## In-depth explanation of the example (plain-language version)
 
@@ -139,21 +136,7 @@ Because the connection is identified by its **connection ID**, if your laptop mo
 
 ### Sequence diagram
 
-```mermaid
-sequenceDiagram
-  participant P0 as Laptop 192.168.1.10
-  participant P1 as Web server 203.0.113.10
-  P0->>P1: 1. QUIC: Initial, CRYPTO (Client Hello, part 1)
-  P0->>P1: 2. QUIC: Initial, CRYPTO (Client Hello, part 2), PADDING
-  P1->>P0: 3. QUIC: Initial, ACK, CRYPTO (Server Hello)
-  P1->>P0: 4. QUIC: Handshake, CRYPTO (Certificate, part 1)
-  P1->>P0: 5. QUIC: Handshake, CRYPTO (Certificate, part 2)
-  P1->>P0: 6. QUIC: Handshake, CRYPTO (Certificate Verify, Finished)
-  P0->>P1: 7. QUIC: Initial, ACK, PADDING, Handshake, ACK, CRYPTO (Finished)
-  P0->>P1: 8. QUIC: 1-RTT, HTTP/3 HEADERS (GET /)
-  P1->>P0: 9. QUIC: 1-RTT, HANDSHAKE_DONE, HTTP/3 HEADERS (200), DATA
-  P0->>P1: 10. QUIC: 1-RTT, ACK
-```
+![Diagram](diagrams/08-quic-02.png)
 
 *The lesson's own sequence diagram:*
 

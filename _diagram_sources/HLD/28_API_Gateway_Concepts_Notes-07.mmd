@@ -1,0 +1,4 @@
+graph LR
+  A["Microservice A<br/>needs: service discovery, client-side LB, circuit breaker, retry, telemetry"] --> B["Microservice B instances"]
+  A -.->|"locations"| SD["Service discovery"]
+  B -.->|"authorization: is A allowed?"| A

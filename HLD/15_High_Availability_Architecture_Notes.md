@@ -32,13 +32,7 @@ The same question can be asked in different ways: design a **data-resiliency** a
 <!-- diagram:15-0 -->
 **Diagram – A single database is a single point of failure**
 
-```mermaid
-graph TD
-  C["Client"] --> LB["Load balancer"]
-  LB --> A["Applications X, Y, Z"]
-  A -->|"read and write"| DB[("Primary DB: FAILED")]:::bad
-  classDef bad fill:#fecaca,stroke:#b91c1c,color:#000
-```
+![Diagram](diagrams/15_High_Availability_Architecture_Notes-01.png)
 <!-- /diagram:15-0 -->
 
 
@@ -71,20 +65,7 @@ The picture shows a client (mobile / PC), a **load balancer**, several applicati
 <!-- diagram:15-1 -->
 **Diagram – Active-passive: one live primary, one replica**
 
-```mermaid
-graph LR
-  C["Client"] --> LB["Load balancer"]
-  subgraph DC1["DC1 Mumbai: live"]
-    A1["Apps"] --> P[("Primary DB: read and write")]
-  end
-  subgraph DC2["DC2 Pune: disaster recovery"]
-    A2["Apps"] --> R[("Replica DB: read only")]
-  end
-  LB --> A1
-  LB --> A2
-  P -->|"one-directional sync"| R
-  A2 -. "writes go to the primary" .-> P
-```
+![Diagram](diagrams/15_High_Availability_Architecture_Notes-02.png)
 <!-- /diagram:15-1 -->
 
 
@@ -129,19 +110,7 @@ graph LR
 <!-- diagram:15-2 -->
 **Diagram – Active-active: both data centres read and write**
 
-```mermaid
-graph LR
-  C["Client"] --> LB["Load balancer"]
-  subgraph DC1["DC1 Mumbai"]
-    A1["Apps"] --> P1[("Live DB")]
-  end
-  subgraph DC2["DC2 Pune"]
-    A2["Apps"] --> P2[("Live DB")]
-  end
-  LB --> A1
-  LB --> A2
-  P1 <-->|"bidirectional sync"| P2
-```
+![Diagram](diagrams/15_High_Availability_Architecture_Notes-03.png)
 <!-- /diagram:15-2 -->
 
 

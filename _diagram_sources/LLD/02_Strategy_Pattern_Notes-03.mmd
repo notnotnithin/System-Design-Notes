@@ -1,0 +1,34 @@
+classDiagram
+  class GoodsVehicle {
+  }
+  class HybridVehicle {
+  }
+  class OffRoadVehicle {
+  }
+  class SportsVehicle {
+  }
+  class Vehicle {
+    +DriveStrategy driveStrategy
+    +drive() void
+  }
+  class DriveStrategy {
+    <<interface>>
+    +drive() void
+  }
+  class EVDrive {
+    +drive() void
+  }
+  class NormalDrive {
+    +drive() void
+  }
+  class SportsDrive {
+    +drive() void
+  }
+  DriveStrategy <|.. EVDrive
+  DriveStrategy <|.. NormalDrive
+  DriveStrategy <|.. SportsDrive
+  Vehicle --> DriveStrategy
+  Vehicle <|-- GoodsVehicle
+  Vehicle <|-- HybridVehicle
+  Vehicle <|-- OffRoadVehicle
+  Vehicle <|-- SportsVehicle

@@ -1,0 +1,13 @@
+sequenceDiagram
+  participant O as Organiser
+  participant S as MeetingScheduler
+  participant R as MeetingRoom
+  participant N as Notification
+  O->>S: scheduleMeeting(organiser, participants, subject, timeInterval)
+  S->>R: find a room: isAvailableFor(interval, capacity = number of participants)
+  R-->>S: room (or none: stop and return null)
+  S->>S: create the Meeting
+  S->>S: add it to the organiser's and every participant's Calendar
+  S->>R: bookSlot (add the interval to the room's booked slots and calendar)
+  S->>N: send invites to all participants
+  N-->>O: invites sent

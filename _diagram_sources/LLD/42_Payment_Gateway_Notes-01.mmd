@@ -1,0 +1,23 @@
+sequenceDiagram
+    participant App
+    participant US as User Service
+    participant IS as Instrument Service
+    participant TS as Txn Service
+    participant P as Processor
+    participant N as Notification
+    App->>US: /addUser (User1)
+    US-->>App: Create user with User1 ID and return
+    App->>US: /addUser (User2)
+    US-->>App: Create user with User2 ID and return
+    App->>IS: /addBank by User1
+    IS-->>App: Create bank for User1 and return
+    App->>IS: /addBank by User2
+    IS-->>App: Create bank for User2 and return
+    Note over App: Now U1 wants to send 10 Rs to U2
+    App->>US: /getUserDetails (get U2 details using email id or user id itself)
+    App->>IS: /getInstruments (get U1 instruments so it can choose the debit instrument)
+    App->>TS: /makePayment
+    TS->>IS: Get U2 credit instrument details, get U1 debit instrument details
+    TS->>P: Pass to processor for processing (assuming everything happens in real time)
+    TS->>N: Notify
+    TS-->>App: Returns txn id

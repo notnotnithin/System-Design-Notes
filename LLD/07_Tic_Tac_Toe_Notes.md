@@ -29,51 +29,7 @@ Design a **two-player Tic-Tac-Toe** game on a 3×3 board. Players choose X or O 
 
 **Diagram – Tic Tac Toe**
 
-```mermaid
-classDiagram
-  class TicTacToeGame {
-    +Deque~Player~ players
-    +Board gameBoard
-    +Player winner
-    +initializeGame() void
-    +startGame() GameStatus
-    +checkForWinner() boolean
-  }
-  class Board {
-    +int size
-    +PlayingPiece[][] board
-    +addPiece() boolean
-    +printBoard() void
-  }
-  class GameStatus {
-    <<enumeration>>
-    DRAW
-    WIN
-  }
-  class PieceType {
-    <<enumeration>>
-    X
-    O
-  }
-  class Player {
-    +String name
-    +PlayingPiece playingPiece
-  }
-  class PlayingPiece {
-    +PieceType pieceType
-  }
-  class PlayingPieceO {
-  }
-  class PlayingPieceX {
-  }
-  Board --> "*" PlayingPiece
-  Player --> PlayingPiece
-  PlayingPiece --> PieceType
-  PlayingPiece <|-- PlayingPieceO
-  PlayingPiece <|-- PlayingPieceX
-  TicTacToeGame --> Board
-  TicTacToeGame --> Player
-```
+![Diagram](diagrams/07_Tic_Tac_Toe_Notes-01.png)
 
 ## Step 3 – How the game runs
 The game keeps the players in a **queue (Deque)**:
@@ -84,32 +40,9 @@ The game keeps the players in a **queue (Deque)**:
 5. Otherwise add the player to the **back** of the queue (so turns alternate).
 6. Check whether this move wins. If yes, the game is over.
 
-```mermaid
-flowchart TD
-  A["Take the first player from the queue"] --> B{"Any free cell?"}
-  B -->|"no"| D["DRAW: game over"]
-  B -->|"yes"| C["Read row, column"]
-  C --> E{"Valid empty cell?"}
-  E -->|"no"| F["Put player back at the FRONT, try again"] --> A
-  E -->|"yes"| G["Place piece, put player at the BACK"]
-  G --> H{"Winning move?"}
-  H -->|"yes"| W["WIN: announce winner"]
-  H -->|"no"| A
-```
+![Diagram](diagrams/07_Tic_Tac_Toe_Notes-02.png)
 
-```mermaid
-sequenceDiagram
-  participant G as TicTacToeGame
-  participant P as Player (current)
-  participant B as Board
-  G->>P: remove from the front of the queue
-  G->>B: getFreeCells()
-  G->>P: ask for row, column
-  G->>B: addPiece(row, column, piece)
-  B-->>G: true (valid)
-  G->>G: players.addLast(player)
-  G->>G: checkForWinner(row, column, pieceType)
-```
+![Diagram](diagrams/07_Tic_Tac_Toe_Notes-03.png)
 
 *Placing a piece and handling an invalid move*
 
@@ -135,17 +68,7 @@ if (isWinner) {
 ## Winner check
 After each move, only the **row, column and diagonals that pass through the new cell** need to be checked: if every cell in one of these lines holds the same `PieceType`, the player wins. This is cheaper than scanning the whole board.
 
-```mermaid
-graph LR
-  M["Move at (row, column)"] --> R["Check the whole row"]
-  M --> C["Check the whole column"]
-  M --> D1["Check the main diagonal (if on it)"]
-  M --> D2["Check the other diagonal (if on it)"]
-  R --> W["All same piece means WIN"]
-  C --> W
-  D1 --> W
-  D2 --> W
-```
+![Diagram](diagrams/07_Tic_Tac_Toe_Notes-04.png)
 
 ## Design points to mention
 - **Single Responsibility:** `Board` knows cells, `Player` knows identity, `TicTacToeGame` knows the rules and turn order.

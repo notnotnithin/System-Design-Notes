@@ -1,0 +1,7 @@
+graph TD
+  M["Match (teamA, teamB, toss, venue)"] --> I1["Innings 1"]
+  M --> I2["Innings 2"]
+  I1 --> O["Overs (up to 20 for T20, 50 for ODI)"]
+  O --> B["Balls (6 legal balls per over, plus extras)"]
+  B --> W["Wicket (optional)"]
+  M -.- MT["MatchType: T20Match or OneDayMatch"]

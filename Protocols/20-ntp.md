@@ -12,10 +12,7 @@
 
 ### How the layers fit together (outer to inner)
 
-```mermaid
-graph LR
-  N1["Ethernet frame"] --> N2["IPv4 packet"] --> N3["UDP port 123"] --> N4["NTP packet: 48 bytes, four timestamps"]
-```
+![Diagram](diagrams/20-ntp-01.png)
 
 ## In-depth explanation of the example (plain-language version)
 
@@ -116,13 +113,7 @@ A small error is fixed by **slewing**: running the clock slightly faster or slow
 
 ### Sequence diagram
 
-```mermaid
-sequenceDiagram
-  participant P0 as Laptop 192.168.1.10
-  participant P1 as NTP server 203.0.113.123
-  P0->>P1: 1. NTP: NTP Version 3, client
-  P1->>P0: 2. NTP: NTP Version 3, server
-```
+![Diagram](diagrams/20-ntp-02.png)
 
 *The lesson's own sequence diagram:*
 

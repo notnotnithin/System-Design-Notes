@@ -1,0 +1,6 @@
+graph LR
+  R["New request for floor f"] --> Q{"f is above the next stop?"}
+  Q -->|"yes"| UP["put in upMinPQ (min-heap)"]
+  Q -->|"no"| DOWN["put in downMaxPQ (max-heap)"]
+  UP --> W["notify(): wake the elevator thread"]
+  DOWN --> W

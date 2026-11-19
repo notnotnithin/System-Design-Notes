@@ -1,0 +1,108 @@
+classDiagram
+  class ParkingSpot {
+    -String spotId
+    -boolean isFree
+    +occupySpot() void
+    +releaseSpot() void
+  }
+  class Vehicle {
+    +String vehicleNumber
+    +VehicleType vehicleType
+  }
+  class ParkingSpotLookupStrategy {
+    <<interface>>
+    +selectSpot() ParkingSpot
+  }
+  class RandomLookupStrategy {
+    +selectSpot() ParkingSpot
+  }
+  class Ticket {
+    -Vehicle vehicle
+    -ParkingLevel level
+    -ParkingSpot spot
+  }
+  class VehicleType {
+    <<enumeration>>
+    TWO_WHEELER
+    FOUR_WHEELER
+  }
+  class EntranceGate {
+    +enter() Ticket
+  }
+  class ExitGate {
+    -CostComputation costComputation
+    +completeExit() void
+  }
+  class ParkingBuilding {
+    -List~ParkingLevel~ levels
+    +allocate() Ticket
+    +release() void
+  }
+  class ParkingLevel {
+    -int levelNumber
+    -Map~VehicleType,ParkingSpotManager~ managers
+    +hasAvailability() boolean
+    +park() ParkingSpot
+    +unPark() void
+  }
+  class ParkingLot {
+    -ParkingBuilding building
+    -EntranceGate entranceGate
+    -ExitGate exitGate
+    +vehicleArrives() Ticket
+    +vehicleExits() void
+  }
+  class CashPayment {
+    +pay() boolean
+  }
+  class Payment {
+    <<interface>>
+    +pay() boolean
+  }
+  class UPIPayment {
+    +pay() boolean
+  }
+  class CostComputation {
+    -PricingStrategy pricingStrategy
+    +compute() double
+  }
+  class FixedPricingStrategy {
+    +calculate() double
+  }
+  class PricingStrategy {
+    <<interface>>
+    +calculate() double
+  }
+  class FourWheelerSpotManager {
+  }
+  class ParkingSpotManager {
+    <<abstract>>
+    +List~ParkingSpot~ spots
+    +ParkingSpotLookupStrategy strategy
+    -ReentrantLock lock
+    +park() ParkingSpot
+    +unPark() void
+    +hasFreeSpot() boolean
+  }
+  class TwoWheelerSpotManager {
+  }
+  CostComputation --> PricingStrategy
+  ExitGate --> CostComputation
+  ParkingBuilding --> "*" ParkingLevel
+  ParkingLevel --> "*" ParkingSpotManager
+  ParkingLevel --> "*" VehicleType
+  ParkingLot --> EntranceGate
+  ParkingLot --> ExitGate
+  ParkingLot --> ParkingBuilding
+  ParkingSpotLookupStrategy <|.. RandomLookupStrategy
+  ParkingSpotManager --> "*" ParkingSpot
+  ParkingSpotManager --> ParkingSpotLookupStrategy
+  ParkingSpotManager <|-- FourWheelerSpotManager
+  ParkingSpotManager <|-- TwoWheelerSpotManager
+  Payment <|.. CashPayment
+  Payment <|.. UPIPayment
+  PricingStrategy <|.. FixedPricingStrategy
+  Ticket --> ParkingLevel
+  Ticket --> ParkingSpot
+  Ticket --> Vehicle
+  Vehicle --> VehicleType

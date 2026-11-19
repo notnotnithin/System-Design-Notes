@@ -1,0 +1,10 @@
+classDiagram
+    class LivingThings { <<abstract>> BreatheImplementor breatheImplementor +breatheProcess() }
+    class BreatheImplementor { <<interface>> +breatheProcess() }
+    LivingThings <|-- Dog
+    LivingThings <|-- Fish
+    LivingThings <|-- Tree
+    LivingThings o-- BreatheImplementor : has-a
+    BreatheImplementor <|.. LandBreathe
+    BreatheImplementor <|.. WaterBreathe
+    BreatheImplementor <|.. TreeBreathe

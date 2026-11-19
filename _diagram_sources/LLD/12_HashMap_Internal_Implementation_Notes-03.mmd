@@ -1,0 +1,8 @@
+flowchart TD
+  A["put(key, value)"] --> B["index = key.hashCode() % table length"]
+  B --> C{"bucket empty?"}
+  C -->|"yes"| D["create an Entry and store it in the bucket"]
+  C -->|"no"| E["walk the chain"]
+  E --> F{"found the same key?"}
+  F -->|"yes"| G["replace its value"]
+  F -->|"no, end of chain"| H["append a new Entry at the end"]

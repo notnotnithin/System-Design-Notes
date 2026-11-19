@@ -12,10 +12,7 @@
 
 ### How the layers fit together (outer to inner)
 
-```mermaid
-graph LR
-  N1["IPv4"] --> N2["UDP port 53 (EDNS, DO bit)"] --> N3["DNS message"] --> N4["RRSIG, DNSKEY, DS records"]
-```
+![Diagram](diagrams/16-dnssec-01.png)
 
 ## In-depth explanation of the example (plain-language version)
 
@@ -131,21 +128,7 @@ The resolver returns `203.0.113.10` to the laptop with an **AD ("Authenticated D
 
 ### Sequence diagram
 
-```mermaid
-sequenceDiagram
-  participant P0 as Laptop 192.168.1.10
-  participant P1 as DNS resolver 8.8.8.8
-  participant P2 as example.com server 198.51.100.53
-  participant P3 as .com server 192.5.6.30
-  P0->>P1: 1. DNS: Standard query A www.example.com
-  P1->>P2: 2. DNS: Standard query A www.example.com OPT
-  P2->>P1: 3. DNS: Standard query response A 203.0.113.10 RRSIG
-  P1->>P2: 4. DNS: Standard query DNSKEY example.com OPT
-  P2->>P1: 5. DNS: Standard query response DNSKEY DNSKEY RRSIG
-  P1->>P3: 6. DNS: Standard query DS example.com OPT
-  P3->>P1: 7. DNS: Standard query response DS RRSIG
-  P1->>P0: 8. DNS: Standard query response A 203.0.113.10
-```
+![Diagram](diagrams/16-dnssec-02.png)
 
 *The lesson's own sequence diagram:*
 

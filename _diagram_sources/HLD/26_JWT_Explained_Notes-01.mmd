@@ -1,0 +1,9 @@
+sequenceDiagram
+  participant C as Client
+  participant A as Authentication server
+  participant R as Resource server
+  C->>A: 1 login with username and password
+  A-->>C: 2 generates and returns a JWT
+  C->>R: 3 GET /details with Authorization: Bearer JWT
+  R->>A: verify(token) / public key (JWKS)
+  R-->>C: 4 response after validating the token

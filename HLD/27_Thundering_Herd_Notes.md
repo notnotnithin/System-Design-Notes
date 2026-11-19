@@ -13,16 +13,7 @@ Source (handwritten, 2 pages): https://drive.google.com/file/d/1s_rhkuSserKURoOT
 <!-- diagram:27-0 -->
 **Diagram – Thundering herd at the 12:00 PM sale**
 
-```mermaid
-graph TD
-  N["New requests"] --> LB["Load balancer"]
-  RT["Retried requests (denied earlier)"] --> LB
-  LB --> T1["TS 1 + full queue"]:::bad
-  LB --> T2["TS 2 + full queue"]:::bad
-  LB --> T3["TS 3 + full queue"]:::bad
-  T1 -. "denied: clients retry at once" .-> RT
-  classDef bad fill:#fecaca,stroke:#b91c1c,color:#000
-```
+![Diagram](diagrams/27_Thundering_Herd_Notes-01.png)
 <!-- /diagram:27-0 -->
 
 
@@ -61,10 +52,7 @@ So the load balancer is hit by *new requests **plus** retried requests,* all at 
 <!-- diagram:27-1 -->
 **Diagram – Backoff spreads the retries over time**
 
-```mermaid
-graph LR
-  F["Request fails"] --> W1["wait 200 ms"] --> R1["retry 1 fails"] --> W2["wait 400 ms"] --> R2["retry 2 fails"] --> W3["wait 800 ms"] --> R3["retry 3"]
-```
+![Diagram](diagrams/27_Thundering_Herd_Notes-02.png)
 <!-- /diagram:27-1 -->
 
 
@@ -102,15 +90,7 @@ Exponential backoff alone still makes **all the clients retry at the same moment
 <!-- diagram:27-2 -->
 **Diagram – Rate limiter at the gateway**
 
-```mermaid
-graph TD
-  C["Clients"] --> AG["Application gateway + rate limiter (token bucket)"]
-  AG -->|"allowed rate only"| LB["Load balancer"]
-  AG -->|"excess"| X["Rejected quickly: try again later"]
-  LB --> T1["TS1"]
-  LB --> T2["TS2"]
-  LB --> T3["TS3"]
-```
+![Diagram](diagrams/27_Thundering_Herd_Notes-03.png)
 <!-- /diagram:27-2 -->
 
 

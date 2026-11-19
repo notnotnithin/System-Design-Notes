@@ -34,192 +34,15 @@ A Zoomcar-style rental service. A user picks a **store** by location, searches v
 
 **Diagram – Car rental**
 
-```mermaid
-classDiagram
-  class Bill {
-    -int billId
-    -int reservationId
-    -double totalBillAmount
-  }
-  class BillManager {
-    -BillingStrategy billingStrategy
-    -Map~Integer,Bill~ bills
-    +generateBill() Bill
-  }
-  class BillingStrategy {
-    <<interface>>
-    +generateBill() Bill
-  }
-  class DailyBillingStrategy {
-    +VehicleInventoryManager vehicleInventoryManager
-    -AtomicInteger billIdGenerator
-    +generateBill() Bill
-  }
-  class Location {
-    +int buildingNo
-    +String area
-    +String city
-  }
-  class Store {
-    -int storeId
-    -Location storeLocation
-    -VehicleInventoryManager inventory
-    +createReservation() Reservation
-    +cancelReservation() void
-    +startTrip() void
-  }
-  class User {
-    +int userId
-    +String userName
-    +String drivingLicenseNo
-  }
-  class VehicleRentalSystem {
-    +List~Store~ storeList
-    +List~User~ userList
-    +addStore() void
-    +addUser() void
-    +removeStore() void
-  }
-  class Payment {
-    -int paymentId
-    -int billId
-    -double amountPaid
-  }
-  class PaymentManager {
-    -PaymentStrategy paymentStrategy
-    -Map~Integer,Payment~ payments
-    +makePayment() Payment
-  }
-  class PaymentMode {
-    <<enumeration>>
-    CASH
-    ONLINE
-    UPI
-  }
-  class PaymentStrategy {
-    <<interface>>
-    +processPayment() Payment
-  }
-  class UPIPaymentStrategy {
-    -AtomicInteger paymentIdGenerator
-    +processPayment() Payment
-  }
-  class DateInterval {
-    -LocalDate from
-    -LocalDate to
-    +overlaps() boolean
-  }
-  class Vehicle {
-    -int vehicleID
-    -String vehicleNumber
-    -VehicleType vehicleType
-  }
-  class VehicleInventoryManager {
-    -ConcurrentMap~Integer,Vehicle~ vehicles
-    -ConcurrentMap~Integer,List~ vehicleBookingIds
-    -ConcurrentMap~Integer,ReentrantLock~ vehicleLocks
-    +addVehicle() void
-    +reserve() boolean
-    +release() void
-  }
-  class VehicleStatus {
-    <<enumeration>>
-    AVAILABLE
-    BOOKED
-    MAINTENANCE
-  }
-  class VehicleType {
-    <<enumeration>>
-    FOUR_WHEELER
-    TWO_WHEELER
-  }
-  class Reservation {
-    -int reservationId
-    -int vehicleId
-    -int userId
-  }
-  class ReservationManager {
-    -VehicleInventoryManager inventory
-    -ReservationRepository reservationRepository
-    -AtomicInteger reservationIdGenerator
-    +findByID() Optional~Reservation~
-    +createReservation() Reservation
-    +cancelReservation() void
-  }
-  class ReservationRepository {
-    -Map~Integer,Reservation~ reservations
-    +save() void
-    +findById() Optional~Reservation~
-    +remove() void
-  }
-  class ReservationStatus {
-    <<enumeration>>
-    SCHEDULED
-    IN_USE
-    COMPLETED
-    CANCELLED
-  }
-  class ReservationType {
-    <<enumeration>>
-    HOURLY
-    DAILY
-  }
-  BillManager --> "*" Bill
-  BillManager --> BillingStrategy
-  BillingStrategy <|.. DailyBillingStrategy
-  DailyBillingStrategy --> VehicleInventoryManager
-  Payment --> PaymentMode
-  PaymentManager --> "*" Payment
-  PaymentManager --> PaymentStrategy
-  PaymentStrategy <|.. UPIPaymentStrategy
-  Reservation --> ReservationStatus
-  Reservation --> ReservationType
-  ReservationManager --> ReservationRepository
-  ReservationManager --> VehicleInventoryManager
-  ReservationRepository --> "*" Reservation
-  Store --> BillManager
-  Store --> Location
-  Store --> PaymentManager
-  Store --> ReservationManager
-  Store --> VehicleInventoryManager
-  Vehicle --> VehicleStatus
-  Vehicle --> VehicleType
-  VehicleInventoryManager --> ReservationRepository
-  VehicleInventoryManager --> "*" Vehicle
-  VehicleRentalSystem --> "*" Store
-  VehicleRentalSystem --> "*" User
-```
+![Diagram](diagrams/09_Car_Rental_System_Notes-01.png)
 
 ## Step 3 – Reservation flow
 
-```mermaid
-sequenceDiagram
-  participant U as User
-  participant S as Store
-  participant R as ReservationManager
-  participant I as VehicleInventoryManager
-  U->>S: createReservation(vehicleId, user, from, to, type)
-  S->>R: createReservation(...)
-  R->>I: reserve(vehicleId, reservationId, from, to)
-  I->>I: lock this vehicle
-  I->>I: dates free? if not, return false
-  I->>I: add booking, status = BOOKED, unlock
-  I-->>R: true
-  R->>R: save Reservation (status SCHEDULED)
-  R-->>U: reservation
-```
+![Diagram](diagrams/09_Car_Rental_System_Notes-02.png)
 
 Then: **startTrip** (`SCHEDULED → IN_USE`), **submitVehicle** (`IN_USE → COMPLETED`, vehicle released), **generateBill**, **makePayment**.
 
-```mermaid
-stateDiagram-v2
-  [*] --> SCHEDULED: reserve
-  SCHEDULED --> IN_USE: start trip
-  IN_USE --> COMPLETED: submit vehicle
-  SCHEDULED --> CANCELLED: cancel
-  COMPLETED --> [*]
-  CANCELLED --> [*]
-```
+![Diagram](diagrams/09_Car_Rental_System_Notes-03.png)
 
 ## Step 4 – Concurrency (the key discussion point)
 Two users try to reserve the same car at the same moment. We need two safeguards:
@@ -254,19 +77,7 @@ public boolean reserve(int vehicleId, int reservationId, LocalDate from, LocalDa
 Availability uses `DateInterval.overlaps(other)`: a new booking is allowed only if its dates don't overlap any existing booking of that vehicle.
 
 ## Step 5 – Billing and payment (Strategy)
-```mermaid
-sequenceDiagram
-  participant U as User
-  participant S as Store
-  participant B as BillManager
-  participant P as PaymentManager
-  U->>S: generateBill(reservationId, billingStrategy)
-  S->>B: generateBill(reservation)
-  B-->>U: Bill (days x daily rate)
-  U->>S: makePayment(bill, paymentStrategy, amount)
-  S->>P: makePayment(bill, amount)
-  P-->>U: Payment (UPI, CASH, ONLINE)
-```
+![Diagram](diagrams/09_Car_Rental_System_Notes-04.png)
 Adding hourly billing or card payment means adding a new `BillingStrategy` or `PaymentStrategy` class ([Strategy pattern](02_Strategy_Pattern_Notes.md)).
 
 ## Design points to mention

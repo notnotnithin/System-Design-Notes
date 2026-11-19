@@ -1,0 +1,5 @@
+graph LR
+  E["execute(cmd)"] --> US["undo stack: push"]
+  US -->|"undo()"| RS["redo stack: push"]
+  RS -->|"redo()"| US
+  E -. "clears" .-> RS

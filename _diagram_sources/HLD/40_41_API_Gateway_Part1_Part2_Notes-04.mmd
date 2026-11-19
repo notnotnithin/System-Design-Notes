@@ -1,0 +1,8 @@
+graph TD
+  R["Request"] --> A{"path starts with /auth?"}
+  A -->|"yes"| P["pass through"]
+  A -->|"no"| H{"Authorization header present?"}
+  H -->|"no"| U["401 Unauthorized"]
+  H -->|"yes"| V{"token valid?"}
+  V -->|"no"| U
+  V -->|"yes"| N["chain.filter: continue, then post-filter logic"]

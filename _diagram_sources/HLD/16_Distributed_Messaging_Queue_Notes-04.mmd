@@ -1,0 +1,14 @@
+graph LR
+  subgraph B1["Broker 1"]
+    L0["P0 leader"]
+  end
+  subgraph B2["Broker 2"]
+    F0["P0 follower"]
+    L1["P1 leader"]
+  end
+  subgraph B3["Broker 3"]
+    F1["P1 follower"]
+  end
+  L0 -->|"replicates"| F0
+  L1 -->|"replicates"| F1
+  PR["Producer and consumers talk to leaders only"] -.- L0

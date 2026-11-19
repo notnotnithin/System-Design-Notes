@@ -1,0 +1,15 @@
+classDiagram
+  class DocumentCharacter {
+    -char character
+    -String fontType
+    -int size
+    +display() void
+  }
+  class ILetter {
+    <<interface>>
+    +display() void
+  }
+  class LetterFactory {
+    +crateLetter() ILetter
+  }
+  ILetter <|.. DocumentCharacter

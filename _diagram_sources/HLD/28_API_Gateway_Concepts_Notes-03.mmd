@@ -1,0 +1,7 @@
+graph LR
+  C["Client: /api/myorder"] --> G["API gateway"]
+  G --> P["Product service"]
+  G --> I["Invoice service"]
+  G --> R["Rating and review"]
+  G --> RC["Recommendation"]
+  G -->|"one joined response"| C

@@ -1,0 +1,14 @@
+flowchart TB
+    subgraph Zone1["Zone1 – Ns03.authoritativeDomainserver.com"]
+        A[conceptandcoding.com]
+        M[mail.conceptandcoding.com]
+    end
+    subgraph Zone2["Zone2 – Ns04.authoritativeDomainserver.com"]
+        B[blog.conceptandcoding.com]
+        US[us.blog.conceptandcoding.com]
+        AU[au.blog.conceptandcoding.com]
+    end
+    A --> B
+    A --> M
+    B --> US
+    B --> AU

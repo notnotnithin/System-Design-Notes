@@ -1,0 +1,6 @@
+graph LR
+  I["Input: ' OR '1' = '1"] --> Q["Unsafe query: WHERE user_name = '' OR '1' = '1'"]
+  Q --> R["Always true: all rows returned"]:::bad
+  I --> P["Parameterized query: WHERE user_name = :name"] --> S["Input treated as data: empty list"]:::good
+  classDef bad fill:#fecaca,stroke:#b91c1c,color:#000
+  classDef good fill:#bbf7d0,stroke:#15803d,color:#000

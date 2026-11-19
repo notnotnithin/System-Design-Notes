@@ -1,0 +1,6 @@
+graph LR
+  U["User"] -->|"action"| C["Controller"]
+  C -->|"updates"| M["Model"]
+  C -->|"selects what to show"| V["View"]
+  M -. "data" .-> V
+  V -->|"shown to"| U

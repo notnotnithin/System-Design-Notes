@@ -1,0 +1,12 @@
+graph LR
+  subgraph A["Abstraction (what it is)"]
+    L["LivingThings"] --> D["Dog"]
+    L --> F["Fish"]
+    L --> T["Tree"]
+  end
+  subgraph I["Implementation (how it works)"]
+    B["BreathingProcess"] --> LU["LungBreathing"]
+    B --> G["GillBreathing"]
+    B --> P["Photosynthesis"]
+  end
+  L -. "has a (the bridge)" .-> B

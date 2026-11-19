@@ -1,0 +1,19 @@
+sequenceDiagram
+  participant U as User
+  participant TC as TheatreController
+  participant BC as BookingController
+  participant BS as BookingService
+  participant S as Show
+  U->>TC: getMovies(city, date)
+  TC-->>U: movies
+  U->>TC: getTheatres(city, movie, date)
+  TC-->>U: theatres
+  U->>TC: getShows(movie, date, theatre)
+  TC-->>U: shows
+  U->>BC: createBooking(user, show, seats)
+  BC->>BS: book(user, show, seats)
+  BS->>S: lockSeats(seats)
+  S-->>BS: true
+  BS->>BS: payment
+  BS->>S: confirmSeats(seats)
+  BS-->>U: Booking

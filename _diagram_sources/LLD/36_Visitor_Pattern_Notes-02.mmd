@@ -1,0 +1,8 @@
+sequenceDiagram
+  participant C as Client
+  participant R as DeluxeRoom
+  participant V as PricingVisitor
+  C->>R: accept(pricingVisitor)
+  R->>V: visitDeluxeRoom(this)
+  V->>V: calculate price for a deluxe room, add to total revenue
+  V-->>C: done

@@ -12,12 +12,7 @@ In the previous topic (API Gateway) the picture is: **Client → DNS** (like AWS
 
 In simple form the page redraws it as:
 
-```mermaid
-flowchart LR
-    GW[API Gateway] --> SD[Service Discovery]
-    GW --> LB1[Application Load Balancer] --> MS1["Microservice1 (many instances)"]
-    GW --> LB2[Application Load Balancer] --> MS2["Microservice2 (many instances)"]
-```
+![Diagram](diagrams/29_Service_Mesh_Notes-01.png)
 
 **In simple words:** the gateway handles traffic coming **from the client**. The follow-up question is the traffic **between services**: Microservice A wants to call Microservice B. What does A need for that? The page lists seven capabilities.
 
@@ -28,23 +23,11 @@ flowchart LR
 
 **Scenario 1:** Service Discovery returns **all of Microservice B's instance locations**.
 
-```mermaid
-sequenceDiagram
-    participant A as Microservice1 (A)
-    participant SD as Service Discovery
-    A->>SD: Give me Microservice B location
-    SD-->>A: Instance1: url:port, Instance2: url:port, Instance3: url:port
-```
+![Diagram](diagrams/29_Service_Mesh_Notes-02.png)
 
 **Scenario 2:** Service Discovery returns the **address of Microservice B's application load balancer**.
 
-```mermaid
-sequenceDiagram
-    participant A as Microservice1 (A)
-    participant SD as Service Discovery
-    A->>SD: Give me Microservice B location
-    SD-->>A: Location of Microservice B Application Load Balancer
-```
+![Diagram](diagrams/29_Service_Mesh_Notes-03.png)
 
 **In simple words:** either the registry hands A the addresses of all the instances of B, or it hands over just the address of B's load balancer, and the load balancer then picks an instance.
 
@@ -52,24 +35,11 @@ sequenceDiagram
 
 **Scenario 1:** A got the instance locations of B and now wants **load balancing capability to distribute the traffic equally** to B. Config looks like `microserviceB.url={instance-url}:{port-no}`. A needs a **client-side load balance capability** inside itself.
 
-```mermaid
-flowchart LR
-    MS1[Microservice1] -- Give me B location --> SD[Service Discovery]
-    SD -- Instance1/2/3 url:port --> CLB
-    subgraph MS1box[Microservice1]
-        CLB[Client side Load Balance Capability]
-    end
-    CLB --> I1[Microservice2: Instance1]
-    CLB --> I2[Microservice2: Instance2]
-    CLB --> I3[Microservice2: Instance3]
-```
+![Diagram](diagrams/29_Service_Mesh_Notes-04.png)
 
 **Scenario 2:** A got **B's application load balancer address** and now needs to invoke that. Config looks like `microserviceB.url={application-load-balancer-url}:{port-no}`. **An extra network call is required, which might cause a latency issue** (the "extra hop" in the diagram).
 
-```mermaid
-flowchart LR
-    MS1[Microservice1] -- extra hop (network call) --> LB[Application Load Balancer] --> I[Microservice2: Instance1/2/3]
-```
+![Diagram](diagrams/29_Service_Mesh_Notes-05.png)
 
 **In simple words:** with scenario 1 the caller picks the instance itself (no extra hop but the caller must contain the balancing logic). With scenario 2 the caller calls a load balancer which then forwards the call: simpler for the caller but one more network hop, so more delay.
 
@@ -77,13 +47,7 @@ flowchart LR
 
 Microservice2's instance must **validate: does Microservice A have permission to invoke this API?**
 
-```mermaid
-flowchart LR
-    A[Microservice1 + client side LB] --> Z
-    subgraph B[Microservice2: Instance1]
-        Z[Authorization]
-    end
-```
+![Diagram](diagrams/29_Service_Mesh_Notes-06.png)
 
 **In simple words:** the called service checks who is calling it before it does the work.
 
@@ -104,11 +68,7 @@ Microservice1 also gets a **Retry** capability (the green circular arrow in the 
 - There are different deployment strategies like **Canary, Red-Black, Blue-Green** etc.
 - Example: in **Canary**, I want **90% of traffic on old and 10% on new** initially, and gradually increase the amount on the new manifest.
 
-```mermaid
-flowchart LR
-    M1[Microservice 1] -- 90% --> OLD["Microservice 2 (Old Manifest)"]
-    M1 -- 10% --> NEW["Microservice 2 (New Manifest)"]
-```
+![Diagram](diagrams/29_Service_Mesh_Notes-07.png)
 
 - Generally the **load balancer helps to control this**, which means **"the client-side load balancer also has to handle this different deployment strategy"**. So the box becomes *Client-side load balance capability + support for deployment strategy*.
 
@@ -120,22 +80,7 @@ flowchart LR
 
 **Everything on one picture:** Microservice1 now carries client-side load balancing + deployment-strategy support, circuit breaker (Hystrix) and retry; Microservice2 carries telemetry and authorization; plus the Service Discovery lookup.
 
-```mermaid
-flowchart LR
-    SD[Service Discovery]
-    subgraph M1[Microservice1]
-        A1[Client side LB + deployment strategy support]
-        A2[Circuit Breaker - Hystrix]
-        A3[Retry]
-    end
-    subgraph M2[Microservice2: Instance1]
-        B1[Telemetry: latency, error rate, traffic]
-        B2[Authorization]
-    end
-    M1 -- Give me Microservice B location --> SD
-    SD -- Instance1/2/3 url:port --> M1
-    M1 --> M2
-```
+![Diagram](diagrams/29_Service_Mesh_Notes-08.png)
 
 **In simple words:** every microservice would have to carry all this extra code (discovery, balancing, authorization, circuit breaking, retry, deployment strategy, telemetry), which is a lot of repeated work inside each service.
 
@@ -143,30 +88,7 @@ flowchart LR
 
 **Service Mesh (like Istio).**
 
-```mermaid
-flowchart LR
-    GW[API Gateway] --> SD[Service Discovery]
-    GW --> LB1[Application Load Balancer] --> P1
-    GW --> LB2[Application Load Balancer] --> P2
-    subgraph DP[Data Plane]
-        subgraph P1[Pod 1..N]
-            I1[Microservice1 Instance]
-            S1[Sidecar Proxy]
-        end
-        subgraph P2[Pod 1..N]
-            I2[Microservice2 Instance]
-            S2[Sidecar Proxy]
-        end
-    end
-    subgraph CP[Control Plane]
-        CM[Configuration Manager] --> TC[Traffic Controller]
-        SM[Security Manager]
-        T[Telemetry]
-    end
-    S1 <--> CP
-    S2 <--> CP
-    T -.-> OD[Observability Dashboards]
-```
+![Diagram](diagrams/29_Service_Mesh_Notes-09.png)
 
 - **Data plane:** the pods, each with the microservice instance **and a sidecar proxy** next to it.
 - **Control plane:** **Configuration Manager, Traffic Controller, Security Manager, Telemetry**; telemetry feeds **Observability Dashboards**.

@@ -1,0 +1,6 @@
+graph TB
+  P["Producer"] -->|"routing key"| E{"Exchange"}
+  E -->|"binding"| Q1["Queue Q1"] --> S1["Subscriber 1"]
+  E -->|"binding"| Q2["Queue Q2"] --> S2["Subscriber 2"]
+  E -->|"binding"| Q3["Queue Q3"] --> S3["Subscriber 3"]
+  E -.- T["Direct: routing key = binding key. Fan-out: copy to all queues. Topic: wildcard match"]

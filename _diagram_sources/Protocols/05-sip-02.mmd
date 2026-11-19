@@ -1,0 +1,25 @@
+sequenceDiagram
+  participant P0 as Laptop 192.168.1.10
+  participant P1 as SIP server 203.0.113.50
+  participant P2 as 198.51.100.200
+  P0->>P1: 1. SIP: Request: REGISTER sip:example.net
+  P1->>P0: 2. SIP: Status: 401 Unauthorized
+  P0->>P1: 3. SIP: Request: REGISTER sip:example.net
+  P1->>P0: 4. SIP: Status: 200 OK (REGISTER)
+  P0->>P1: 5. SIP/SDP: Request: INVITE sip:bob@example.net
+  P1->>P0: 6. SIP: Status: 100 Trying
+  P1->>P2: 7. SIP/SDP: Request: INVITE sip:bob@192.168.0.23:5060
+  P2->>P1: 8. SIP: Status: 180 Ringing
+  P1->>P0: 9. SIP: Status: 180 Ringing
+  P2->>P1: 10. SIP/SDP: Status: 200 OK (INVITE)
+  P1->>P0: 11. SIP/SDP: Status: 200 OK (INVITE)
+  P0->>P1: 12. SIP: Request: ACK sip:bob@192.168.0.23:5060
+  P1->>P2: 13. SIP: Request: ACK sip:bob@192.168.0.23:5060
+  P0->>P1: 14. RTP: PT=ITU-T G.711 PCMU, SSRC=0x3A9F12C4, Seq=11203, Time=54720
+  P1->>P2: 15. RTP: PT=ITU-T G.711 PCMU, SSRC=0x3A9F12C4, Seq=11203, Time=54720
+  P2->>P1: 16. RTP: PT=ITU-T G.711 PCMU, SSRC=0x77D0E95B, Seq=30871, Time=913600
+  P1->>P0: 17. RTP: PT=ITU-T G.711 PCMU, SSRC=0x77D0E95B, Seq=30871, Time=913600
+  P2->>P1: 18. SIP: Request: BYE sip:alice@192.168.1.10:5060
+  P1->>P0: 19. SIP: Request: BYE sip:alice@192.168.1.10:5060
+  P0->>P1: 20. SIP: Status: 200 OK (BYE)
+  P1->>P2: 21. SIP: Status: 200 OK (BYE)

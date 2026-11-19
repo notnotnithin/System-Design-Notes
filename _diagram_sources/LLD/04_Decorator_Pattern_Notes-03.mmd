@@ -1,0 +1,11 @@
+sequenceDiagram
+  participant C as Client
+  participant M as MushroomTopping
+  participant E as ExtraCheeseTopping
+  participant F as Farmhouse
+  C->>M: cost()
+  M->>E: cost()
+  E->>F: cost()
+  F-->>E: 200
+  E-->>M: 200 + 30
+  M-->>C: 230 + 40

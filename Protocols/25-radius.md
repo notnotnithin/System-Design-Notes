@@ -12,11 +12,7 @@
 
 ### How the layers fit together (outer to inner)
 
-```mermaid
-graph LR
-  N1["Laptop to AP: 802.11"] --> N2["EAPOL"] --> N3["EAP-TLS"]
-  N4["AP to server: IPv4"] --> N5["UDP port 1812"] --> N6["RADIUS Access-Request / Challenge / Accept"] --> N7["EAP message"]
-```
+![Diagram](diagrams/25-radius-01.png)
 
 ## In-depth explanation of the example (plain-language version)
 
@@ -161,34 +157,7 @@ Both the AP and the laptop now hold the same master key, so they run **the same 
 
 ### Sequence diagram
 
-```mermaid
-sequenceDiagram
-  participant P0 as Router / AP 00:00:5e:00:53:01
-  participant P1 as Laptop 00:00:5e:00:53:10
-  participant P2 as Access point 192.168.1.2
-  participant P3 as NAS 192.168.1.20
-  P0->>P1: 1. EAP: Request, Identity
-  P1->>P0: 2. EAP: Response, Identity
-  P2->>P3: 3. RADIUS: Access-Request id=81
-  P3->>P2: 4. RADIUS: Access-Challenge id=81
-  P0->>P1: 5. EAP: Request, TLS EAP (EAP-TLS)
-  P1->>P0: 6. EAP: Response, TLS EAP: Client Hello
-  P2->>P3: 7. RADIUS: Access-Request id=82: Client Hello
-  P3->>P2: 8. RADIUS: Access-Challenge id=82: Server Hello, certificate
-  P0->>P1: 9. EAP: Request, TLS EAP: Server Hello, encrypted handshake
-  P1->>P0: 10. EAP: Response, TLS EAP: encrypted handshake
-  P2->>P3: 11. RADIUS: Access-Request id=83: encrypted handshake
-  P3->>P2: 12. RADIUS: Access-Challenge id=83
-  P0->>P1: 13. EAP: Request, TLS EAP: Application Data
-  P1->>P0: 14. EAP: Response, TLS EAP (EAP-TLS)
-  P2->>P3: 15. RADIUS: Access-Request id=84
-  P3->>P2: 16. RADIUS: Access-Accept id=84
-  P0->>P1: 17. EAP: Success
-  P0->>P1: 18. EAPOL: Key (Message 1 of 4)
-  P1->>P0: 19. EAPOL: Key (Message 2 of 4)
-  P0->>P1: 20. EAPOL: Key (Message 3 of 4)
-  P1->>P0: 21. EAPOL: Key (Message 4 of 4)
-```
+![Diagram](diagrams/25-radius-02.png)
 
 *The lesson's own sequence diagram:*
 

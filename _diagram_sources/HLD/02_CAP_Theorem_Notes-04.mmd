@@ -1,0 +1,7 @@
+graph TD
+  W["Application writes a = 6"] --> B["Node B: a = 6"]
+  B -. "partition: replication blocked" .- C["Node C: still a = 5"]
+  Q["Read query"] --> C
+  C -->|"answers a = 5"| S["Stale data: Consistency is broken"]:::bad
+  C -->|"refuses to answer"| N["No response: Availability is broken"]:::bad
+  classDef bad fill:#fecaca,stroke:#b91c1c,color:#000

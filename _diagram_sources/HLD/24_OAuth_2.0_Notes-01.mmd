@@ -1,0 +1,5 @@
+graph TB
+  RO["Resource owner<br/>the user (Himanshu)"] -->|"uses"| CL["Client<br/>Instagram / Facebook"]
+  CL <-->|"redirect, authorization code, access token"| AS["Authorization server<br/>Gmail login and consent"]
+  CL -->|"access token"| RS["Resource server<br/>Gmail data: name, DOB"]
+  RS -.->|"validates the token"| AS

@@ -1,0 +1,8 @@
+sequenceDiagram
+  participant C as Client
+  participant F as CircleCreator (ShapeFactory)
+  participant S as Circle
+  C->>F: createShape()
+  F->>S: new Circle()
+  F-->>C: Shape
+  C->>S: computeArea() and draw()

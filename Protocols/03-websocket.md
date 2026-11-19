@@ -12,10 +12,7 @@
 
 ### How the layers fit together (outer to inner)
 
-```mermaid
-graph LR
-  N1["Ethernet frame"] --> N2["IPv4 packet"] --> N3["TCP port 80 (or 443 with TLS)"] --> N4["HTTP Upgrade handshake"] --> N5["WebSocket frames"]
-```
+![Diagram](diagrams/03-websocket-01.png)
 
 ## In-depth explanation of the example (plain-language version)
 
@@ -142,22 +139,7 @@ The page calls `socket.close()`. The browser sends a **Close** frame with code `
 
 ### Sequence diagram
 
-```mermaid
-sequenceDiagram
-  participant P0 as Laptop 192.168.1.10
-  participant P1 as Web server 203.0.113.10
-  P0->>P1: 1. TCP: 52360 → 80 [SYN] Seq=0
-  P1->>P0: 2. TCP: 80 → 52360 [SYN, ACK] Seq=0 Ack=1
-  P0->>P1: 3. TCP: 52360 → 80 [ACK] Seq=1 Ack=1
-  P0->>P1: 4. HTTP: GET /chat HTTP/1.1
-  P1->>P0: 5. HTTP: HTTP/1.1 101 Switching Protocols
-  P0->>P1: 6. WebSocket: WebSocket Text [FIN] [MASKED]
-  P1->>P0: 7. WebSocket: WebSocket Text [FIN]
-  P1->>P0: 8. WebSocket: WebSocket Ping [FIN]
-  P0->>P1: 9. WebSocket: WebSocket Pong [FIN] [MASKED]
-  P0->>P1: 10. WebSocket: WebSocket Connection Close [FIN] [MASKED]
-  P1->>P0: 11. WebSocket: WebSocket Connection Close [FIN]
-```
+![Diagram](diagrams/03-websocket-02.png)
 
 *The lesson's own sequence diagram:*
 

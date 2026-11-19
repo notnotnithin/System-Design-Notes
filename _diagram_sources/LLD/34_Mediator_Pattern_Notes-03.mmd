@@ -1,0 +1,11 @@
+graph LR
+  subgraph W["Without a mediator: n x n links"]
+    a1["A"] --- b1["B"]
+    a1 --- c1["C"]
+    b1 --- c1
+  end
+  subgraph M["With a mediator: n links"]
+    a2["A"] --- m["Mediator"]
+    b2["B"] --- m
+    c2["C"] --- m
+  end

@@ -1,0 +1,16 @@
+sequenceDiagram
+  participant U as User
+  participant M as VendingMachine
+  participant S as current State
+  U->>M: click insert coin button
+  M->>S: IdleState.clickOnInsertCoinButton()
+  S->>M: set state to HasMoneyState
+  U->>M: insert coin (several times)
+  M->>S: HasMoneyState.insertCoin()
+  U->>M: click start product selection
+  S->>M: set state to SelectionState
+  U->>M: choose product, code 102
+  M->>S: SelectionState.chooseProduct(102)
+  S->>M: enough money, set state to DispenseState
+  M->>S: DispenseState.dispenseProduct(102)
+  S->>M: remove item, return change, set state to IdleState

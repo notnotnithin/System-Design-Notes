@@ -12,10 +12,7 @@
 
 ### How the layers fit together (outer to inner)
 
-```mermaid
-graph LR
-  N1["Ethernet frame"] --> N2["IPv4 packet (protocol 1)"] --> N3["ICMP: type and code"] --> N4["Echo, Time Exceeded, Unreachable"]
-```
+![Diagram](diagrams/18-icmp-01.png)
 
 ## In-depth explanation of the example (plain-language version)
 
@@ -135,23 +132,7 @@ A program sends a UDP packet to port 9999 where **nothing is listening** (packet
 
 ### Sequence diagram
 
-```mermaid
-sequenceDiagram
-  participant P0 as Laptop 192.168.1.10
-  participant P1 as Web server 203.0.113.10
-  participant P2 as Router 192.168.1.1
-  participant P3 as ISP router 198.51.100.1
-  P0->>P1: 1. ICMP: Echo (ping) request id=0x0001, seq=1, ttl=128
-  P1->>P0: 2. ICMP: Echo (ping) reply id=0x0001, seq=1, ttl=52
-  P0->>P1: 3. ICMP: Echo (ping) request id=0x0001, seq=2, ttl=1
-  P2->>P0: 4. ICMP: Time-to-live exceeded (in transit)
-  P0->>P1: 5. ICMP: Echo (ping) request id=0x0001, seq=3, ttl=2
-  P3->>P0: 6. ICMP: Time-to-live exceeded (in transit)
-  P0->>P1: 7. ICMP: Echo (ping) request id=0x0001, seq=4, ttl=13
-  P1->>P0: 8. ICMP: Echo (ping) reply id=0x0001, seq=4, ttl=52
-  P0->>P1: 9. UDP: 52500 → 9999 Len=18
-  P1->>P0: 10. ICMP: Destination unreachable (Port unreachable)
-```
+![Diagram](diagrams/18-icmp-02.png)
 
 *The lesson's own sequence diagram:*
 

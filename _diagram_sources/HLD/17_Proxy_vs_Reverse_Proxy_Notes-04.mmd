@@ -1,0 +1,4 @@
+graph LR
+  I["Internet"] --> F{"Firewall<br/>checks IP, port, source, destination"}
+  F -->|"allowed by rule"| N["Your network"]
+  F -->|"blocked"| X["Dropped"]

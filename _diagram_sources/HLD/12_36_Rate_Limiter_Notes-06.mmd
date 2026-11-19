@@ -1,0 +1,4 @@
+graph LR
+  P["Previous window: 5 requests"] -->|"x 90% still inside the slider"| E["4.5"]
+  C["Current window: 0 requests"] --> SUM["0 + 4.5 is about 5<br/>limit reached, reject"]
+  E --> SUM

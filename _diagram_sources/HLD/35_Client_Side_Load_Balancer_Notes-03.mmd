@@ -1,0 +1,3 @@
+graph LR
+  O["Order service"] -->|"product-service"| R["RandomLoadBalancer"]
+  O -->|"all other services"| RR["RoundRobinLoadBalancer (default config)"]

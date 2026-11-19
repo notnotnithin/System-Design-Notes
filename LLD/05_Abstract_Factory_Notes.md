@@ -23,74 +23,11 @@ A car needs an interior and an exterior. If the client code does `new LuxuryInte
 
 **Diagram – Car factories**
 
-```mermaid
-classDiagram
-  class CarExterior {
-    <<interface>>
-    +addExteriorComponents() void
-  }
-  class CarFactory {
-    <<interface>>
-    +createInterior() CarInterior
-    +createExterior() CarExterior
-    +produceCompleteVehicle() void
-  }
-  class CarType {
-    <<enumeration>>
-    ECONOMY
-    LUXURY
-    PREMIUM
-  }
-  class CarFactoryProvider {
-  }
-  class CarInterior {
-    <<interface>>
-    +addInteriorComponents() void
-  }
-  class EconomyCarExterior {
-    +addExteriorComponents() void
-  }
-  class EconomyCarFactory {
-    -String brand
-    +createInterior() CarInterior
-    +createExterior() CarExterior
-  }
-  class EconomyCarInterior {
-    +addInteriorComponents() void
-  }
-  class LuxuryCarExterior {
-    +addExteriorComponents() void
-  }
-  class LuxuryCarFactory {
-    -String brand
-    +createInterior() CarInterior
-    +createExterior() CarExterior
-  }
-  class LuxuryCarInterior {
-    +addInteriorComponents() void
-  }
-  CarExterior <|.. EconomyCarExterior
-  CarExterior <|.. LuxuryCarExterior
-  CarFactory <|.. EconomyCarFactory
-  CarFactory <|.. LuxuryCarFactory
-  CarInterior <|.. EconomyCarInterior
-  CarInterior <|.. LuxuryCarInterior
-```
+![Diagram](diagrams/05_Abstract_Factory_Notes-01.png)
 
 **Diagram – building a luxury car**
 
-```mermaid
-sequenceDiagram
-  participant C as Client
-  participant P as CarFactoryProvider
-  participant F as LuxuryCarFactory
-  C->>P: getFactory(LUXURY, brand)
-  P-->>C: LuxuryCarFactory
-  C->>F: produceCompleteVehicle()
-  F->>F: createInterior() gives LuxuryCarInterior
-  F->>F: createExterior() gives LuxuryCarExterior
-  F-->>C: complete luxury car
-```
+![Diagram](diagrams/05_Abstract_Factory_Notes-02.png)
 
 *The provider picks the family*
 

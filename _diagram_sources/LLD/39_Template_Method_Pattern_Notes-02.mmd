@@ -1,0 +1,8 @@
+sequenceDiagram
+  participant C as Client
+  participant M as MerchantPayment (PaymentFlow)
+  C->>M: sendMoney()
+  M->>M: validateRequest() (subclass)
+  M->>M: debitAmount() (subclass)
+  M->>M: calculateFees() (subclass)
+  M->>M: creditAmount() (subclass)

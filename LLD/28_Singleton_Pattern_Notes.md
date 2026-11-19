@@ -18,19 +18,7 @@ Typical uses: a database connection manager, configuration, a logger, a cache.
 
 The five versions below differ only in *when* the instance is created and *how thread-safe* it is.
 
-```mermaid
-classDiagram
-  class DBConnection {
-    -DBConnection instance$
-    -DBConnection()
-    +getInstance() DBConnection$
-    +displayMessage()
-  }
-  class Client1
-  class Client2
-  Client1 --> DBConnection : getInstance()
-  Client2 --> DBConnection : getInstance()
-```
+![Diagram](diagrams/28_Singleton_Pattern_Notes-01.png)
 
 *Both clients receive the same object.*
 
@@ -148,17 +136,7 @@ public void displayMessage() {
 }
 ```
 
-```mermaid
-sequenceDiagram
-  participant T1 as Thread 1
-  participant T2 as Thread 2
-  participant S as Singleton
-  T1->>S: getInstance(): instance is null
-  T1->>S: lock, check again, create the object
-  T2->>S: getInstance(): waits on the lock
-  S-->>T1: the instance
-  S-->>T2: the same instance (second check finds it)
-```
+![Diagram](diagrams/28_Singleton_Pattern_Notes-02.png)
 
 ## Other ways (good to know)
 - **Enum singleton** (`enum Config { INSTANCE }`): thread-safe and safe against reflection and serialization tricks. Often the simplest best choice in Java.

@@ -1,0 +1,6 @@
+graph TB
+  subgraph TX["One local DB transaction"]
+    U["Insert User"] --- E["Insert User Event (outbox table)"]
+  end
+  TX --> PO["Poller service reads the outbox table"] --> PB["Publisher"] --> MB[["Message broker"]]
+  MB --> C["Consumers (must be idempotent)"]

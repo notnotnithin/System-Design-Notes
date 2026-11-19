@@ -1,0 +1,8 @@
+sequenceDiagram
+  participant C as Client
+  participant O as Original Student
+  participant K as Cloned Student
+  C->>O: clone()
+  O->>K: new Student(id, name, branch, rollNo)
+  O-->>C: copy
+  C->>K: change the fields that differ

@@ -1,0 +1,9 @@
+graph TD
+  C["Client generates idempotency key IK1 and sets it in the request header"] --> V{"IK present in request?"}
+  V -->|"no"| E400["HTTP 400 validation error"]
+  V -->|"yes"| DB{"IK present in DB?"}
+  DB -->|"no"| INS["Insert IK1 with status Created, do the operation"]
+  INS --> OK["Mark IK1 Consumed, return HTTP 201"]
+  DB -->|"yes"| ST{"Status?"}
+  ST -->|"Created: still processing"| E409["HTTP 409 conflict"]
+  ST -->|"Consumed: already done"| E200["HTTP 200 with earlier result"]

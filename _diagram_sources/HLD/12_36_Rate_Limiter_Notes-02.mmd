@@ -1,0 +1,2 @@
+graph LR
+  RL["Rate limiter"] --> BH["Bulkhead"] --> TL["Time limiter"] --> CB["Circuit breaker"] --> RT["Retry"]

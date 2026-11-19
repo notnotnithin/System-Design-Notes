@@ -89,13 +89,7 @@ hovernotes-id: doc_bb965ebb-605e-400d-9a62-1048d3bc5385
     - The server sends a **response** back to the client
 - Communication is initiated by the client, making it a one-way initiation process (client $\rightarrow$ server for the request)
 
-```mermaid
-sequenceDiagram
-    participant Client as Client (Web Browser)
-    participant Server as Server (Web Server)
-    Client->>Server: Request
-    Server-->>Client: Response
-```
+![Diagram](diagrams/Network-Protocols-AI-01.png)
 
 ### WebSockets vs. Standard Client-Server Protocols
 
@@ -104,13 +98,7 @@ sequenceDiagram
     - The client can talk to the server
     - The server can also talk to the client
 
-```mermaid
-sequenceDiagram
-    participant Client
-    participant Server
-    Client->>Server: Data/Request
-    Server->>Client: Data/Response
-```
+![Diagram](diagrams/Network-Protocols-AI-02.png)
 
 ### Peer-to-Peer (P2P) Concept
 
@@ -157,16 +145,7 @@ sequenceDiagram
         - Used for reading and downloading emails
         - **[Key Characteristic]** Once an email is downloaded via POP3, it is typically deleted from the server
 
-```mermaid
-mindmap
-  root((Email Protocols))
-    Sending
-      SMTP
-    Accessing/Reading
-      IMAP
-      POP3
-        Note: Deletes email after download
-```
+![Diagram](diagrams/Network-Protocols-AI-03.png)
 
 ### Email Delivery Architecture
 
@@ -180,12 +159,7 @@ mindmap
 ![Email delivery flow between User Agent and MTA](hover-notes-images/screenshot-01M7HWX7A61G50HM5SKEEMPA5A.png)
 [00:07:12](https://www.youtube.com/watch?v=JwTiZ9ENquI&list=PL6W8uoQQ2c63W58rpNFDwdrBnq5G3EfT7&index=2&t=432s)
 
-```mermaid
-flowchart LR
-    UA_Sender["User Agent (Sender)"] -->|Sends message| MTA_Client["MTA Client"]
-    MTA_Client -->|Passes to| MTA_Server["MTA Server"]
-    MTA_Server -->|Delivers to| UA_Receiver["User Agent (Receiver)"]
-```
+![Diagram](diagrams/Network-Protocols-AI-04.png)
 
 - **The Process Flow**
     - The User Agent sends a message to the MTA Client
@@ -199,12 +173,7 @@ flowchart LR
     - This allows all participants to talk directly with each other
 - **[Example Protocol]** WebRTC is a Peer-to-Peer protocol
 
-```mermaid
-flowchart TD
-    NodeA["Node A (Client & Server)"] <--> NodeB["Node B (Client & Server)"]
-    NodeB <--> NodeC["Node C (Client & Server)"]
-    NodeC <--> NodeA
-```
+![Diagram](diagrams/Network-Protocols-AI-05.png)
 
 ### Comparison of Network Models
 
@@ -221,13 +190,7 @@ flowchart TD
         - Maintains a virtual connection between systems
     - **UDP/IP**
 
-```mermaid
-mindmap
-  root((Transport Layer))
-    TCP/IP
-      Maintains virtual connection
-    UDP/IP
-```
+![Diagram](diagrams/Network-Protocols-AI-06.png)
 
 ### TCP/IP Reliability Mechanisms
 
@@ -241,19 +204,7 @@ mindmap
 ![TCP/IP sequencing and acknowledgement process](hover-notes-images/screenshot-01M7HWZZPS5AZB2EBJ4W7RZZ9Z.png)
 [00:09:32](https://www.youtube.com/watch?v=JwTiZ9ENquI&list=PL6W8uoQQ2c63W58rpNFDwdrBnq5G3EfT7&index=2&t=572s)
 
-```mermaid
-sequenceDiagram
-    participant S as Sender
-    participant R as Receiver
-    S->>R: Packet 1
-    R-->>S: Ack 1
-    S->>R: Packet 2
-    Note over S,R: Packet 2 is lost or not acknowledged
-    S->>R: Packet 2 (Retransmission)
-    R-->>S: Ack 2
-    S->>R: Packet 3
-    R-->>S: Ack 3
-```
+![Diagram](diagrams/Network-Protocols-AI-07.png)
 
 ### UDP/IP Protocol
 
@@ -262,22 +213,7 @@ sequenceDiagram
     - These datagrams are sent in parallel across multiple virtual connections
 - **[Consequence]** Because there is no established connection or sequencing mechanism, the original order of the packets may not be maintained upon arrival
 
-```mermaid
-flowchart LR
-    S[Sender] -- "Datagram 1" --> R[Receiver]
-    S -- "Datagram 2" --> R
-    S -- "Datagram 3" --> R
-
-    subgraph "No Connection Maintained"
-    direction LR
-    D1[Datagram 1]
-    D2[Datagram 2]
-    D3[Datagram 3]
-    end
-
-    style S fill:#f9f,stroke:#333,stroke-width:2px
-    style R fill:#bbf,stroke:#333,stroke-width:2px
-```
+![Diagram](diagrams/Network-Protocols-AI-08.png)
 
 ### UDP/IP Performance and Use Cases
 
@@ -315,15 +251,7 @@ flowchart LR
     - In a messaging app, if User 2 sends a message to User 1, the server must be able to push that message to Client 1
     - WebSockets allow the server to talk to the client just as easily as the client talks to the server
 
-```mermaid
-sequenceDiagram
-    participant C1 as Client 1
-    participant S as Server
-    participant C2 as Client 2
-
-    C2->>S: Send message to Client 1
-    S->>C1: Push message to Client 1
-```
+![Diagram](diagrams/Network-Protocols-AI-09.png)
 
 ### Protocol Selection: HTTP vs. FTP
 
@@ -346,13 +274,4 @@ sequenceDiagram
 | Live Streaming / Video Calling | WebRTC / UDP |
 | Reliable Data Transfer | TCP |
 
-```mermaid
-mindmap
-  root((Protocol Selection))
-    Client-Server
-      HTTP/HTTPS
-      WebSockets (Messaging)
-    Peer-to-Peer
-      WebRTC (Streaming)
-      UDP (Fast/Real-time)
-```
+![Diagram](diagrams/Network-Protocols-AI-10.png)

@@ -1,0 +1,12 @@
+sequenceDiagram
+  participant U as User
+  participant C as BlogController
+  participant M as Blog (model)
+  participant V as BlogView
+  U->>C: addBlog(title, content, author)
+  C->>M: new Blog(...)
+  C->>C: store the blog in the list
+  U->>C: showBlog(0)
+  C->>M: read the blog
+  C->>V: displayBlogDetails(blog)
+  V-->>U: shows the blog

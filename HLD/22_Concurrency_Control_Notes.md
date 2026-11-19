@@ -19,12 +19,7 @@ If Free:
     Update the DB
 ```
 
-```mermaid
-flowchart LR
-    U1[User1] --> S[(Seat row: ID 10, Status FREE)]
-    U2[User2] --> S
-    U3[User3] --> S
-```
+![Diagram](diagrams/22_Concurrency_Control_Notes-01.png)
 
 **In simple words:** if all three read "FREE" at the same moment, all three will think the seat is theirs and all three will write "Booked". That is the concurrency problem to solve.
 
@@ -46,11 +41,7 @@ The page asks: **"Will this solution work for a distributed system?"**
 
 ## 3. Solution 2 – Distributed concurrency control
 
-```mermaid
-flowchart TB
-    D[Distributed Concurrency Control] --> O["Optimistic Concurrency Control (OCC)"]
-    D --> P["Pessimistic Concurrency Control (PCC)"]
-```
+![Diagram](diagrams/22_Concurrency_Control_Notes-02.png)
 
 Before learning this, the page says we **MUST** know three important things first:
 1. What is the usage of **Transaction**?
@@ -192,14 +183,7 @@ The page then says: "Let's come back to the main solution of the problem *how to
 
 Flow of OCC:
 
-```mermaid
-flowchart TB
-    A[Creates Transaction] --> B["Read Row (unlocked too)"]
-    B --> C[Computation on fetched Row]
-    C --> D{Row Modified?}
-    D -- Yes --> R[Rollback] --> A
-    D -- No --> U[Update DB] --> CM[Commit]
-```
+![Diagram](diagrams/22_Concurrency_Control_Notes-03.png)
 
 **In simple words:** nobody locks the row while they read and think. Each row has a version number. When a transaction finally wants to write, it locks the row only briefly and checks that the version is still the one it read. A saw version 1 and updated it to version 2. When B arrives, the version is no longer 1, so B rolls back and has to retry from the start.
 
@@ -210,17 +194,7 @@ The page for PCC is a **handwritten whiteboard sketch** that is hard to read. Wh
 - A **use case** with two transactions: **T1: Read A, Update B** and **T2: Read B, Update A**, on a DB holding rows A and B, drawn with shared locks and exclusive locks.
 - The word **"Deadlock"** circled: T1 holds a shared lock on A and wants to write B, while T2 holds a shared lock on B and wants to write A. Each is waiting for the other to release a shared lock, so one of them gets **aborted**.
 
-```mermaid
-sequenceDiagram
-    participant T1
-    participant T2
-    participant DB as DB rows A, B
-    T1->>DB: Read A (shared lock on A)
-    T2->>DB: Read B (shared lock on B)
-    T1->>DB: Update B (waits for T2 to release shared lock on B)
-    T2->>DB: Update A (waits for T1 to release shared lock on A)
-    Note over T1,T2: Deadlock, one transaction is aborted
-```
+![Diagram](diagrams/22_Concurrency_Control_Notes-04.png)
 
 **In simple words:** pessimistic control assumes conflicts will happen, so it locks the rows up front. That keeps data safe, but it can lead to deadlocks and long waits, which is why the table above lists those as its downsides.
 

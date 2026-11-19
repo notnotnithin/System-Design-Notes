@@ -1,0 +1,91 @@
+classDiagram
+  class ATM {
+    -ATM atmObject
+    +ATMState currentATMState
+    +int noOfTwoThousandNotes
+    +deductATMBalance() void
+    +deductTwoThousandNotes() void
+    +deductFiveHundredNotes() void
+  }
+  class ATMRoom {
+    +ATM atm
+    +User user
+  }
+  class Card {
+    +int PIN_NUMBER
+    -int cardNumber
+    -int cvv
+    +deductBankBalance() void
+  }
+  class User {
+    +Card card
+    +UserBankAccount bankAccount
+  }
+  class UserBankAccount {
+    +int balance
+    +withdrawalBalance() void
+  }
+  class ATMState {
+    <<abstract>>
+    +insertCard() void
+    +authenticatePin() void
+    +selectOperation() void
+  }
+  class CashWithdrawalState {
+    +cashWithdrawal() void
+    +exit() void
+    +returnCard() void
+  }
+  class CheckBalanceState {
+    +displayBalance() void
+    +exit() void
+    +returnCard() void
+  }
+  class HasCardState {
+    +authenticatePin() void
+    +exit() void
+    +returnCard() void
+  }
+  class IdleState {
+    +insertCard() void
+  }
+  class SelectOperationState {
+    +selectOperation() void
+    +exit() void
+    +returnCard() void
+  }
+  class CashWithdrawProcessor {
+    <<abstract>>
+    +CashWithdrawProcessor nextCashWithdrawalProcessor
+    +withdraw() void
+  }
+  class FiveHundredWithdrawProcessor {
+    +withdraw() void
+  }
+  class OneHundredWithdrawProcessor {
+    +withdraw() void
+  }
+  class TwoThousandWithdrawProcessor {
+    +withdraw() void
+  }
+  class TransactionType {
+    <<enumeration>>
+    CASH_WITHDRAWAL
+    BALANCE_CHECK
+    +CASH_WITHDRAWAL, BALANCE_CHECK
+    +showAllTransactionTypes() void
+  }
+  ATM --> ATMState
+  ATMRoom --> ATM
+  ATMRoom --> User
+  ATMState <|-- CashWithdrawalState
+  ATMState <|-- CheckBalanceState
+  ATMState <|-- HasCardState
+  ATMState <|-- IdleState
+  ATMState <|-- SelectOperationState
+  Card --> UserBankAccount
+  CashWithdrawProcessor <|-- FiveHundredWithdrawProcessor
+  CashWithdrawProcessor <|-- OneHundredWithdrawProcessor
+  CashWithdrawProcessor <|-- TwoThousandWithdrawProcessor
+  User --> Card
+  User --> UserBankAccount

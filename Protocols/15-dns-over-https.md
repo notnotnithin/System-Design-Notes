@@ -12,10 +12,7 @@
 
 ### How the layers fit together (outer to inner)
 
-```mermaid
-graph LR
-  N1["IPv4"] --> N2["TCP port 443"] --> N3["TLS"] --> N4["HTTP/2 request"] --> N5["DNS message"]
-```
+![Diagram](diagrams/15-dns-over-https-01.png)
 
 ## In-depth explanation of the example (plain-language version)
 
@@ -129,21 +126,7 @@ The resolver replies `200 OK` with a tiny 49-byte body: the ordinary DNS answer 
 
 ### Sequence diagram
 
-```mermaid
-sequenceDiagram
-  participant P0 as Laptop 192.168.1.10
-  participant P1 as DNS resolver 8.8.8.8
-  P0->>P1: 1. DNS: Standard query A www.example.com
-  P1->>P0: 2. DNS: Standard query response A 203.0.113.10
-  P0->>P1: 3. TCP: 52420 → 443 [SYN] Seq=0
-  P1->>P0: 4. TCP: 443 → 52420 [SYN, ACK] Seq=0 Ack=1
-  P0->>P1: 5. TCP: 52420 → 443 [ACK] Seq=1 Ack=1
-  P0->>P1: 6. TLSv1.3: Client Hello (SNI=dns.google)
-  P1->>P0: 7. TLSv1.3: Server Hello + encrypted handshake, 2 segments
-  P0->>P1: 8. TLSv1.3: Change Cipher Spec, Finished (encrypted)
-  P0->>P1: 9. TLSv1.3: Application Data (HTTP/2: DNS query)
-  P1->>P0: 10. TLSv1.3: Application Data (HTTP/2: DNS answer)
-```
+![Diagram](diagrams/15-dns-over-https-02.png)
 
 *The lesson's own sequence diagram:*
 

@@ -1,0 +1,14 @@
+flowchart LR
+    S[Sender] -- "Datagram 1" --> R[Receiver]
+    S -- "Datagram 2" --> R
+    S -- "Datagram 3" --> R
+
+    subgraph "No Connection Maintained"
+    direction LR
+    D1[Datagram 1]
+    D2[Datagram 2]
+    D3[Datagram 3]
+    end
+
+    style S fill:#f9f,stroke:#333,stroke-width:2px
+    style R fill:#bbf,stroke:#333,stroke-width:2px

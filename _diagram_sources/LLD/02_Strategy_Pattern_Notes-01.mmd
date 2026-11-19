@@ -1,0 +1,25 @@
+classDiagram
+  class ShoppingCart {
+    -PaymentStrategy paymentStrategy
+    +checkout() void
+  }
+  class CreditCardPayment {
+    -String cardNumber
+    +pay() void
+  }
+  class PayPalPayment {
+    -String email
+    +pay() void
+  }
+  class PaymentStrategy {
+    <<interface>>
+    +pay() void
+  }
+  class UPIPayment {
+    -String upiId
+    +pay() void
+  }
+  PaymentStrategy <|.. CreditCardPayment
+  PaymentStrategy <|.. PayPalPayment
+  PaymentStrategy <|.. UPIPayment
+  ShoppingCart --> PaymentStrategy

@@ -1,0 +1,24 @@
+classDiagram
+  class EngineeringStudentBuilder {
+  }
+  class MBAStudentBuilder {
+  }
+  class Student {
+    +int rollNumber
+    +int age
+    +String name
+  }
+  class StudentBuilder {
+    <<abstract>>
+    +int rollNumber
+    +int age
+    +String name
+    +build() Student
+  }
+  class StudentRegistrationDirector {
+    +StudentBuilder studentBuilder
+    +createStudent() Student
+  }
+  StudentBuilder <|-- EngineeringStudentBuilder
+  StudentBuilder <|-- MBAStudentBuilder
+  StudentRegistrationDirector --> StudentBuilder

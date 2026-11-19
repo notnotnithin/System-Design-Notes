@@ -1,0 +1,8 @@
+graph LR
+  subgraph MONO["Monolith"]
+    R["Request"] --> DB[("One DB: ACID, start to stop")]
+  end
+  subgraph MICRO["Microservices"]
+    R1["Request R1"] --> S1["S1"] --> DB1[("Own DB: Txn start to stop")]
+    R1 --> S2["S2"] --> DB2[("Own DB: Txn start to stop")]
+  end

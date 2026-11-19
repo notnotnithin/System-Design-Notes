@@ -1,0 +1,5 @@
+graph LR
+  C["Clients"] --> O["Order service<br/>all threads busy"]:::bad
+  O -->|"each call waits 60 s"| P["Product service<br/>slow: 60 s per response"]:::bad
+  C -. "clients of Order are blocked too" .-> O
+  classDef bad fill:#fecaca,stroke:#b91c1c,color:#000

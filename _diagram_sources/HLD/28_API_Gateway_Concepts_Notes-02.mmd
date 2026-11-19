@@ -1,0 +1,5 @@
+graph LR
+  R["/api/invoice"] --> LB["Load balancer"]
+  LB --> I1["Invoice instance 1"]
+  LB --> I2["Invoice instance 2"]
+  LB --> I3["Invoice instance 3"]

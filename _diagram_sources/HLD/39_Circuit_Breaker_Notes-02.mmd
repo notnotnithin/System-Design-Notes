@@ -1,0 +1,6 @@
+stateDiagram-v2
+  [*] --> CLOSED
+  CLOSED --> OPEN: failure rate crosses the threshold
+  OPEN --> HALF_OPEN: wait duration completed
+  HALF_OPEN --> CLOSED: test calls 100% successful
+  HALF_OPEN --> OPEN: test calls not 100% successful

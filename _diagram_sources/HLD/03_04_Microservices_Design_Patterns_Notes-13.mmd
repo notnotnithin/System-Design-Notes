@@ -1,0 +1,4 @@
+graph LR
+  C["Commands: create, update, delete"] --> W[("DB1, DB2: write side")]
+  W -->|"events"| V[("Read VIEW DB (already joined)")]
+  Q["Queries: select, read"] --> V

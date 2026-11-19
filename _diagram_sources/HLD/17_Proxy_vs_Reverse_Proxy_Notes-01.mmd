@@ -1,0 +1,11 @@
+graph LR
+  subgraph NET["Closed client network"]
+    C1["C1 172.1.0.1"]
+    C2["C2 172.2.0.1"]
+    C3["C3 172.3.0.1"]
+  end
+  C1 --> FP["Forward proxy<br/>uses its own IP 192.30.0.1"]
+  C2 --> FP
+  C3 --> FP
+  FP --> S["Internet server: sees only the proxy"]
+  FP --- CA[("Cache")]

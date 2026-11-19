@@ -1,0 +1,8 @@
+graph LR
+  C["Client"] <--> LB["Load balancer"]
+  LB --> A1["App S1"]
+  LB --> A2["App S2"]
+  LB --> A3["App S3"]
+  A1 --> D[("DB server")]
+  A2 --> D
+  A3 --> D

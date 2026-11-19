@@ -1,0 +1,11 @@
+sequenceDiagram
+  participant C as Client (role USER)
+  participant P as EmployeeDaoProxy
+  participant R as EmployeeDaoImpl
+  C->>P: getEmployeeInfo(5)
+  P->>P: role USER is allowed
+  P->>R: getEmployeeInfo(5)
+  R-->>C: employee details
+  C->>P: createEmployee(obj)
+  P->>P: role USER is not ADMIN
+  P-->>C: RuntimeException: Access Denied

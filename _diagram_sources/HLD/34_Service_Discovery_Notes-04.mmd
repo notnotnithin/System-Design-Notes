@@ -1,0 +1,9 @@
+sequenceDiagram
+  participant O as Order service
+  participant E as Eureka server
+  participant P as Product service
+  O->>E: at startup: fetch registry (cached locally)
+  loop every 30 s
+    O->>E: refresh the local copy
+  end
+  O->>P: normal calls use the local copy (no extra hop)

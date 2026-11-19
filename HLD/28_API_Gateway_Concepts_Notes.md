@@ -20,13 +20,7 @@ Sources:
 <!-- diagram:28-0 -->
 **Diagram – API gateway routes by endpoint**
 
-```mermaid
-graph LR
-  C["Client"] --> G["API gateway"]
-  G -->|"/api/invoice"| I["Invoice microservice"]
-  G -->|"/api/order"| O["Order microservice"]
-  G -->|"/api/sales"| S["Sales microservice"]
-```
+![Diagram](diagrams/28_API_Gateway_Concepts_Notes-01.png)
 <!-- /diagram:28-0 -->
 
 
@@ -38,13 +32,7 @@ It **accepts the client's API request and routes it to the correct backend servi
 <!-- diagram:28-1 -->
 **Diagram – Load balancer: instances of one service only**
 
-```mermaid
-graph LR
-  R["/api/invoice"] --> LB["Load balancer"]
-  LB --> I1["Invoice instance 1"]
-  LB --> I2["Invoice instance 2"]
-  LB --> I3["Invoice instance 3"]
-```
+![Diagram](diagrams/28_API_Gateway_Concepts_Notes-02.png)
 <!-- /diagram:28-1 -->
 
 
@@ -76,15 +64,7 @@ An API gateway **accepts the client's API request and routes it to the correct b
 <!-- diagram:28-2 -->
 **Diagram – API composition: one call, many services**
 
-```mermaid
-graph LR
-  C["Client: /api/myorder"] --> G["API gateway"]
-  G --> P["Product service"]
-  G --> I["Invoice service"]
-  G --> R["Rating and review"]
-  G --> RC["Recommendation"]
-  G -->|"one joined response"| C
-```
+![Diagram](diagrams/28_API_Gateway_Concepts_Notes-03.png)
 <!-- /diagram:28-2 -->
 
 
@@ -106,18 +86,7 @@ The problem: the **"My Orders" page** on a **mobile client** calls REST APIs to 
 <!-- diagram:28-3 -->
 **Diagram – Authentication at the gateway**
 
-```mermaid
-sequenceDiagram
-  participant C as Client
-  participant A as Authorization server
-  participant G as API gateway
-  participant S as Microservices
-  C->>A: get access token
-  A-->>C: token
-  C->>G: API request + token
-  G->>G: validate token
-  G->>S: forward only if valid
-```
+![Diagram](diagrams/28_API_Gateway_Concepts_Notes-04.png)
 <!-- /diagram:28-3 -->
 
 
@@ -151,17 +120,7 @@ The rules you can set: **manage burst limit** (the **maximum number of concurren
 <!-- diagram:28-4 -->
 **Diagram – Service discovery behind the gateway**
 
-```mermaid
-sequenceDiagram
-  participant C as Client
-  participant G as API gateway
-  participant D as Service discovery (Eureka)
-  participant S as Order / Invoice / Sales
-  C->>G: 1 /api/order
-  G->>D: 2 where is the order service?
-  D-->>G: 3 locations (healthy instances only)
-  G->>S: 4 call the instance
-```
+![Diagram](diagrams/28_API_Gateway_Concepts_Notes-05.png)
 <!-- /diagram:28-4 -->
 
 
@@ -203,18 +162,7 @@ The notes also list **request / response transformation, response caching and lo
 <!-- diagram:28-5 -->
 **Diagram – Scaling the gateway across zones and regions**
 
-```mermaid
-graph TD
-  C["Client"] --> DNS["DNS: Route 53 / Traffic Manager, routes by region"]
-  DNS --> R1
-  DNS --> R2
-  subgraph R1["Region 1: Mumbai"]
-    G1["API gateway + service discovery"] --> LB1["Load balancers in AZ1, AZ2, AZ3"] --> M1["Invoice / Order instances"]
-  end
-  subgraph R2["Region 2: Bangalore"]
-    G2["API gateway + service discovery"] --> LB2["Load balancers in AZ1, AZ2"] --> M2["Invoice / Order instances"]
-  end
-```
+![Diagram](diagrams/28_API_Gateway_Concepts_Notes-06.png)
 <!-- /diagram:28-5 -->
 
 
@@ -243,12 +191,7 @@ The **client reaches the system through DNS** (**AWS Route 53, Azure Traffic Man
 <!-- diagram:28-6 -->
 **Diagram – What Microservice A needs to call Microservice B**
 
-```mermaid
-graph LR
-  A["Microservice A<br/>needs: service discovery, client-side LB, circuit breaker, retry, telemetry"] --> B["Microservice B instances"]
-  A -.->|"locations"| SD["Service discovery"]
-  B -.->|"authorization: is A allowed?"| A
-```
+![Diagram](diagrams/28_API_Gateway_Concepts_Notes-07.png)
 <!-- /diagram:28-6 -->
 
 

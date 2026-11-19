@@ -20,10 +20,7 @@ Sources:
 <!-- diagram:19-0 -->
 **Diagram – Caching in the request path**
 
-```mermaid
-graph LR
-  C["Client (browser cache)"] --> CDN["CDN"] --> LB["Load balancer"] --> A["App servers"] --> R[("Cache: Redis")] --> D[("DB")]
-```
+![Diagram](diagrams/19_Distributed_Cache_and_Caching_Strategies_Notes-01.png)
 <!-- /diagram:19-0 -->
 
 
@@ -52,16 +49,7 @@ Caching is **a technique to store frequently used data in fast-access memory ins
 <!-- diagram:19-1 -->
 **Diagram – Distributed cache pool with a cache client**
 
-```mermaid
-graph LR
-  A1["App server 1<br/>+ cache client"] --> H{"consistent hashing picks a cache server"}
-  A2["App server 2<br/>+ cache client"] --> H
-  H --> C1[("Cache 1")]
-  H --> C2[("Cache 2")]
-  H --> C3[("Cache 3")]
-  H --> C4[("Cache 4")]
-  H --> C5[("Cache 5")]
-```
+![Diagram](diagrams/19_Distributed_Cache_and_Caching_Strategies_Notes-02.png)
 <!-- /diagram:19-1 -->
 
 
@@ -91,23 +79,7 @@ With a **single cache service** all app servers (1, 2, 3) use one cache with **l
 <!-- diagram:19-2 -->
 **Diagram – Cache-aside**
 
-```mermaid
-sequenceDiagram
-  participant C as Client
-  participant S as Server
-  participant K as Cache
-  participant D as DB
-  C->>S: GET
-  S->>K: read
-  alt cache hit
-    K-->>S: data
-  else cache miss
-    S->>D: read from DB
-    D-->>S: data
-    S->>K: write into cache
-  end
-  S-->>C: response
-```
+![Diagram](diagrams/19_Distributed_Cache_and_Caching_Strategies_Notes-03.png)
 <!-- /diagram:19-2 -->
 
 
@@ -139,21 +111,7 @@ Flow (`Client → Server → Cache → DB`):
 <!-- diagram:19-3 -->
 **Diagram – Read-through**
 
-```mermaid
-sequenceDiagram
-  participant A as Application
-  participant K as Cache library
-  participant D as DB
-  A->>K: read
-  alt cache hit
-    K-->>A: data
-  else cache miss
-    K->>D: cache fetches from DB
-    D-->>K: data
-    K->>K: store
-    K-->>A: data
-  end
-```
+![Diagram](diagrams/19_Distributed_Cache_and_Caching_Strategies_Notes-04.png)
 <!-- /diagram:19-3 -->
 
 
@@ -184,17 +142,7 @@ The application first checks the cache. On a **hit** it returns the data. On a *
 <!-- diagram:19-4 -->
 **Diagram – Write-around**
 
-```mermaid
-sequenceDiagram
-  participant C as Client
-  participant S as Server
-  participant D as DB
-  participant K as Cache
-  C->>S: write (PUT / PATCH)
-  S->>D: write directly to DB
-  S->>K: invalidate the cached entry
-  S-->>C: done
-```
+![Diagram](diagrams/19_Distributed_Cache_and_Caching_Strategies_Notes-05.png)
 <!-- /diagram:19-4 -->
 
 
@@ -224,17 +172,7 @@ It **writes directly into the DB and does not touch the cache.** It does not upd
 <!-- diagram:19-5 -->
 **Diagram – Write-through**
 
-```mermaid
-sequenceDiagram
-  participant C as Client
-  participant S as Server
-  participant K as Cache
-  participant D as DB
-  C->>S: write (POST)
-  S->>K: 1 write into cache
-  S->>D: 2 write into DB (synchronous)
-  S-->>C: done (exception if any write fails)
-```
+![Diagram](diagrams/19_Distributed_Cache_and_Caching_Strategies_Notes-06.png)
 <!-- /diagram:19-5 -->
 
 
@@ -265,19 +203,7 @@ It **first writes the data into the cache and then synchronously writes it into 
 <!-- diagram:19-6 -->
 **Diagram – Write-back**
 
-```mermaid
-sequenceDiagram
-  participant C as Client
-  participant S as Server
-  participant K as Cache
-  participant Q as Queue
-  participant D as DB
-  C->>S: write (POST)
-  S->>K: write into cache
-  S->>Q: push message
-  S-->>C: done (fast)
-  Q->>D: later: write into DB (retries if DB is down)
-```
+![Diagram](diagrams/19_Distributed_Cache_and_Caching_Strategies_Notes-07.png)
 <!-- /diagram:19-6 -->
 
 

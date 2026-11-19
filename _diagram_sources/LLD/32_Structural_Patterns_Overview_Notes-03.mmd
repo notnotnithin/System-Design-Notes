@@ -1,0 +1,7 @@
+classDiagram
+    class Component { <<interface>> +operation() }
+    class Leaf { +operation() }
+    class Composite { +operation() +add() }
+    Component <|.. Leaf
+    Component <|.. Composite
+    Composite o-- "*" Component

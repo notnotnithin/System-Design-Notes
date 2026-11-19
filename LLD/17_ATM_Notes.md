@@ -33,136 +33,16 @@ Two patterns do the heavy lifting: **State** (what the ATM allows right now) and
 
 **Diagram – ATM**
 
-```mermaid
-classDiagram
-  class ATM {
-    -ATM atmObject
-    +ATMState currentATMState
-    +int noOfTwoThousandNotes
-    +deductATMBalance() void
-    +deductTwoThousandNotes() void
-    +deductFiveHundredNotes() void
-  }
-  class ATMRoom {
-    +ATM atm
-    +User user
-  }
-  class Card {
-    +int PIN_NUMBER
-    -int cardNumber
-    -int cvv
-    +deductBankBalance() void
-  }
-  class User {
-    +Card card
-    +UserBankAccount bankAccount
-  }
-  class UserBankAccount {
-    +int balance
-    +withdrawalBalance() void
-  }
-  class ATMState {
-    <<abstract>>
-    +insertCard() void
-    +authenticatePin() void
-    +selectOperation() void
-  }
-  class CashWithdrawalState {
-    +cashWithdrawal() void
-    +exit() void
-    +returnCard() void
-  }
-  class CheckBalanceState {
-    +displayBalance() void
-    +exit() void
-    +returnCard() void
-  }
-  class HasCardState {
-    +authenticatePin() void
-    +exit() void
-    +returnCard() void
-  }
-  class IdleState {
-    +insertCard() void
-  }
-  class SelectOperationState {
-    +selectOperation() void
-    +exit() void
-    +returnCard() void
-  }
-  class CashWithdrawProcessor {
-    <<abstract>>
-    +CashWithdrawProcessor nextCashWithdrawalProcessor
-    +withdraw() void
-  }
-  class FiveHundredWithdrawProcessor {
-    +withdraw() void
-  }
-  class OneHundredWithdrawProcessor {
-    +withdraw() void
-  }
-  class TwoThousandWithdrawProcessor {
-    +withdraw() void
-  }
-  class TransactionType {
-    <<enumeration>>
-    CASH_WITHDRAWAL
-    BALANCE_CHECK
-    +CASH_WITHDRAWAL, BALANCE_CHECK
-    +showAllTransactionTypes() void
-  }
-  ATM --> ATMState
-  ATMRoom --> ATM
-  ATMRoom --> User
-  ATMState <|-- CashWithdrawalState
-  ATMState <|-- CheckBalanceState
-  ATMState <|-- HasCardState
-  ATMState <|-- IdleState
-  ATMState <|-- SelectOperationState
-  Card --> UserBankAccount
-  CashWithdrawProcessor <|-- FiveHundredWithdrawProcessor
-  CashWithdrawProcessor <|-- OneHundredWithdrawProcessor
-  CashWithdrawProcessor <|-- TwoThousandWithdrawProcessor
-  User --> Card
-  User --> UserBankAccount
-```
+![Diagram](diagrams/17_ATM_Notes-01.png)
 
 ## Step 3 – The state machine
 Each state only supports the actions that make sense. A wrong action prints an error.
 
-```mermaid
-stateDiagram-v2
-  [*] --> Idle
-  Idle --> HasCard: insert card
-  HasCard --> SelectOperation: correct PIN
-  HasCard --> Idle: wrong PIN, card returned
-  SelectOperation --> CashWithdrawal: choose withdraw
-  SelectOperation --> CheckBalance: choose balance
-  CashWithdrawal --> Idle: money given, card returned
-  CheckBalance --> Idle: balance shown, card returned
-```
+![Diagram](diagrams/17_ATM_Notes-02.png)
 
 ## Step 4 – A cash withdrawal
 
-```mermaid
-sequenceDiagram
-  participant U as User
-  participant A as ATM
-  participant S as Current state
-  U->>A: insert card
-  A->>S: IdleState.insertCard()
-  S->>A: move to HasCardState
-  U->>A: enter PIN
-  A->>S: HasCardState.authenticatePin()
-  S->>A: PIN ok, move to SelectOperationState
-  U->>A: choose CASH_WITHDRAWAL
-  S->>A: move to CashWithdrawalState
-  U->>A: withdraw 2700
-  A->>S: CashWithdrawalState.cashWithdrawal(2700)
-  S->>S: check ATM balance and bank balance
-  S->>S: deduct and start the note chain
-  S->>A: exit: return card, back to IdleState
-```
+![Diagram](diagrams/17_ATM_Notes-03.png)
 
 *Check both balances, then hand over the work to the chain*
 
@@ -191,12 +71,7 @@ public void cashWithdrawal(ATM atmObject, Card card, int withdrawalAmountRequest
 ## Step 5 – Which notes? (Chain of Responsibility)
 The chain is built as `₹2000 → ₹500 → ₹100`. Each processor takes as many notes of its value as it can, and passes the **remaining amount** to the next one.
 
-```mermaid
-graph LR
-  A["Request 2700"] --> B["TwoThousandProcessor: 1 note, remaining 700"]
-  B --> C["FiveHundredProcessor: 1 note, remaining 200"]
-  C --> D["OneHundredProcessor: 2 notes, remaining 0"]
-```
+![Diagram](diagrams/17_ATM_Notes-04.png)
 
 If a denomination runs out of notes, the shortfall is pushed to the next (smaller) processor.
 

@@ -24,56 +24,13 @@ If one class both stores the data, prints it and handles user commands, changing
 
 **Diagram – Blog application**
 
-```mermaid
-classDiagram
-  class BlogController {
-    -List~Blog~ blogs
-    -BlogView view
-    +addBlog() void
-    +updateBlog() void
-    +deleteBlog() void
-    +showBlog() void
-    +showAllBlogs() void
-  }
-  class Blog {
-    -String title
-    -String content
-    -String author
-    -Date createdAt
-  }
-  class BlogView {
-    +displayBlogDetails() void
-    +displayAllBlogs() void
-  }
-  BlogController --> "*" Blog
-  BlogController --> BlogView
-```
+![Diagram](diagrams/37_MVC_Notes-01.png)
 
 **Diagram – adding and showing a blog**
 
-```mermaid
-sequenceDiagram
-  participant U as User
-  participant C as BlogController
-  participant M as Blog (model)
-  participant V as BlogView
-  U->>C: addBlog(title, content, author)
-  C->>M: new Blog(...)
-  C->>C: store the blog in the list
-  U->>C: showBlog(0)
-  C->>M: read the blog
-  C->>V: displayBlogDetails(blog)
-  V-->>U: shows the blog
-```
+![Diagram](diagrams/37_MVC_Notes-02.png)
 
-```mermaid
-graph LR
-  U["User"] -->|"action"| C["Controller"]
-  C -->|"updates"| M["Model"]
-  C -->|"selects what to show"| V["View"]
-  M -. "data" .-> V
-  V -->|"shown to"| U
-```
+![Diagram](diagrams/37_MVC_Notes-03.png)
 
 *The controller updates the model*
 

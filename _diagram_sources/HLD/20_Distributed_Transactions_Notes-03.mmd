@@ -1,0 +1,10 @@
+sequenceDiagram
+  participant TC as Coordinator
+  participant P as Participants
+  TC->>P: Phase 1: PREPARE
+  P-->>TC: OK
+  TC->>P: Phase 2: PRE-COMMIT (decision shared)
+  P-->>TC: acknowledge
+  TC->>P: Phase 3: COMMIT
+  P-->>TC: DONE
+  Note over TC,P: if the coordinator fails after pre-commit, participants already know the decision

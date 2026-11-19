@@ -1,0 +1,15 @@
+sequenceDiagram
+  participant U as Sender
+  participant TC as TransactionController
+  participant TS as TransactionService
+  participant IC as InstrumentController
+  participant P as Processor
+  U->>TC: makePayment(transactionDO)
+  TC->>TS: makePayment(transactionDO)
+  TS->>IC: getInstrumentByID(sender, debit instrument)
+  IC-->>TS: sender InstrumentDO
+  TS->>IC: getInstrumentByID(receiver, credit instrument)
+  IC-->>TS: receiver InstrumentDO
+  TS->>P: processPayment(sender, receiver)
+  TS->>TS: create Transaction (status SUCCESS) and add to the sender's history
+  TS-->>U: transactionDO

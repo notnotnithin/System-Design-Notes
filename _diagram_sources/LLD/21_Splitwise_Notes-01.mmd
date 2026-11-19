@@ -1,0 +1,96 @@
+classDiagram
+  class Balance {
+    +double amountOwe
+    +double amountGetBack
+  }
+  class BalanceSheetController {
+    +updateUserExpenseBalanceSheet() void
+    +showBalanceSheetOfUser() void
+  }
+  class Expense {
+    +String expenseId
+    +String description
+    +double expenseAmount
+    +User paidByUser
+  }
+  class ExpenseController {
+    +BalanceSheetController balanceSheetController
+    +createExpense() Expense
+  }
+  class ExpenseSplitType {
+    <<enumeration>>
+    EQUAL
+    UNEQUAL
+    PERCENTAGE
+  }
+  class EqualExpenseSplit {
+    +validateSplitRequest() void
+  }
+  class ExpenseSplit {
+    <<interface>>
+    +validateSplitRequest() void
+  }
+  class PercentageExpenseSplit {
+    +validateSplitRequest() void
+  }
+  class Split {
+    +User user
+    +double amountOwe
+  }
+  class UnequalExpenseSplit {
+    +validateSplitRequest() void
+  }
+  class SplitFactory {
+  }
+  class Group {
+    +String groupId
+    +String groupName
+    +List~User~ groupMembers
+    +List~Expense~ expenseList
+    +addMember() void
+    +createExpense() Expense
+  }
+  class GroupController {
+    +List~Group~ groupList
+    +createNewGroup() void
+  }
+  class Splitwise {
+    +UserController userController
+    +GroupController groupController
+    +BalanceSheetController balanceSheetController
+    +demo() void
+    +setupUserAndGroup() void
+  }
+  class User {
+    +String userId
+    +String userName
+    +UserExpenseBalanceSheet userExpenseBalanceSheet
+  }
+  class UserController {
+    +List~User~ userList
+    +addUser() void
+  }
+  class UserExpenseBalanceSheet {
+    +Map~String,Balance~ userVsBalance
+    +double totalYourExpense
+    +double totalPayment
+    +double totalYouOwe
+  }
+  Expense --> ExpenseSplitType
+  Expense --> "*" Split
+  Expense --> User
+  ExpenseController --> BalanceSheetController
+  ExpenseSplit <|.. EqualExpenseSplit
+  ExpenseSplit <|.. PercentageExpenseSplit
+  ExpenseSplit <|.. UnequalExpenseSplit
+  Group --> "*" Expense
+  Group --> ExpenseController
+  Group --> "*" User
+  GroupController --> "*" Group
+  Split --> User
+  Splitwise --> BalanceSheetController
+  Splitwise --> GroupController
+  Splitwise --> UserController
+  User --> UserExpenseBalanceSheet
+  UserController --> "*" User
+  UserExpenseBalanceSheet --> "*" Balance

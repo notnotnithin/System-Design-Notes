@@ -1,0 +1,25 @@
+classDiagram
+  class BankTransfer {
+    +validateRequest() void
+    +debitAmount() void
+    +calculateFees() void
+    +creditAmount() void
+  }
+  class MerchantPayment {
+    +validateRequest() void
+    +debitAmount() void
+    +calculateFees() void
+    +creditAmount() void
+    +requiresOTPAuthentication() boolean
+  }
+  class PaymentFlow {
+    <<abstract>>
+    +validateRequest() void
+    +debitAmount() void
+    +calculateFees() void
+    +creditAmount() void
+    +sendMoney() void
+    +requiresOTPAuthentication() boolean
+  }
+  PaymentFlow <|-- BankTransfer
+  PaymentFlow <|-- MerchantPayment

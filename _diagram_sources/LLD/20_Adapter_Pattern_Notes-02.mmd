@@ -1,0 +1,9 @@
+sequenceDiagram
+  participant C as Client
+  participant A as WeightMachineAdapterImpl
+  participant M as ImperialWeighingMachine
+  C->>A: getWeightInKg()
+  A->>M: getWeightInPounds()
+  M-->>A: 100 pounds
+  A->>A: pounds x 0.45
+  A-->>C: about 45 kg

@@ -1,0 +1,7 @@
+graph LR
+  subgraph PX["Proxy"]
+    C1["Client"] --> P["Proxy"] --> S1["Server"]
+  end
+  subgraph VP["VPN"]
+    C2["Client + VPN client"] ==>|"encrypted tunnel"| V["VPN server"] --> S2["Server"]
+  end

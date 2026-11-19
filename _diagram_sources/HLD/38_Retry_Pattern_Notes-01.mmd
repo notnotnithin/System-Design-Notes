@@ -1,0 +1,12 @@
+sequenceDiagram
+  participant C as Client
+  participant O as Order service
+  participant P as Product service
+  C->>O: request
+  O->>O: 90% of the work done
+  O->>P: call
+  P-->>O: transient failure (5xx / timeout)
+  Note over O: wait, then retry (no need to redo the 90%)
+  O->>P: retry
+  P-->>O: success
+  O-->>C: response

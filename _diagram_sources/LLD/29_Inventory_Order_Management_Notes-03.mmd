@@ -1,0 +1,7 @@
+stateDiagram-v2
+  [*] --> Placed
+  Placed --> Paid: payment success
+  Paid --> DELIVERED
+  Placed --> CANCELLED
+  DELIVERED --> RETURNED
+  Paid --> UNDELIVERED: delivery failed

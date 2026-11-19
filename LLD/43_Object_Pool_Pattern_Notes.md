@@ -25,43 +25,13 @@ Opening a database connection is slow and expensive. If every request creates a 
 
 **Diagram – Connection pool**
 
-```mermaid
-classDiagram
-  class DBConnectionPoolManager {
-    -DBConnectionPoolManager dbConnectionPoolManagerInstance
-    +List~DBConnection~ freeConnections
-    +List~DBConnection~ inUseConnections
-    +int INITIAL_POOL_SIZE
-    +int MAX_POOL_SIZE
-    +releaseDBConnection() void
-  }
-```
+![Diagram](diagrams/43_Object_Pool_Pattern_Notes-01.png)
 
 **Diagram – borrow and return**
 
-```mermaid
-sequenceDiagram
-  participant C as Client
-  participant P as DBConnectionPoolManager
-  participant F as free list
-  participant U as in-use list
-  C->>P: getDBConnection()
-  P->>F: take a connection
-  P->>U: add it
-  P-->>C: connection
-  C->>C: run queries
-  C->>P: releaseDBConnection(conn)
-  P->>U: remove it
-  P->>F: add it back
-```
+![Diagram](diagrams/43_Object_Pool_Pattern_Notes-02.png)
 
-```mermaid
-graph LR
-  A["Pool created: 5 connections free"] --> B["Request: borrow one (4 free, 1 in use)"]
-  B --> C["Request: all 5 in use, pool at MAX"]
-  C --> D["New request must wait or fail"]
-  B --> E["Release: connection goes back to free"]
-```
+![Diagram](diagrams/43_Object_Pool_Pattern_Notes-03.png)
 
 *Borrowing a connection*
 

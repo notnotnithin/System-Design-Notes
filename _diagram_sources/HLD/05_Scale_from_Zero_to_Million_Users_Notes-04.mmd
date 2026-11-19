@@ -1,0 +1,6 @@
+graph LR
+  A["App servers"] -->|"writes"| M[("Master DB")]
+  M -->|"replication"| S1[("Slave DB 1")]
+  M -->|"replication"| S2[("Slave DB 2")]
+  A -->|"reads"| S1
+  A -->|"reads"| S2

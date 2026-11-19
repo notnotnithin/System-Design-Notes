@@ -1,0 +1,35 @@
+classDiagram
+  class AbstractExpression {
+    <<interface>>
+    +interpret() int
+  }
+  class AddNonTerminalExpression {
+    -AbstractExpression rightExpression
+    -AbstractExpression leftExpression
+    +interpret() int
+  }
+  class BinaryNonTerminalExpression {
+    +AbstractExpression leftExpression
+    +AbstractExpression rightExpression
+    +char operator
+    +interpret() int
+  }
+  class Context {
+    -Map~String,Integer~ variables
+  }
+  class MultiplyNonTerminalExpression {
+    -AbstractExpression leftExpression
+    -AbstractExpression rightExpression
+    +interpret() int
+  }
+  class NumberTerminalExpression {
+    +String stringValue
+    +interpret() int
+  }
+  AbstractExpression <|.. AddNonTerminalExpression
+  AbstractExpression <|.. BinaryNonTerminalExpression
+  AbstractExpression <|.. MultiplyNonTerminalExpression
+  AbstractExpression <|.. NumberTerminalExpression
+  AddNonTerminalExpression --> AbstractExpression
+  BinaryNonTerminalExpression --> AbstractExpression
+  MultiplyNonTerminalExpression --> AbstractExpression

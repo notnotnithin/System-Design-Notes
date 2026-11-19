@@ -1,0 +1,8 @@
+graph LR
+  A1["App server 1<br/>+ cache client"] --> H{"consistent hashing picks a cache server"}
+  A2["App server 2<br/>+ cache client"] --> H
+  H --> C1[("Cache 1")]
+  H --> C2[("Cache 2")]
+  H --> C3[("Cache 3")]
+  H --> C4[("Cache 4")]
+  H --> C5[("Cache 5")]

@@ -18,15 +18,7 @@ Creational patterns are about **how objects get created** so the rest of the cod
 | **Prototype** | creating from scratch is costly, so **copy** an existing one | this note |
 | **Object Pool** | creating is expensive, so **reuse** a fixed set of objects | [43 Object Pool](43_Object_Pool_Pattern_Notes.md) |
 
-```mermaid
-graph TD
-  C["Creational patterns"] --> S["Singleton: one instance"]
-  C --> F["Factory Method: subclass decides"]
-  C --> AF["Abstract Factory: family of products"]
-  C --> B["Builder: step by step"]
-  C --> P["Prototype: clone an existing object"]
-  C --> OP["Object Pool: reuse expensive objects"]
-```
+![Diagram](diagrams/27_Prototype_and_Creational_Overview_Notes-01.png)
 
 ---
 
@@ -41,23 +33,7 @@ graph TD
 
 **Diagram – Student prototype**
 
-```mermaid
-classDiagram
-  class Student {
-    +int id
-    +String name
-    +String branch
-    +boolean inHighSchool
-    -int rollNo
-    +clone() StudentPrototype
-    +printDetails() void
-  }
-  class StudentPrototype {
-    <<interface>>
-    +clone() StudentPrototype
-  }
-  StudentPrototype <|.. Student
-```
+![Diagram](diagrams/27_Prototype_and_Creational_Overview_Notes-02.png)
 
 *clone() builds a copy*
 
@@ -67,16 +43,7 @@ public StudentPrototype clone() {
 }
 ```
 
-```mermaid
-sequenceDiagram
-  participant C as Client
-  participant O as Original Student
-  participant K as Cloned Student
-  C->>O: clone()
-  O->>K: new Student(id, name, branch, rollNo)
-  O-->>C: copy
-  C->>K: change the fields that differ
-```
+![Diagram](diagrams/27_Prototype_and_Creational_Overview_Notes-03.png)
 
 ### Shallow copy vs deep copy
 - **Shallow copy:** copies the fields, but objects inside (lists, other objects) are *shared* between the original and the copy. Changing one changes the other.

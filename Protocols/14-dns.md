@@ -12,10 +12,7 @@
 
 ### How the layers fit together (outer to inner)
 
-```mermaid
-graph LR
-  N1["Ethernet frame"] --> N2["IPv4 packet"] --> N3["UDP port 53"] --> N4["DNS message: header, question, answers"]
-```
+![Diagram](diagrams/14-dns-01.png)
 
 ## In-depth explanation of the example (plain-language version)
 
@@ -127,22 +124,7 @@ The resolver sends the final answer back to the laptop (repeating the original t
 
 ### Sequence diagram
 
-```mermaid
-sequenceDiagram
-  participant P0 as Laptop 192.168.1.10
-  participant P1 as DNS resolver 8.8.8.8
-  participant P2 as Root server 198.41.0.4
-  participant P3 as .com server 192.5.6.30
-  participant P4 as example.com server 198.51.100.53
-  P0->>P1: 1. DNS: Standard query A www.example.com
-  P1->>P2: 2. DNS: Standard query A www.example.com
-  P2->>P1: 3. DNS: Referral: com. NS ×13 (with glue)
-  P1->>P3: 4. DNS: Standard query A www.example.com
-  P3->>P1: 5. DNS: Referral: example.com. NS ×2 (with glue)
-  P1->>P4: 6. DNS: Standard query A www.example.com
-  P4->>P1: 7. DNS: Response A 203.0.113.10 (authoritative)
-  P1->>P0: 8. DNS: Standard query response A 203.0.113.10
-```
+![Diagram](diagrams/14-dns-02.png)
 
 *The lesson's own sequence diagram:*
 

@@ -1,0 +1,9 @@
+graph TD
+  L7["7 Application: HTTP, FTP, SMTP, IMAP/POP, WebSocket, WebRTC"] --> L6["6 Presentation"]
+  L6 --> L5["5 Session"]
+  L5 --> L4["4 Transport: TCP, UDP"]
+  L4 --> L3["3 Network: IP"]
+  L3 --> L2["2 Data link: Ethernet, Wi-Fi"]
+  L2 --> L1["1 Physical: cables, radio"]
+  classDef hi fill:#fde68a,stroke:#b45309,color:#000
+  class L7,L4 hi

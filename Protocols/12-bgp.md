@@ -12,10 +12,7 @@
 
 ### How the layers fit together (outer to inner)
 
-```mermaid
-graph LR
-  N1["Ethernet frame"] --> N2["IPv4 packet (TTL 1)"] --> N3["TCP port 179"] --> N4["BGP: OPEN, UPDATE, KEEPALIVE, NOTIFICATION"]
-```
+![Diagram](diagrams/12-bgp-01.png)
 
 ## In-depth explanation of the example (plain-language version)
 
@@ -146,28 +143,7 @@ Later the hosting company takes the prefix away (a link failed, or maintenance).
 
 ### Sequence diagram
 
-```mermaid
-sequenceDiagram
-  participant P0 as 192.0.2.5
-  participant P1 as 192.0.2.4
-  participant P2 as 192.0.2.9
-  participant P3 as 192.0.2.8
-  participant P4 as Laptop 192.168.1.10
-  participant P5 as Web server 203.0.113.10
-  P0->>P1: 1. TCP: 50311 → 179 [SYN] Seq=0
-  P1->>P0: 2. TCP: 179 → 50311 [SYN, ACK] Seq=0 Ack=1
-  P0->>P1: 3. TCP: 50311 → 179 [ACK] Seq=1 Ack=1
-  P0->>P1: 4. BGP: OPEN Message
-  P1->>P0: 5. BGP: OPEN Message
-  P1->>P0: 6. BGP: KEEPALIVE Message
-  P0->>P1: 7. BGP: KEEPALIVE Message
-  P2->>P3: 8. BGP: UPDATE Message: 203.0.113.0/24
-  P1->>P0: 9. BGP: UPDATE Message: 203.0.113.0/24
-  P4->>P5: 10. TCP: 52800 → 443 [SYN] Seq=0
-  P5->>P4: 11. TCP: 443 → 52800 [SYN, ACK] Seq=0 Ack=1
-  P2->>P3: 12. BGP: UPDATE Message: withdrawn 203.0.113.0/24
-  P1->>P0: 13. BGP: UPDATE Message: withdrawn 203.0.113.0/24
-```
+![Diagram](diagrams/12-bgp-02.png)
 
 *The lesson's own sequence diagram:*
 

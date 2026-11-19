@@ -1,0 +1,11 @@
+sequenceDiagram
+  participant C as Client
+  participant R as root Directory
+  participant D as documents Directory
+  participant F as File
+  C->>R: printContents()
+  R->>D: printContents()
+  D->>F: printContents()
+  F-->>D: prints file name
+  D-->>R: done
+  R-->>C: done

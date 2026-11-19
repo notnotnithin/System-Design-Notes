@@ -23,52 +23,13 @@ Because a `Directory` is itself a `FileSystemComponent`, directories can contain
 
 **Diagram – File system**
 
-```mermaid
-classDiagram
-  class Directory {
-    +String directoryName
-    +List~FileSystemComponent~ children
-    +add() void
-    +remove() void
-    +printContents() void
-  }
-  class File {
-    +String fileName
-    +printContents() void
-  }
-  class FileSystemComponent {
-    <<interface>>
-    +printContents() void
-  }
-  Directory --> "*" FileSystemComponent
-  FileSystemComponent <|.. Directory
-  FileSystemComponent <|.. File
-```
+![Diagram](diagrams/19_Composite_File_System_Notes-01.png)
 
 **Diagram – a sample tree**
 
-```mermaid
-graph TD
-  R["Directory: root"] --> D1["Directory: documents"]
-  R --> F1["File: readme.txt"]
-  D1 --> F2["File: resume.pdf"]
-  D1 --> D2["Directory: photos"]
-  D2 --> F3["File: trip.jpg"]
-```
+![Diagram](diagrams/19_Composite_File_System_Notes-02.png)
 
-```mermaid
-sequenceDiagram
-  participant C as Client
-  participant R as root Directory
-  participant D as documents Directory
-  participant F as File
-  C->>R: printContents()
-  R->>D: printContents()
-  D->>F: printContents()
-  F-->>D: prints file name
-  D-->>R: done
-  R-->>C: done
-```
+![Diagram](diagrams/19_Composite_File_System_Notes-03.png)
 
 *The composite loops over its children*
 
@@ -87,34 +48,7 @@ sequenceDiagram
 
 **Diagram – Math expression tree**
 
-```mermaid
-classDiagram
-  class ArithmeticExpression {
-    <<interface>>
-    +evaluate() int
-  }
-  class Expression {
-    +ArithmeticExpression leftExpression
-    +ArithmeticExpression rightExpression
-    +OperationType operation
-    +evaluate() int
-  }
-  class Number {
-    +int value
-    +evaluate() int
-  }
-  class OperationType {
-    <<enumeration>>
-    ADD
-    SUBTRACT
-    MULTIPLY
-    DIVIDE
-  }
-  ArithmeticExpression <|.. Expression
-  ArithmeticExpression <|.. Number
-  Expression --> ArithmeticExpression
-  Expression --> OperationType
-```
+![Diagram](diagrams/19_Composite_File_System_Notes-04.png)
 
 ## When to use
 - Data is naturally a tree (folders, menus, organisation charts, UI components, expressions).

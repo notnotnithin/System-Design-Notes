@@ -12,10 +12,7 @@
 
 ### How the layers fit together (outer to inner)
 
-```mermaid
-graph LR
-  N1["IPv4"] --> N2["TCP port 22"] --> N3["SSH transport: key exchange, encryption"] --> N4["User authentication"] --> N5["Channels: shell, SFTP, port forwarding"]
-```
+![Diagram](diagrams/32-ssh-01.png)
 
 ## In-depth explanation of the example (plain-language version)
 
@@ -154,40 +151,7 @@ SSH carries many **channels** over the single encrypted connection: a shell, a c
 
 ### Sequence diagram
 
-```mermaid
-sequenceDiagram
-  participant P0 as Laptop 192.168.1.10
-  participant P1 as SSH server 203.0.113.22
-  P0->>P1: 1. TCP: 53210 → 22 [SYN] Seq=0
-  P1->>P0: 2. TCP: 22 → 53210 [SYN, ACK] Seq=0 Ack=1
-  P0->>P1: 3. TCP: 53210 → 22 [ACK] Seq=1 Ack=1
-  P0->>P1: 4. SSH: Client: SSH-2.0-OpenSSH_for_Windows_9.5
-  P1->>P0: 5. SSH: Server: SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13.5
-  P1->>P0: 6. SSH: Server: Key Exchange Init
-  P0->>P1: 7. SSH: Client: Key Exchange Init, 2 segments
-  P0->>P1: 8. SSH: Client: KEX_ECDH_INIT (sntrup761x25519 public keys)
-  P1->>P0: 9. SSH: Server: KEX_ECDH_REPLY (host key, its half, signature)
-  P1->>P0: 10. SSH: Server: New Keys
-  P0->>P1: 11. SSH: Client: New Keys
-  P0->>P1: 12. SSH: Encrypted (len=44): service request, ssh-userauth
-  P1->>P0: 13. SSH: Encrypted (len=44): service accept
-  P0->>P1: 14. SSH: Encrypted (len=68): login with method none
-  P1->>P0: 15. SSH: Encrypted (len=52): try publickey,password
-  P0->>P1: 16. SSH: Encrypted (len=140): offer public key
-  P1->>P0: 17. SSH: Encrypted (len=100): public key OK
-  P0->>P1: 18. SSH: Encrypted (len=308): public key + signature
-  P1->>P0: 19. SSH: Encrypted (len=28): login success
-  P0->>P1: 20. SSH: Encrypted (len=52): channel open: session
-  P1->>P0: 21. SSH: Encrypted (len=44): channel open confirmed
-  P0->>P1: 22. SSH: Encrypted (len=36): keystroke
-  P1->>P0: 23. SSH: Encrypted (len=36): echo
-  P0->>P1: 24. SSH: Encrypted (len=36): keystroke
-  P1->>P0: 25. SSH: Encrypted (len=36): echo
-  P0->>P1: 26. SSH: Encrypted (len=36): keystroke
-  P1->>P0: 27. SSH: Encrypted (len=36): echo
-  P0->>P1: 28. SSH: Encrypted (len=36): keystroke (Enter)
-  P1->>P0: 29. SSH: Encrypted (len=132): output and a new prompt
-```
+![Diagram](diagrams/32-ssh-02.png)
 
 *The lesson's own sequence diagram:*
 

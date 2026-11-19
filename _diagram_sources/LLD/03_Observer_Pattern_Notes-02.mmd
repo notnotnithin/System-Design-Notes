@@ -1,0 +1,12 @@
+sequenceDiagram
+  participant U1 as EmailObserver
+  participant U2 as PushObserver
+  participant P as IphoneProductObservable
+  U1->>P: addStockObserver(this)
+  U2->>P: addStockObserver(this)
+  Note over P: stock is 0
+  P->>P: restock(10)
+  P->>U1: update()
+  U1->>U1: sendEmail()
+  P->>U2: update()
+  U2->>U2: sendPushNotification()

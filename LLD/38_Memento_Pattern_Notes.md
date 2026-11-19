@@ -21,48 +21,11 @@ An application has settings (`theme`, `fontSize`, `notificationsEnabled`, `langu
 
 **Diagram – Application configuration with undo**
 
-```mermaid
-classDiagram
-  class ApplicationConfiguration {
-    -String theme
-    -int fontSize
-    -boolean notificationsEnabled
-    -String language
-    +save() ConfigurationMemento
-    +restore() void
-  }
-  class ConfigurationManager {
-    -Stack~ConfigurationMemento~ history
-    +saveState() void
-    +undo() void
-  }
-  class ConfigurationMemento {
-    -String theme
-    -int fontSize
-    -boolean notificationsEnabled
-    -String language
-  }
-  ConfigurationManager --> ConfigurationMemento
-```
+![Diagram](diagrams/38_Memento_Pattern_Notes-01.png)
 
 **Diagram – save, change, undo**
 
-```mermaid
-sequenceDiagram
-  participant C as Client
-  participant M as ConfigurationManager (caretaker)
-  participant A as ApplicationConfiguration (originator)
-  C->>M: saveState(config)
-  M->>A: save()
-  A-->>M: memento 1 (default theme, size 12)
-  M->>M: push memento 1
-  C->>A: change theme to dark, size to 16
-  C->>M: saveState(config)
-  M->>M: push memento 2
-  C->>M: undo(config)
-  M->>M: pop memento 2, peek memento 1
-  M->>A: restore(memento 1)
-```
+![Diagram](diagrams/38_Memento_Pattern_Notes-02.png)
 
 *The caretaker restores the previous snapshot*
 

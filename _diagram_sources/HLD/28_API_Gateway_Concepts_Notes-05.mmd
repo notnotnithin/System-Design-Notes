@@ -1,0 +1,9 @@
+sequenceDiagram
+  participant C as Client
+  participant G as API gateway
+  participant D as Service discovery (Eureka)
+  participant S as Order / Invoice / Sales
+  C->>G: 1 /api/order
+  G->>D: 2 where is the order service?
+  D-->>G: 3 locations (healthy instances only)
+  G->>S: 4 call the instance

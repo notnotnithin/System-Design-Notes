@@ -1,0 +1,41 @@
+sequenceDiagram
+  participant P0 as Laptop 192.168.1.10
+  participant P1 as smtp.example.com 203.0.113.25
+  participant P2 as DNS resolver 8.8.8.8
+  participant P3 as mx.example.org 198.51.100.25
+  P0->>P1: 1. TCP: 52900 → 465 [SYN] Seq=0
+  P1->>P0: 2. TCP: 465 → 52900 [SYN, ACK] Seq=0 Ack=1
+  P0->>P1: 3. TCP: 52900 → 465 [ACK] Seq=1 Ack=1
+  P0->>P1: 4. TLSv1.3: Client Hello (SNI=smtp.example.com)
+  P1->>P0: 5. TLSv1.3: Server Hello + encrypted handshake, 2 segments
+  P0->>P1: 6. TLSv1.3: Change Cipher Spec, Finished (encrypted)
+  P1->>P0: 7. SMTP (TLS): 220 smtp.example.com ESMTP Postfix
+  P0->>P1: 8. SMTP (TLS): EHLO alice-laptop
+  P1->>P0: 9. SMTP (TLS): 250 capabilities (PIPELINING, SIZE, AUTH …)
+  P0->>P1: 10. SMTP (TLS): AUTH PLAIN (credentials)
+  P1->>P0: 11. SMTP (TLS): 235 2.7.0 Authentication successful
+  P0->>P1: 12. SMTP (TLS): MAIL FROM, RCPT TO, DATA (pipelined)
+  P1->>P0: 13. SMTP (TLS): 250 Ok, 250 Ok, 354 End data with <CR><LF>.<CR><LF>
+  P0->>P1: 14. SMTP (TLS): Message (316 bytes), then “.”
+  P1->>P0: 15. SMTP (TLS): 250 2.0.0 Ok: queued as 4A1F2C3D9E
+  P1->>P2: 16. DNS: Standard query MX example.org
+  P2->>P1: 17. DNS: Standard query response MX 10 mx.example.org
+  P1->>P2: 18. DNS: Standard query A mx.example.org
+  P2->>P1: 19. DNS: Standard query response A 198.51.100.25
+  P1->>P3: 20. TCP: 41522 → 25 [SYN] Seq=0
+  P3->>P1: 21. TCP: 25 → 41522 [SYN, ACK] Seq=0 Ack=1
+  P1->>P3: 22. TCP: 41522 → 25 [ACK] Seq=1 Ack=1
+  P3->>P1: 23. SMTP: 220 mx.example.org ESMTP Postfix
+  P1->>P3: 24. SMTP: EHLO smtp.example.com
+  P3->>P1: 25. SMTP: 250 capabilities (PIPELINING, STARTTLS …)
+  P1->>P3: 26. SMTP: STARTTLS
+  P3->>P1: 27. SMTP: 220 2.0.0 Ready to start TLS
+  P1->>P3: 28. TLSv1.3: Client Hello (SNI=mx.example.org)
+  P3->>P1: 29. TLSv1.3: Server Hello + encrypted handshake, 2 segments
+  P1->>P3: 30. TLSv1.3: Change Cipher Spec, Finished (encrypted)
+  P1->>P3: 31. SMTP (TLS): EHLO smtp.example.com
+  P3->>P1: 32. SMTP (TLS): 250 capabilities (PIPELINING, SIZE …)
+  P1->>P3: 33. SMTP (TLS): MAIL FROM (SIZE=1316), RCPT TO, DATA
+  P3->>P1: 34. SMTP (TLS): 250 Ok, 250 Ok, 354 End data with <CR><LF>.<CR><LF>
+  P1->>P3: 35. SMTP (TLS): Message (1,316 bytes), then “.”
+  P3->>P1: 36. SMTP (TLS): 250 2.0.0 Ok: queued as 7B3E9F01A2

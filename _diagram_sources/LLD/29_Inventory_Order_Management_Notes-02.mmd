@@ -1,0 +1,21 @@
+sequenceDiagram
+  participant U as User
+  participant S as ProductDeliverySystem
+  participant WC as WarehouseController
+  participant OC as OrderController
+  participant O as Order
+  participant W as Warehouse
+  U->>S: addProductToCart(user, product, count)
+  S->>S: Cart.addItemInCart(categoryId, count)
+  U->>S: placeOrder(user, warehouse)
+  S->>WC: selectWarehouse(strategy)
+  WC-->>S: nearest warehouse
+  S->>OC: createNewOrder(user, warehouse)
+  OC-->>S: Order
+  U->>S: checkout(order)
+  S->>O: checkout()
+  O->>W: removeItemFromInventory(products and counts)
+  W->>W: Inventory.removeItems(...)
+  O->>O: makePayment(paymentMode)
+  O->>O: generateOrderInvoice()
+  O-->>U: invoice and order status

@@ -1,0 +1,6 @@
+graph TB
+  P["Partition: offsets 0 to 7"] --> C["Consumer polls offset 7"]
+  C -->|"fails"| R{"retries left? (3 attempts)"}
+  R -->|"yes"| C
+  R -->|"no"| DLQ[["Dead letter queue"]]
+  DLQ --> N["Consumer moves on to the next message"]

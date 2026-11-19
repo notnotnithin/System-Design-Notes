@@ -1,0 +1,2 @@
+graph LR
+  C["Client (browser cache)"] --> CDN["CDN"] --> LB["Load balancer"] --> A["App servers"] --> R[("Cache: Redis")] --> D[("DB")]

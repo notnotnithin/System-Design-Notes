@@ -70,18 +70,7 @@ The flow is: the **user** reaches a **load balancer**, which sends the request t
 <!-- diagram:07-0 -->
 **Diagram – URL shortener architecture**
 
-```mermaid
-graph LR
-  U["User"] --> LB["Load balancer"]
-  LB --> T1["TinyURL service instance"]
-  LB --> T2["TinyURL service instance"]
-  T1 --> ZK["ID generator: ZooKeeper (ranges)"]
-  T1 --> CA[("Cache")]
-  T1 --> DB[("Relational DB: id | short | long")]
-  T2 --> ZK
-  T2 --> CA
-  T2 --> DB
-```
+![Diagram](diagrams/07_URL_Shortener_Notes-01.png)
 <!-- /diagram:07-0 -->
 
 

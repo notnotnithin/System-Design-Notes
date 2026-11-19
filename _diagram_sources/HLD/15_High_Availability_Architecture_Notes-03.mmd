@@ -1,0 +1,11 @@
+graph LR
+  C["Client"] --> LB["Load balancer"]
+  subgraph DC1["DC1 Mumbai"]
+    A1["Apps"] --> P1[("Live DB")]
+  end
+  subgraph DC2["DC2 Pune"]
+    A2["Apps"] --> P2[("Live DB")]
+  end
+  LB --> A1
+  LB --> A2
+  P1 <-->|"bidirectional sync"| P2

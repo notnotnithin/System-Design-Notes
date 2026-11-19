@@ -1,0 +1,5 @@
+graph LR
+  A["App server"] -->|"1 check cache"| C[("Cache: Redis")]
+  C -->|"hit: return data"| A
+  C -->|"miss"| A
+  A -->|"2 read DB, then fill cache"| D[("Database")]

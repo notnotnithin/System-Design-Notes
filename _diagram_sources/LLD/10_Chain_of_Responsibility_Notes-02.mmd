@@ -1,0 +1,12 @@
+sequenceDiagram
+  participant C as Client
+  participant D as DebugLogProcessor
+  participant I as InfoLogProcessor
+  participant E as ErrorLogProcessor
+  C->>D: logMessage(ERROR, "disk full")
+  D->>D: level is DEBUG, not my level
+  D->>I: pass on
+  I->>I: level is INFO, not my level
+  I->>E: pass on
+  E->>E: level matches
+  E->>E: write("disk full")

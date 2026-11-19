@@ -1,0 +1,9 @@
+stateDiagram-v2
+  [*] --> Idle
+  Idle --> HasCard: insert card
+  HasCard --> SelectOperation: correct PIN
+  HasCard --> Idle: wrong PIN, card returned
+  SelectOperation --> CashWithdrawal: choose withdraw
+  SelectOperation --> CheckBalance: choose balance
+  CashWithdrawal --> Idle: money given, card returned
+  CheckBalance --> Idle: balance shown, card returned

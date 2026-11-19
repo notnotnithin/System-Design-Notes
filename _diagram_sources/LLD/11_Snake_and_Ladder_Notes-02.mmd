@@ -1,0 +1,11 @@
+flowchart TD
+  A["findPlayerTurn(): take next player, put at the back"] --> B["rollDice()"]
+  B --> C["newPosition = current + dice"]
+  C --> D{"Cell has a snake or ladder?"}
+  D -->|"yes"| E["newPosition = end of the jump"]
+  D -->|"no"| F["keep newPosition"]
+  E --> G["save position"]
+  F --> G
+  G --> H{"Reached the last cell?"}
+  H -->|"yes"| W["Winner found, game over"]
+  H -->|"no"| A

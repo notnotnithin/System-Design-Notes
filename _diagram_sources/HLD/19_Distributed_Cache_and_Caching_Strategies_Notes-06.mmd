@@ -1,0 +1,9 @@
+sequenceDiagram
+  participant C as Client
+  participant S as Server
+  participant K as Cache
+  participant D as DB
+  C->>S: write (POST)
+  S->>K: 1 write into cache
+  S->>D: 2 write into DB (synchronous)
+  S-->>C: done (exception if any write fails)

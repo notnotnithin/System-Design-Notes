@@ -1,0 +1,6 @@
+graph TB
+  R["New request at time t"] --> L["Log of accepted timestamps"]
+  L --> D["Drop timestamps older than t minus 10 s"]
+  D --> Q{"count in window is less than limit 5?"}
+  Q -->|"yes"| A["Accept and add timestamp"]
+  Q -->|"no"| X["Reject"]

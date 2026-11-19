@@ -1,0 +1,157 @@
+classDiagram
+  class Demo {
+  }
+  class BallDetails {
+    +int ballNumber
+    +BallType ballType
+    +RunType runType
+    +startBallDelivery() void
+  }
+  class BallType {
+    <<enumeration>>
+    NORMAL
+    WIDEBALL
+    NOBALL
+  }
+  class InningDetails {
+    +Team battingTeam
+    +Team bowlingTeam
+    +MatchType matchType
+    +start() void
+  }
+  class OverDetails {
+    +int overNumber
+    +List~BallDetails~ balls
+    +int extraBallsCount
+    +startOver() boolean
+  }
+  class RunType {
+    <<enumeration>>
+    ZERO
+    ONE
+    TWO
+    THREE
+    FOUR
+    SIX
+  }
+  class Match {
+    +Team teamA
+    +Team teamB
+    +Date matchDate
+    +startMatch() void
+  }
+  class MatchType {
+    <<interface>>
+    +noOfOvers() int
+    +maxOverCountBowlers() int
+  }
+  class OneDayMatch {
+    +noOfOvers() int
+    +maxOverCountBowlers() int
+  }
+  class BattingScoreUpdater {
+    +update() void
+  }
+  class BowlingScoreUpdater {
+    +update() void
+  }
+  class ScoreUpdaterObserver {
+    <<interface>>
+    +update() void
+  }
+  class T20Match {
+    +noOfOvers() int
+    +maxOverCountBowlers() int
+  }
+  class Person {
+    +String name
+    +int age
+    +String address
+  }
+  class PlayerBattingController {
+    +Queue~PlayerDetails~ yetToPlay
+    +PlayerDetails striker
+    +PlayerDetails nonStriker
+  }
+  class PlayerBowlingController {
+    +Deque~PlayerDetails~ bowlersList
+    +Map~PlayerDetails,Integer~ bowlerVsOverCount
+    +PlayerDetails currentBowler
+  }
+  class PlayerDetails {
+    +Person person
+    +PlayerType playerType
+    +BattingScoreCard battingScoreCard
+    +printBattingScoreCard() void
+    +printBowlingScoreCard() void
+  }
+  class PlayerType {
+    <<enumeration>>
+    BATSMAN
+    BOWLER
+    WICKETKEEPER
+    CAPTAIN
+    ALLROUNDER
+    +CAPTAIN, ALLROUNDER
+  }
+  class BattingScoreCard {
+    +int totalRuns
+    +int totalBallsPlayed
+    +int totalFours
+  }
+  class BowlingScoreCard {
+    +int totalOversCount
+    +int runsGiven
+    +int wicketsTaken
+  }
+  class Team {
+    +String teamName
+    +Queue~PlayerDetails~ playing11
+    +List~PlayerDetails~ bench
+    +chooseNextBatsMan() void
+    +chooseNextBowler() void
+  }
+  class Wicket {
+    +WicketType wicketType
+    +PlayerDetails takenBy
+    +OverDetails overDetail
+  }
+  class WicketType {
+    <<enumeration>>
+    RUNOUT
+    BOLD
+    CATCH
+  }
+  BallDetails --> BallType
+  BallDetails --> PlayerDetails
+  BallDetails --> RunType
+  BallDetails --> "*" ScoreUpdaterObserver
+  BallDetails --> Wicket
+  BattingScoreCard --> Wicket
+  InningDetails --> MatchType
+  InningDetails --> "*" OverDetails
+  InningDetails --> Team
+  Match --> "*" InningDetails
+  Match --> MatchType
+  Match --> Team
+  MatchType <|.. OneDayMatch
+  MatchType <|.. T20Match
+  OverDetails --> "*" BallDetails
+  OverDetails --> PlayerDetails
+  PlayerBattingController --> PlayerDetails
+  PlayerBattingController --> "*" PlayerDetails
+  PlayerBowlingController --> PlayerDetails
+  PlayerBowlingController --> "*" PlayerDetails
+  PlayerDetails --> BattingScoreCard
+  PlayerDetails --> BowlingScoreCard
+  PlayerDetails --> Person
+  PlayerDetails --> PlayerType
+  ScoreUpdaterObserver <|.. BattingScoreUpdater
+  ScoreUpdaterObserver <|.. BowlingScoreUpdater
+  Team --> PlayerBattingController
+  Team --> PlayerBowlingController
+  Team --> "*" PlayerDetails
+  Wicket --> BallDetails
+  Wicket --> OverDetails
+  Wicket --> PlayerDetails
+  Wicket --> WicketType

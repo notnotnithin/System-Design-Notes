@@ -1,0 +1,8 @@
+classDiagram
+    class IRobot { <<interface>> +display(x, y) }
+    class HumanoidRobot { String type, Sprites body +display(x, y) }
+    class RoboticDog { String type, Sprites body +display(x, y) }
+    class RoboticFactory { static Map~String,IRobot~ roboticObjectCache +createRobot(type) IRobot }
+    IRobot <|.. HumanoidRobot
+    IRobot <|.. RoboticDog
+    RoboticFactory ..> IRobot : creates or returns cached

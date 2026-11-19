@@ -1,0 +1,4 @@
+graph LR
+  U["User in USA"] --> CU["CDN node USA"]
+  CU -->|"not found: try nearest other CDN"| CI["CDN node India"]
+  CI -->|"not found"| O["Origin server (static data cached afterwards)"]

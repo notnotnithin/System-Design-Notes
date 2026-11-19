@@ -1,0 +1,9 @@
+sequenceDiagram
+  participant S as Sender (private 4)
+  participant R as Receiver (private 5)
+  Note over S,R: public and agreed by both: prime P = 7, primitive root = 3
+  S->>R: public key = 3^4 mod 7 = 4
+  R->>S: public key = 3^5 mod 7 = 5
+  Note over S: secret = 5^4 mod 7 = 2
+  Note over R: secret = 4^5 mod 7 = 2
+  Note over S,R: both hold the same secret 2, used as the AES key

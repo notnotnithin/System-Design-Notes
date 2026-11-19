@@ -1,0 +1,72 @@
+classDiagram
+  class VendingMachineAppDemo {
+  }
+  class Inventory {
+    +ItemShelf[] inventory
+    +initialEmptyInventory() void
+    +addItem() void
+    +updateSoldOutItem() void
+  }
+  class Item {
+    +ItemType type
+    +int price
+  }
+  class ItemShelf {
+    +int code
+    +Item item
+    +boolean soldOut
+  }
+  class ItemType {
+    <<enumeration>>
+    COKE
+    PEPSI
+    JUICE
+    SODA
+    +JUICE, SODA
+  }
+  class VendingMachine {
+    -State vendingMachineState
+    -Inventory inventory
+    -List~Coin~ coinList
+  }
+  class Coin {
+    <<enumeration>>
+    PENNY
+    NICKEL
+    DIME
+    QUARTER
+    +int value
+  }
+  class State {
+    <<abstract>>
+    +clickOnInsertCoinButton() void
+    +clickOnStartProductSelectionButton() void
+    +insertCoin() void
+    +chooseProduct() void
+  }
+  class DispenseState {
+    +dispenseProduct() Item
+  }
+  class HasMoneyState {
+    +clickOnStartProductSelectionButton() void
+    +insertCoin() void
+    +refundFullMoney() List~Coin~
+  }
+  class IdleState {
+    +clickOnInsertCoinButton() void
+    +updateInventory() void
+  }
+  class SelectionState {
+    +chooseProduct() void
+    +refundFullMoney() List~Coin~
+  }
+  Inventory --> "*" ItemShelf
+  Item --> ItemType
+  ItemShelf --> Item
+  State <|-- DispenseState
+  State <|-- HasMoneyState
+  State <|-- IdleState
+  State <|-- SelectionState
+  VendingMachine --> "*" Coin
+  VendingMachine --> Inventory
+  VendingMachine --> State

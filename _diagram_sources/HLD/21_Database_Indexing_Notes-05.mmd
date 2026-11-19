@@ -1,0 +1,14 @@
+flowchart LR
+    subgraph IDX[EMPID INDEX sorted]
+        i1[1] --> i2[2] --> i4[4] --> i5[5]
+    end
+    subgraph PG[Data Page ID 1]
+        r1[Row EmpID 1]
+        r4[Row EmpID 4]
+        r5[Row EmpID 5]
+        r2[Row EmpID 2]
+    end
+    s0[slot 0: EMP1] --> r1
+    s1[slot 1: EMP2] --> r2
+    s2[slot 2: EMP4] --> r4
+    s3[slot 3: EMP5] --> r5

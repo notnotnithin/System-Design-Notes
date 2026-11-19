@@ -1,0 +1,42 @@
+classDiagram
+  class Book {
+    -String title
+    -String author
+    -String isbn
+    -int price
+  }
+  class BookCollection {
+    <<interface>>
+    +createIterator() Iterator~Book~
+    +createReverseIterator() Iterator~Book~
+  }
+  class Iterator {
+    <<interface>>
+    +hasNext() boolean
+    +next() T
+  }
+  class Library {
+    -List~Book~ books
+    +createIterator() Iterator~Book~
+    +createReverseIterator() Iterator~Book~
+  }
+  class LibraryIterator {
+    -List~Book~ books
+    -int position
+    +hasNext() boolean
+    +next() Book
+  }
+  class LibraryIteratorDemo {
+  }
+  class ReverseLibraryIterator {
+    -List~Book~ books
+    -int position
+    +hasNext() boolean
+    +next() Book
+  }
+  BookCollection <|.. Library
+  Iterator <|.. LibraryIterator
+  Iterator <|.. ReverseLibraryIterator
+  Library --> "*" Book
+  LibraryIterator --> "*" Book
+  ReverseLibraryIterator --> "*" Book

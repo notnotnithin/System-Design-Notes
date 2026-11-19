@@ -1,0 +1,5 @@
+graph TD
+  U["User / Application"] --> SYS
+  subgraph SYS["The system (hidden from the user)"]
+    B["Node B"] -. "link broken" .- C["Node C"]
+  end

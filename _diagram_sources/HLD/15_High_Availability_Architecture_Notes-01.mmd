@@ -1,0 +1,5 @@
+graph TD
+  C["Client"] --> LB["Load balancer"]
+  LB --> A["Applications X, Y, Z"]
+  A -->|"read and write"| DB[("Primary DB: FAILED")]:::bad
+  classDef bad fill:#fecaca,stroke:#b91c1c,color:#000

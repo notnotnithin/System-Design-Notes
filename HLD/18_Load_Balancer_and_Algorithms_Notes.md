@@ -13,15 +13,7 @@ Source (handwritten, 7 pages): https://drive.google.com/file/d/1dAg77qQ1t9mlHXc1
 <!-- diagram:18-0 -->
 **Diagram – Load balancer spreads the traffic**
 
-```mermaid
-graph LR
-  C1["Client"] --> LB["Load balancer"]
-  C2["Client"] --> LB
-  C3["Client"] --> LB
-  LB --> S1["Server S1"]
-  LB --> S2["Server S2"]
-  LB --> S3["Server S3"]
-```
+![Diagram](diagrams/18_Load_Balancer_and_Algorithms_Notes-01.png)
 <!-- /diagram:18-0 -->
 
 
@@ -41,15 +33,7 @@ Clients send requests, and **not all requests should go to only one server**, be
 <!-- diagram:18-1 -->
 **Diagram – L4 versus L7 load balancing**
 
-```mermaid
-graph LR
-  subgraph L4["L4 network LB: IP and TCP/UDP port, fast"]
-    R4["Request"] --> B4["LB looks at IP and port only"] --> S4["Server"]
-  end
-  subgraph L7["L7 application LB: header, cookie, data, caching"]
-    R7["Request"] --> B7["LB reads headers, session, cookies"] --> S7["Server chosen by content"]
-  end
-```
+![Diagram](diagrams/18_Load_Balancer_and_Algorithms_Notes-02.png)
 <!-- /diagram:18-1 -->
 
 
@@ -96,12 +80,7 @@ For the network LB the algorithms are **static** (Round Robin, Weighted Round Ro
 <!-- diagram:18-2 -->
 **Diagram – Round robin**
 
-```mermaid
-graph LR
-  R["Requests 1,2,3,4,5,6"] --> LB["Load balancer"]
-  LB -->|"1, 3, 5"| S1["Server 1"]
-  LB -->|"2, 4, 6"| S2["Server 2"]
-```
+![Diagram](diagrams/18_Load_Balancer_and_Algorithms_Notes-03.png)
 <!-- /diagram:18-2 -->
 
 
@@ -127,12 +106,7 @@ Requests are handed to the servers **in turn:** with 4 clients and 2 servers, re
 <!-- diagram:18-3 -->
 **Diagram – Weighted round robin: server 1 weight 3, server 2 weight 1**
 
-```mermaid
-graph LR
-  R["Requests 1 to 8"] --> LB["Load balancer"]
-  LB -->|"1,2,3 and 5,6,7"| S1["Server 1 (weight 3)"]
-  LB -->|"4 and 8"| S2["Server 2 (weight 1)"]
-```
+![Diagram](diagrams/18_Load_Balancer_and_Algorithms_Notes-04.png)
 <!-- /diagram:18-3 -->
 
 
@@ -157,14 +131,7 @@ Each server has a **weight, which is its capacity.** For example Server 1 weight
 <!-- diagram:18-4 -->
 **Diagram – IP hash: same client, same server**
 
-```mermaid
-graph LR
-  C1["192.178.10.4"] --> H{"hash(source IP)"}
-  C2["182.178.14.2"] --> H
-  C3["172.178.10.242"] --> H
-  H --> S1["Server 1"]
-  H --> S2["Server 2"]
-```
+![Diagram](diagrams/18_Load_Balancer_and_Algorithms_Notes-05.png)
 <!-- /diagram:18-4 -->
 
 
@@ -194,12 +161,7 @@ The LB computes **Hash(source IP address)** and uses that value to **assign the 
 <!-- diagram:18-5 -->
 **Diagram – Least connection**
 
-```mermaid
-graph LR
-  C4["New request from Client 4"] --> LB["Load balancer"]
-  LB -->|"Server 2 has fewer active connections"| S2["Server 2: connection from Client 2"]
-  S1["Server 1: connections from Client 1 and 3"] -.- LB
-```
+![Diagram](diagrams/18_Load_Balancer_and_Algorithms_Notes-06.png)
 <!-- /diagram:18-5 -->
 
 
@@ -224,11 +186,7 @@ The LB **checks which server has fewer active connections** and sends the new re
 <!-- diagram:18-6 -->
 **Diagram – Weighted least connection**
 
-```mermaid
-graph LR
-  LB["Load balancer: ratio = active connections / weight"] --> S1["Server 1: weight 10, 2 connections<br/>ratio 0.2: chosen"]
-  LB --> S2["Server 2: weight 1, 1 connection<br/>ratio 1.0"]
-```
+![Diagram](diagrams/18_Load_Balancer_and_Algorithms_Notes-07.png)
 <!-- /diagram:18-6 -->
 
 
@@ -248,12 +206,7 @@ graph LR
 <!-- diagram:18-7 -->
 **Diagram – Least response time**
 
-```mermaid
-graph LR
-  LB["Load balancer: score = TTFB x active connections, lowest wins, ties use round robin"] --> S1["S1: 3 x 2 = 6"]
-  LB --> S2["S2: 1 x 4 = 4"]
-  LB --> S3["S3: lowest score: chosen"]
-```
+![Diagram](diagrams/18_Load_Balancer_and_Algorithms_Notes-08.png)
 <!-- /diagram:18-7 -->
 
 

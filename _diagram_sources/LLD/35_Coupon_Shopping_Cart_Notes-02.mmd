@@ -1,0 +1,4 @@
+graph TB
+  P["Office Chair (6000), FURNITURE"] --> D1["PercentageCoupon 10%: 6000 - 600 = 5400"]
+  D1 --> D2["TypeCoupon 5% (furniture is eligible): 5400 - 270 = 5130"]
+  D2 --> T["getPrice() returns 5130"]

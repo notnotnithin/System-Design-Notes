@@ -1,0 +1,7 @@
+graph TD
+  V1["v1: 45-CAR (1) on S1, S2, S3"] --> V2["v2: 45-CART (2) on S1, S2, S3"]
+  V2 --> V3["v3: 45-CARM (3) on S2, S3 while S1 is down"]
+  V2 --> V4["v4: 45-CARR (4) written concurrently on S3"]
+  V3 --> G["Get: coordinator sees conflicting versions"]
+  V4 --> G
+  G --> R["client or app resolves using the vector clocks"]

@@ -1,0 +1,4 @@
+graph LR
+  LB["Load balancer: score = TTFB x active connections, lowest wins, ties use round robin"] --> S1["S1: 3 x 2 = 6"]
+  LB --> S2["S2: 1 x 4 = 4"]
+  LB --> S3["S3: lowest score: chosen"]

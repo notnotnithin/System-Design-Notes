@@ -1,0 +1,5 @@
+graph TD
+  S1["S1"] --> D1[("D1: relational DB (SQL)")]
+  S2["S2"] --> D2[("D2: NoSQL (MongoDB)")]
+  S3["S3"] --> D3[("D3: PostgreSQL")]
+  S2 -. "if S2 wants DB3 data: request S3 through its API" .-> S3

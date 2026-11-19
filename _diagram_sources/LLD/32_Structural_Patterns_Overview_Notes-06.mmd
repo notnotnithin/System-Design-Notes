@@ -1,0 +1,6 @@
+flowchart LR
+    C["Client: obj.turnOnButtonClicked()"] --> F[ACFacade]
+    F --> I[ACInternalUnit.acceptUserTempCmd]
+    F --> E1[ACExternalUnit.checkVoltage]
+    F --> E2[ACExternalUnit.consumeNitrogen]
+    F --> E3[ACExternalUnit.startCondensor]

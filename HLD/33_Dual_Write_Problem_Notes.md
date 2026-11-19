@@ -15,20 +15,7 @@ Sources:
 <!-- diagram:33-0 -->
 **Diagram – Two ways the dual write goes wrong**
 
-```mermaid
-sequenceDiagram
-  participant S as Service
-  participant DB as Database
-  participant K as Message broker (Kafka)
-  Note over S,K: Failure 1
-  S->>K: publish event OK
-  S->>DB: write FAILS
-  Note over S,K: event published but data not saved
-  Note over S,K: Failure 2
-  S->>DB: write OK
-  S->>K: publish FAILS
-  Note over S,K: data saved but nobody is told
-```
+![Diagram](diagrams/33_Dual_Write_Problem_Notes-01.png)
 <!-- /diagram:33-0 -->
 
 
@@ -90,14 +77,7 @@ The notes say 2PC is **not a viable solution** here because: dual-write scenario
 <!-- diagram:33-1 -->
 **Diagram – Transactional outbox**
 
-```mermaid
-graph LR
-  subgraph TX["One local DB transaction"]
-    U["Insert User"] --- E["Insert User Event (outbox table)"]
-  end
-  TX --> PO["Poller service reads the outbox table"] --> PB["Publisher"] --> MB[["Message broker"]]
-  MB --> C["Consumers (must be idempotent)"]
-```
+![Diagram](diagrams/33_Dual_Write_Problem_Notes-02.png)
 <!-- /diagram:33-1 -->
 
 
@@ -159,13 +139,7 @@ Instead of writing to the DB **and** publishing an event, **write the event into
 <!-- diagram:33-2 -->
 **Diagram – Listen-to-yourself**
 
-```mermaid
-graph LR
-  A["User service: write only the event"] --> EV[("Event table")]
-  EV --> PO["Poller"] --> MB[["Message broker"]]
-  MB --> C["Other consumers"]
-  MB --> D["User service daemon: consumes its own event"] --> UT[("User table")]
-```
+![Diagram](diagrams/33_Dual_Write_Problem_Notes-03.png)
 <!-- /diagram:33-2 -->
 
 

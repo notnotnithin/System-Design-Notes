@@ -36,156 +36,16 @@ Design a multi-level parking lot. Vehicles enter at a gate, get a spot and a tic
 
 **Diagram – Parking lot**
 
-```mermaid
-classDiagram
-  class ParkingSpot {
-    -String spotId
-    -boolean isFree
-    +occupySpot() void
-    +releaseSpot() void
-  }
-  class Vehicle {
-    +String vehicleNumber
-    +VehicleType vehicleType
-  }
-  class ParkingSpotLookupStrategy {
-    <<interface>>
-    +selectSpot() ParkingSpot
-  }
-  class RandomLookupStrategy {
-    +selectSpot() ParkingSpot
-  }
-  class Ticket {
-    -Vehicle vehicle
-    -ParkingLevel level
-    -ParkingSpot spot
-  }
-  class VehicleType {
-    <<enumeration>>
-    TWO_WHEELER
-    FOUR_WHEELER
-  }
-  class EntranceGate {
-    +enter() Ticket
-  }
-  class ExitGate {
-    -CostComputation costComputation
-    +completeExit() void
-  }
-  class ParkingBuilding {
-    -List~ParkingLevel~ levels
-    +allocate() Ticket
-    +release() void
-  }
-  class ParkingLevel {
-    -int levelNumber
-    -Map~VehicleType,ParkingSpotManager~ managers
-    +hasAvailability() boolean
-    +park() ParkingSpot
-    +unPark() void
-  }
-  class ParkingLot {
-    -ParkingBuilding building
-    -EntranceGate entranceGate
-    -ExitGate exitGate
-    +vehicleArrives() Ticket
-    +vehicleExits() void
-  }
-  class CashPayment {
-    +pay() boolean
-  }
-  class Payment {
-    <<interface>>
-    +pay() boolean
-  }
-  class UPIPayment {
-    +pay() boolean
-  }
-  class CostComputation {
-    -PricingStrategy pricingStrategy
-    +compute() double
-  }
-  class FixedPricingStrategy {
-    +calculate() double
-  }
-  class PricingStrategy {
-    <<interface>>
-    +calculate() double
-  }
-  class FourWheelerSpotManager {
-  }
-  class ParkingSpotManager {
-    <<abstract>>
-    +List~ParkingSpot~ spots
-    +ParkingSpotLookupStrategy strategy
-    -ReentrantLock lock
-    +park() ParkingSpot
-    +unPark() void
-    +hasFreeSpot() boolean
-  }
-  class TwoWheelerSpotManager {
-  }
-  CostComputation --> PricingStrategy
-  ExitGate --> CostComputation
-  ParkingBuilding --> "*" ParkingLevel
-  ParkingLevel --> "*" ParkingSpotManager
-  ParkingLevel --> "*" VehicleType
-  ParkingLot --> EntranceGate
-  ParkingLot --> ExitGate
-  ParkingLot --> ParkingBuilding
-  ParkingSpotLookupStrategy <|.. RandomLookupStrategy
-  ParkingSpotManager --> "*" ParkingSpot
-  ParkingSpotManager --> ParkingSpotLookupStrategy
-  ParkingSpotManager <|-- FourWheelerSpotManager
-  ParkingSpotManager <|-- TwoWheelerSpotManager
-  Payment <|.. CashPayment
-  Payment <|.. UPIPayment
-  PricingStrategy <|.. FixedPricingStrategy
-  Ticket --> ParkingLevel
-  Ticket --> ParkingSpot
-  Ticket --> Vehicle
-  Vehicle --> VehicleType
-```
+![Diagram](diagrams/06_Parking_Lot_Notes-01.png)
 
 ## Step 3 – Flows
 **Entering**
 
-```mermaid
-sequenceDiagram
-  participant V as Vehicle
-  participant G as EntranceGate
-  participant B as ParkingBuilding
-  participant L as ParkingLevel
-  participant M as ParkingSpotManager
-  V->>G: enter(building, vehicle)
-  G->>B: allocate(vehicle)
-  B->>L: hasAvailability(type)?
-  L-->>B: yes
-  B->>L: park(type)
-  L->>M: park()
-  M->>M: lock, strategy.selectSpot(), occupySpot(), unlock
-  M-->>L: spot
-  B-->>G: Ticket (level, spot, entry time)
-  G-->>V: ticket
-```
+![Diagram](diagrams/06_Parking_Lot_Notes-02.png)
 
 **Exiting**
 
-```mermaid
-sequenceDiagram
-  participant V as Vehicle
-  participant X as ExitGate
-  participant C as CostComputation
-  participant P as Payment
-  participant B as ParkingBuilding
-  V->>X: completeExit(building, ticket, payment)
-  X->>C: compute(ticket)
-  C-->>X: price (PricingStrategy)
-  X->>P: pay(price)
-  P-->>X: success
-  X->>B: release(ticket)
-  B->>B: spot becomes free
-```
+![Diagram](diagrams/06_Parking_Lot_Notes-03.png)
 
 ## Design decisions worth explaining
 - **Spot = dumb data, Manager = smart.** A `ParkingSpot` is just a POJO. A `ParkingSpotManager` holds the logic to search, reserve and release spots of **one type**, so each type can have its own strategy and its own lock.

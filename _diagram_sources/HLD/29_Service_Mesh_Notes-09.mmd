@@ -1,0 +1,22 @@
+flowchart LR
+    GW[API Gateway] --> SD[Service Discovery]
+    GW --> LB1[Application Load Balancer] --> P1
+    GW --> LB2[Application Load Balancer] --> P2
+    subgraph DP[Data Plane]
+        subgraph P1[Pod 1..N]
+            I1[Microservice1 Instance]
+            S1[Sidecar Proxy]
+        end
+        subgraph P2[Pod 1..N]
+            I2[Microservice2 Instance]
+            S2[Sidecar Proxy]
+        end
+    end
+    subgraph CP[Control Plane]
+        CM[Configuration Manager] --> TC[Traffic Controller]
+        SM[Security Manager]
+        T[Telemetry]
+    end
+    S1 <--> CP
+    S2 <--> CP
+    T -.-> OD[Observability Dashboards]

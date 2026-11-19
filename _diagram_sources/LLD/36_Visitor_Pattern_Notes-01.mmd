@@ -1,0 +1,49 @@
+classDiagram
+  class DeluxeRoom {
+    -String roomNumber
+    -boolean hasJacuzzi
+    +accept() void
+    +hasJacuzzi() boolean
+  }
+  class IRoom {
+    <<interface>>
+    +accept() void
+  }
+  class StandardRoom {
+    -String roomNumber
+    +accept() void
+  }
+  class SuiteRoom {
+    -String roomNumber
+    -int numberOfRooms
+    +accept() void
+  }
+  class HousekeepingVisitor {
+    +visitStandardRoom() void
+    +visitDeluxeRoom() void
+    +visitSuiteRoom() void
+  }
+  class IRoomVisitor {
+    <<interface>>
+    +visitStandardRoom() void
+    +visitDeluxeRoom() void
+    +visitSuiteRoom() void
+  }
+  class PricingVisitor {
+    -double totalRevenue
+    +visitStandardRoom() void
+    +visitDeluxeRoom() void
+    +visitSuiteRoom() void
+  }
+  class RoomServiceVisitor {
+    -String orderDetails
+    +visitStandardRoom() void
+    +visitDeluxeRoom() void
+    +visitSuiteRoom() void
+  }
+  IRoom <|.. DeluxeRoom
+  IRoom <|.. StandardRoom
+  IRoom <|.. SuiteRoom
+  IRoomVisitor <|.. HousekeepingVisitor
+  IRoomVisitor <|.. PricingVisitor
+  IRoomVisitor <|.. RoomServiceVisitor

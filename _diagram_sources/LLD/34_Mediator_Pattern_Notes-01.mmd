@@ -1,0 +1,33 @@
+classDiagram
+  class AuctionHouse {
+    -List~IColleague~ bidders
+    -String itemName
+    -double currentHighestBid
+    -IColleague currentHighestBidder
+    +registerBidder() void
+    +placeBid() void
+    +closeAuction() void
+  }
+  class AuctionMediator {
+    <<interface>>
+    +registerBidder() void
+    +placeBid() void
+    +closeAuction() void
+  }
+  class Bidder {
+    +String name
+    +AuctionMediator mediator
+    +placeBid() void
+    +receiveBidNotification() void
+  }
+  class IColleague {
+    <<interface>>
+    +placeBid() void
+    +receiveBidNotification() void
+    +getName() String
+  }
+  AuctionHouse --> IColleague
+  AuctionHouse --> "*" IColleague
+  AuctionMediator <|.. AuctionHouse
+  Bidder --> AuctionMediator
+  IColleague <|.. Bidder

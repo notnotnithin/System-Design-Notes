@@ -1,0 +1,9 @@
+sequenceDiagram
+  participant C as Eureka client (Product service)
+  participant S as Eureka server
+  C->>S: register (name, IP, port, status)
+  loop every 30 s (default)
+    C->>S: heartbeat (lease renewal)
+  end
+  Note over S: no heartbeat for 90 s (default): instance removed
+  C->>S: de-register on graceful shutdown: marked DOWN

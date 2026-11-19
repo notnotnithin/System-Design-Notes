@@ -22,67 +22,13 @@ A pizza shop has many bases and many toppings. If every combination is a subclas
 
 **Diagram – Pizza and toppings**
 
-```mermaid
-classDiagram
-  class BasePizza {
-    <<interface>>
-    +getDescription() String
-    +getCost() double
-  }
-  class ChickenDominator {
-  }
-  class ExtraCheeseTopping {
-  }
-  class Farmhouse {
-  }
-  class MushroomTopping {
-  }
-  class PepperoniTopping {
-  }
-  class PlainPizza {
-  }
-  class TandooriPaneerDelight {
-  }
-  class ToppingDecorator {
-    <<abstract>>
-    +BasePizza pizza
-  }
-  class VeggiesTopping {
-  }
-  BasePizza <|.. ChickenDominator
-  BasePizza <|.. Farmhouse
-  BasePizza <|.. PlainPizza
-  BasePizza <|.. TandooriPaneerDelight
-  BasePizza <|.. ToppingDecorator
-  ToppingDecorator --> BasePizza
-  ToppingDecorator <|-- ExtraCheeseTopping
-  ToppingDecorator <|-- MushroomTopping
-  ToppingDecorator <|-- PepperoniTopping
-  ToppingDecorator <|-- VeggiesTopping
-```
+![Diagram](diagrams/04_Decorator_Pattern_Notes-01.png)
 
 **Diagram – how the wrapping works**
 
-```mermaid
-graph LR
-  A["Farmhouse (cost 200)"] --> B["ExtraCheeseTopping wraps it: + 30"]
-  B --> C["MushroomTopping wraps that: + 40"]
-  C --> D["cost() = 200 + 30 + 40 = 270"]
-```
+![Diagram](diagrams/04_Decorator_Pattern_Notes-02.png)
 
-```mermaid
-sequenceDiagram
-  participant C as Client
-  participant M as MushroomTopping
-  participant E as ExtraCheeseTopping
-  participant F as Farmhouse
-  C->>M: cost()
-  M->>E: cost()
-  E->>F: cost()
-  F-->>E: 200
-  E-->>M: 200 + 30
-  M-->>C: 230 + 40
-```
+![Diagram](diagrams/04_Decorator_Pattern_Notes-03.png)
 
 *A decorator adds its bit to the wrapped object's result*
 

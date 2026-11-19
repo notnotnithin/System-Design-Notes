@@ -1,0 +1,13 @@
+sequenceDiagram
+  participant C as Client
+  participant F as LetterFactory
+  participant M as map of letters
+  C->>F: crateLetter('a')
+  F->>M: contains 'a'?
+  M-->>F: no, create DocumentCharacter('a') and store it
+  F-->>C: letter a
+  C->>F: crateLetter('a') again
+  F->>M: contains 'a'?
+  M-->>F: yes
+  F-->>C: the SAME object as before
+  C->>C: display(row 0, column 1) and display(row 3, column 7)

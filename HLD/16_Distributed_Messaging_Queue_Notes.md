@@ -25,10 +25,7 @@ Source (handwritten, 10 pages): https://drive.google.com/file/d/1kfnXbRlobCeK-U9
 <!-- diagram:16-0 -->
 **Diagram – Producer, queue, consumer**
 
-```mermaid
-graph LR
-  P["Producer: e-commerce app"] --> Q[["Queue"]] --> C["Consumer: send notification"]
-```
+![Diagram](diagrams/16_Distributed_Messaging_Queue_Notes-01.png)
 <!-- /diagram:16-0 -->
 
 
@@ -67,18 +64,7 @@ The advantages listed: (1) **latency improves,** because the user is not blocked
 <!-- diagram:16-1 -->
 **Diagram – Point-to-point versus publish/subscribe**
 
-```mermaid
-graph LR
-  subgraph PP["Point-to-point: each message consumed once"]
-    P1["Publisher"] --> Q1[["Queue"]]
-    Q1 --> C1["Consumer 1 or Consumer 2"]
-  end
-  subgraph PS["Pub/Sub: every subscriber gets a copy"]
-    P2["Publisher"] --> E{"Exchange"}
-    E --> QA[["Q1"]] --> CA["Consumer 1"]
-    E --> QB[["Q2"]] --> CB["Consumer 2"]
-  end
-```
+![Diagram](diagrams/16_Distributed_Messaging_Queue_Notes-02.png)
 <!-- /diagram:16-1 -->
 
 
@@ -102,20 +88,7 @@ graph LR
 <!-- diagram:16-2 -->
 **Diagram – Kafka: topic, partitions and consumer group**
 
-```mermaid
-graph LR
-  P["Producer"] -->|"hash(key)"| T
-  subgraph T["Topic A on the Kafka cluster"]
-    P0["Partition P0: offsets 0,1,2,3"]
-    P1["Partition P1: offsets 0,1,2"]
-  end
-  subgraph G["Consumer group A"]
-    C1["Consumer 1"]
-    C2["Consumer 2"]
-  end
-  P0 --> C1
-  P1 --> C2
-```
+![Diagram](diagrams/16_Distributed_Messaging_Queue_Notes-03.png)
 <!-- /diagram:16-2 -->
 
 
@@ -157,22 +130,7 @@ A message has a **key** (optional), a **value** (the actual message), a **partit
 <!-- diagram:16-3 -->
 **Diagram – Leader and follower replicas across brokers**
 
-```mermaid
-graph LR
-  subgraph B1["Broker 1"]
-    L0["P0 leader"]
-  end
-  subgraph B2["Broker 2"]
-    F0["P0 follower"]
-    L1["P1 leader"]
-  end
-  subgraph B3["Broker 3"]
-    F1["P1 follower"]
-  end
-  L0 -->|"replicates"| F0
-  L1 -->|"replicates"| F1
-  PR["Producer and consumers talk to leaders only"] -.- L0
-```
+![Diagram](diagrams/16_Distributed_Messaging_Queue_Notes-04.png)
 <!-- /diagram:16-3 -->
 
 
@@ -194,14 +152,7 @@ Partitions can live on **different Kafka servers** (Broker 1 has P0 of Topic 1, 
 <!-- diagram:16-4 -->
 **Diagram – Retries and the dead letter queue**
 
-```mermaid
-graph LR
-  P["Partition: offsets 0 to 7"] --> C["Consumer polls offset 7"]
-  C -->|"fails"| R{"retries left? (3 attempts)"}
-  R -->|"yes"| C
-  R -->|"no"| DLQ[["Dead letter queue"]]
-  DLQ --> N["Consumer moves on to the next message"]
-```
+![Diagram](diagrams/16_Distributed_Messaging_Queue_Notes-05.png)
 <!-- /diagram:16-4 -->
 
 
@@ -226,14 +177,7 @@ Offsets 0 to 6 are processed fine; **offset 7 is a buggy message**, so the consu
 <!-- diagram:16-5 -->
 **Diagram – RabbitMQ: exchange routes by key**
 
-```mermaid
-graph LR
-  P["Producer<br/>routing key india-123"] --> E{"Exchange"}
-  E -->|"binding key 1"| Q1[["Queue 1"]] --> C1["Consumer 1"]
-  E -->|"binding key 2"| Q2[["Queue 2"]] --> C2["Consumer 2"]
-  E -->|"binding key 3"| Q3[["Queue 3"]] --> C3["Consumer 3"]
-  C1 -. "cannot process: requeue, then DLQ" .-> Q1
-```
+![Diagram](diagrams/16_Distributed_Messaging_Queue_Notes-06.png)
 <!-- /diagram:16-5 -->
 
 

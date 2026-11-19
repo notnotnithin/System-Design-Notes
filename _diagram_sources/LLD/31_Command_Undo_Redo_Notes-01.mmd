@@ -1,0 +1,44 @@
+classDiagram
+  class AirConditioner {
+    +boolean isOn
+    +int temperature
+    +turnOn() void
+    +turnOff() void
+  }
+  class ICommand {
+    <<interface>>
+    +execute() void
+    +undo() void
+  }
+  class RemoteController {
+    +ICommand command
+    +Stack~ICommand~ commandHistory
+    +pressButton() void
+    +undo() void
+  }
+  class SetTemperatureCommand {
+    -AirConditioner ac
+    -int newTemperature
+    -int previousTemperature
+    +execute() void
+    +undo() void
+  }
+  class TurnOffCommand {
+    -AirConditioner ac
+    -boolean previousState
+    +execute() void
+    +undo() void
+  }
+  class TurnOnCommand {
+    -AirConditioner ac
+    -boolean previousState
+    +execute() void
+    +undo() void
+  }
+  ICommand <|.. SetTemperatureCommand
+  ICommand <|.. TurnOffCommand
+  ICommand <|.. TurnOnCommand
+  RemoteController --> ICommand
+  SetTemperatureCommand --> AirConditioner
+  TurnOffCommand --> AirConditioner
+  TurnOnCommand --> AirConditioner

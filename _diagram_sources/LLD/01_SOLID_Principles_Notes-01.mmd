@@ -1,0 +1,21 @@
+classDiagram
+  class InvoiceBad {
+    +calculateTotal()
+    +saveToDB()
+    +printInvoice()
+  }
+  class Invoice {
+    -Marker marker
+    -int quantity
+    +calculateTotal()
+  }
+  class InvoiceDao {
+    -Invoice invoice
+    +saveToDB()
+  }
+  class InvoicePrinter {
+    -Invoice invoice
+    +print()
+  }
+  Invoice <-- InvoiceDao
+  Invoice <-- InvoicePrinter

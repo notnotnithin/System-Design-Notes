@@ -1,0 +1,15 @@
+classDiagram
+  class WarehouseSelectionStrategy {
+    <<abstract>>
+    +selectWarehouse(list) Warehouse
+  }
+  class NearestWarehouseSelectionStrategy
+  class PaymentMode {
+    <<interface>>
+    +makePayment() boolean
+  }
+  class UPIPaymentMode
+  class CardPaymentMode
+  WarehouseSelectionStrategy <|-- NearestWarehouseSelectionStrategy
+  PaymentMode <|.. UPIPaymentMode
+  PaymentMode <|.. CardPaymentMode

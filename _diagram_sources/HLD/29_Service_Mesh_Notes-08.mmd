@@ -1,0 +1,14 @@
+flowchart TB
+    SD[Service Discovery]
+    subgraph M1[Microservice1]
+        A1[Client side LB + deployment strategy support]
+        A2[Circuit Breaker - Hystrix]
+        A3[Retry]
+    end
+    subgraph M2[Microservice2: Instance1]
+        B1[Telemetry: latency, error rate, traffic]
+        B2[Authorization]
+    end
+    M1 -- Give me Microservice B location --> SD
+    SD -- Instance1/2/3 url:port --> M1
+    M1 --> M2

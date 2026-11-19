@@ -1,0 +1,6 @@
+graph LR
+  A["Operation: place order"] --> O["Order service"] --> OD[("Order DB: its own ACID transaction")]
+  A --> I["Inventory service"] --> ID[("Inventory DB: its own ACID transaction")]
+  OD -.- X["no single transaction covers both databases"]:::bad
+  ID -.- X
+  classDef bad fill:#fecaca,stroke:#b91c1c,color:#000

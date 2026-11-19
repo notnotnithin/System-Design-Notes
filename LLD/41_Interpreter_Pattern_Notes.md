@@ -22,69 +22,13 @@ You must evaluate expressions such as `a + b` or `(a + b) * c` where the values 
 
 **Diagram – Expression tree**
 
-```mermaid
-classDiagram
-  class AbstractExpression {
-    <<interface>>
-    +interpret() int
-  }
-  class AddNonTerminalExpression {
-    -AbstractExpression rightExpression
-    -AbstractExpression leftExpression
-    +interpret() int
-  }
-  class BinaryNonTerminalExpression {
-    +AbstractExpression leftExpression
-    +AbstractExpression rightExpression
-    +char operator
-    +interpret() int
-  }
-  class Context {
-    -Map~String,Integer~ variables
-  }
-  class MultiplyNonTerminalExpression {
-    -AbstractExpression leftExpression
-    -AbstractExpression rightExpression
-    +interpret() int
-  }
-  class NumberTerminalExpression {
-    +String stringValue
-    +interpret() int
-  }
-  AbstractExpression <|.. AddNonTerminalExpression
-  AbstractExpression <|.. BinaryNonTerminalExpression
-  AbstractExpression <|.. MultiplyNonTerminalExpression
-  AbstractExpression <|.. NumberTerminalExpression
-  AddNonTerminalExpression --> AbstractExpression
-  BinaryNonTerminalExpression --> AbstractExpression
-  MultiplyNonTerminalExpression --> AbstractExpression
-```
+![Diagram](diagrams/41_Interpreter_Pattern_Notes-01.png)
 
 **Diagram – the tree for (a + b) * c**
 
-```mermaid
-graph TD
-  M["Multiply"] --> A["Add"]
-  M --> C["Number: c = 3"]
-  A --> X["Number: a = 12"]
-  A --> Y["Number: b = 5"]
-```
+![Diagram](diagrams/41_Interpreter_Pattern_Notes-02.png)
 
-```mermaid
-sequenceDiagram
-  participant C as Client
-  participant M as Multiply
-  participant A as Add
-  participant N as Number leaves
-  C->>M: interpret(context)
-  M->>A: interpret(context)
-  A->>N: a = 12 and b = 5
-  N-->>A: 12, 5
-  A-->>M: 17
-  M->>N: c
-  N-->>M: 3
-  M-->>C: 51
-```
+![Diagram](diagrams/41_Interpreter_Pattern_Notes-03.png)
 
 *A non-terminal combines its children*
 

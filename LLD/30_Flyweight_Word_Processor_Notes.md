@@ -24,41 +24,11 @@ A word processor shows a million characters. If each `Character` object stores i
 
 **Diagram – Word processor flyweights**
 
-```mermaid
-classDiagram
-  class DocumentCharacter {
-    -char character
-    -String fontType
-    -int size
-    +display() void
-  }
-  class ILetter {
-    <<interface>>
-    +display() void
-  }
-  class LetterFactory {
-    +crateLetter() ILetter
-  }
-  ILetter <|.. DocumentCharacter
-```
+![Diagram](diagrams/30_Flyweight_Word_Processor_Notes-01.png)
 
 **Diagram – sharing letters**
 
-```mermaid
-sequenceDiagram
-  participant C as Client
-  participant F as LetterFactory
-  participant M as map of letters
-  C->>F: crateLetter('a')
-  F->>M: contains 'a'?
-  M-->>F: no, create DocumentCharacter('a') and store it
-  F-->>C: letter a
-  C->>F: crateLetter('a') again
-  F->>M: contains 'a'?
-  M-->>F: yes
-  F-->>C: the SAME object as before
-  C->>C: display(row 0, column 1) and display(row 3, column 7)
-```
+![Diagram](diagrams/30_Flyweight_Word_Processor_Notes-02.png)
 
 *The factory reuses existing letters*
 
@@ -84,32 +54,7 @@ Many robots of the same type share one heavy `Sprites` object (the image data). 
 
 **Diagram – Robot flyweights**
 
-```mermaid
-classDiagram
-  class HumanoidRobot {
-    -String type
-    -Sprites body
-    +display() void
-  }
-  class IRobot {
-    <<interface>>
-    +display() void
-  }
-  class RoboticDog {
-    -String type
-    -Sprites body
-    +display() void
-  }
-  class RoboticFactory {
-    +createRobot() IRobot
-  }
-  class Sprites {
-  }
-  HumanoidRobot --> Sprites
-  IRobot <|.. HumanoidRobot
-  IRobot <|.. RoboticDog
-  RoboticDog --> Sprites
-```
+![Diagram](diagrams/30_Flyweight_Word_Processor_Notes-03.png)
 
 ## When to use
 - You need a very large number of similar objects.

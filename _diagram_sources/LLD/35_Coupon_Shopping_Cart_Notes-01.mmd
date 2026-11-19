@@ -1,0 +1,46 @@
+classDiagram
+  class ShoppingCart {
+    +List~Product~ productList
+    +addToCart() void
+  }
+  class CouponDecorator {
+    <<abstract>>
+    +Product product
+    +int discountPercentage
+  }
+  class PercentageCouponDecorator {
+  }
+  class TypeCouponDecorator {
+    +List~ProductType~ eligibleTypes
+  }
+  class Item1 {
+  }
+  class Item2 {
+  }
+  class Item3 {
+  }
+  class Item4 {
+  }
+  class Product {
+    <<abstract>>
+    +String name
+    +double originalPrice
+    +ProductType type
+  }
+  class ProductType {
+    <<enumeration>>
+    FURNITURE
+    ELECTRONICS
+    CLOTHES
+    PHARMACY
+  }
+  CouponDecorator --> Product
+  CouponDecorator <|-- PercentageCouponDecorator
+  CouponDecorator <|-- TypeCouponDecorator
+  Product --> ProductType
+  Product <|-- CouponDecorator
+  Product <|-- Item1
+  Product <|-- Item2
+  Product <|-- Item3
+  Product <|-- Item4
+  ShoppingCart --> "*" Product

@@ -1,0 +1,4 @@
+flowchart LR
+    GW[API Gateway] --> SD[Service Discovery]
+    GW --> LB1[Application Load Balancer] --> MS1["Microservice1 (many instances)"]
+    GW --> LB2[Application Load Balancer] --> MS2["Microservice2 (many instances)"]

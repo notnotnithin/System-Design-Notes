@@ -12,10 +12,7 @@
 
 ### How the layers fit together (outer to inner)
 
-```mermaid
-graph LR
-  N1["Preamble"] --> N2["Destination MAC"] --> N3["Source MAC"] --> N4["EtherType"] --> N5["Payload 46-1500 bytes"] --> N6["FCS (CRC-32)"]
-```
+![Diagram](diagrams/21-ethernet-01.png)
 
 ## In-depth explanation of the example (plain-language version)
 
@@ -138,28 +135,7 @@ The router **removes the Ethernet frame**, lowers the TTL (128 → 127), applies
 
 ### Sequence diagram
 
-```mermaid
-sequenceDiagram
-  participant P0 as Laptop 00:00:5e:00:53:10
-  participant P1 as Broadcast
-  participant P2 as NAS 00:00:5e:00:53:20
-  participant P3 as Laptop 192.168.1.10
-  participant P4 as NAS 192.168.1.20
-  participant P5 as Web server 203.0.113.10
-  participant P6 as Router (public side) 198.51.100.7
-  P0->>P1: 1. ARP: In port 1 · Who has 192.168.1.20? Tell 192.168.1.10
-  P0->>P1: 2. ARP: Out port 2 (flooded) · Who has 192.168.1.20?
-  P0->>P1: 3. ARP: Out port 8 (flooded) · Who has 192.168.1.20?
-  P2->>P0: 4. ARP: In port 2 · 192.168.1.20 is at 00:00:5e:00:53:20
-  P2->>P0: 5. ARP: Out port 1 only · 192.168.1.20 is at 00:00:5e:00:53:20
-  P3->>P4: 6. TCP: In port 1 · 50532 → 445 [SYN]
-  P3->>P4: 7. TCP: Out port 2 · 50532 → 445 [SYN]
-  P4->>P3: 8. TCP: In port 2 · 445 → 50532 [SYN, ACK]
-  P4->>P3: 9. TCP: Out port 1 · 445 → 50532 [SYN, ACK]
-  P3->>P5: 10. TCP: In port 1 · 52344 → 443 [SYN] (frame to the router)
-  P3->>P5: 11. TCP: Out port 8 · 52344 → 443 [SYN]
-  P6->>P5: 12. TCP: TTL 127 · 40112 → 443 [SYN] (new frame, after NAT)
-```
+![Diagram](diagrams/21-ethernet-02.png)
 
 *The lesson's own sequence diagram:*
 

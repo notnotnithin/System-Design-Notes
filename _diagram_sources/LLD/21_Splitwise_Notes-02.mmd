@@ -1,0 +1,16 @@
+sequenceDiagram
+  participant U as User (payer)
+  participant G as Group
+  participant EC as ExpenseController
+  participant F as SplitFactory
+  participant V as ExpenseSplit (validator)
+  participant B as BalanceSheetController
+  U->>G: createExpense(id, description, amount, splits, splitType, paidBy)
+  G->>EC: createExpense(...)
+  EC->>F: get the validator for splitType
+  F-->>EC: EqualExpenseSplit / Unequal / Percentage
+  EC->>V: validateSplitRequest(splits, amount)
+  V-->>EC: ok (or throws)
+  EC->>EC: create the Expense
+  EC->>B: updateUserExpenseBalanceSheet(paidBy, splits, amount)
+  B->>B: update the payer's and every debtor's balance sheet

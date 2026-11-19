@@ -34,19 +34,7 @@ They **differ in the direction of communication**: **Forward** and **Reverse**.
 <!-- diagram:17-0 -->
 **Diagram – Forward proxy: hides the clients**
 
-```mermaid
-graph LR
-  subgraph NET["Closed client network"]
-    C1["C1 172.1.0.1"]
-    C2["C2 172.2.0.1"]
-    C3["C3 172.3.0.1"]
-  end
-  C1 --> FP["Forward proxy<br/>uses its own IP 192.30.0.1"]
-  C2 --> FP
-  C3 --> FP
-  FP --> S["Internet server: sees only the proxy"]
-  FP --- CA[("Cache")]
-```
+![Diagram](diagrams/17_Proxy_vs_Reverse_Proxy_Notes-01.png)
 <!-- /diagram:17-0 -->
 
 
@@ -77,13 +65,7 @@ A forward proxy sits in front of **a group of clients in a closed network** (cli
 <!-- diagram:17-1 -->
 **Diagram – Reverse proxy: hides the servers**
 
-```mermaid
-graph LR
-  I["Internet"] --> RP["Reverse proxy"]
-  RP --> S1["Server 1"]
-  RP --> S2["Server 2"]
-  RP --> SN["Server n"]
-```
+![Diagram](diagrams/17_Proxy_vs_Reverse_Proxy_Notes-02.png)
 <!-- /diagram:17-1 -->
 
 
@@ -126,15 +108,7 @@ The picture is `Internet → [Reverse proxy] → Server 1 / Server 2 / … / Ser
 <!-- diagram:17-2 -->
 **Diagram – Proxy versus VPN path**
 
-```mermaid
-graph LR
-  subgraph PX["Proxy"]
-    C1["Client"] --> P["Proxy"] --> S1["Server"]
-  end
-  subgraph VP["VPN"]
-    C2["Client + VPN client"] ==>|"encrypted tunnel"| V["VPN server"] --> S2["Server"]
-  end
-```
+![Diagram](diagrams/17_Proxy_vs_Reverse_Proxy_Notes-03.png)
 <!-- /diagram:17-2 -->
 
 
@@ -170,12 +144,7 @@ With a **proxy** the path is `Client → Proxy → Server`, and it gives **anony
 <!-- diagram:17-3 -->
 **Diagram – Firewall filters packets by rules**
 
-```mermaid
-graph LR
-  I["Internet"] --> F{"Firewall<br/>checks IP, port, source, destination"}
-  F -->|"allowed by rule"| N["Your network"]
-  F -->|"blocked"| X["Dropped"]
-```
+![Diagram](diagrams/17_Proxy_vs_Reverse_Proxy_Notes-04.png)
 <!-- /diagram:17-3 -->
 
 

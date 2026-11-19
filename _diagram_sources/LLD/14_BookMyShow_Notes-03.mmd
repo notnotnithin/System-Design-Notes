@@ -1,0 +1,6 @@
+stateDiagram-v2
+  [*] --> AVAILABLE
+  AVAILABLE --> LOCKED: lockSeats
+  LOCKED --> BOOKED: payment success, confirmSeats
+  LOCKED --> AVAILABLE: payment failed, releaseSeats
+  BOOKED --> [*]

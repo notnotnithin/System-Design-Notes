@@ -1,0 +1,7 @@
+stateDiagram-v2
+  [*] --> SCHEDULED: reserve
+  SCHEDULED --> IN_USE: start trip
+  IN_USE --> COMPLETED: submit vehicle
+  SCHEDULED --> CANCELLED: cancel
+  COMPLETED --> [*]
+  CANCELLED --> [*]

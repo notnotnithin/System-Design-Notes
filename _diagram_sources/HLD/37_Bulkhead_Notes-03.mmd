@@ -1,0 +1,8 @@
+graph LR
+  R["6 concurrent requests"] --> TP
+  subgraph TP["Dedicated pool for productService"]
+    T["3 threads running"]
+    Q["Queue: 2 waiting"]
+  end
+  TP --> P["Product service"]
+  R -->|"6th request: pool and queue full"| F["Rejected: fallback"]

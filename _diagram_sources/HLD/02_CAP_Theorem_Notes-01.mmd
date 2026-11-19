@@ -1,0 +1,4 @@
+graph TD
+  A["Application A"] -->|"write a = 5"| B["DB node B (India)<br/>a: 4 to 5"]
+  A -->|"read query"| C["DB node C (US)<br/>a = 5 after replication"]
+  B <-->|"replication"| C

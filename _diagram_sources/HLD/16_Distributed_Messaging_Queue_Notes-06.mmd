@@ -1,0 +1,6 @@
+graph LR
+  P["Producer<br/>routing key india-123"] --> E{"Exchange"}
+  E -->|"binding key 1"| Q1[["Queue 1"]] --> C1["Consumer 1"]
+  E -->|"binding key 2"| Q2[["Queue 2"]] --> C2["Consumer 2"]
+  E -->|"binding key 3"| Q3[["Queue 3"]] --> C3["Consumer 3"]
+  C1 -. "cannot process: requeue, then DLQ" .-> Q1

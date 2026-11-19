@@ -1,0 +1,5 @@
+graph TB
+  C["Call to the method"] --> AOP["AOP proxy"] --> SM["CircuitBreakerStateMachine"]
+  SM -->|"threshold exceeded while CLOSED"| OP["transitionToOpenState"]
+  OP --> SC["ScheduledThreadPoolExecutor (delay queue): toHalfOpenState after the wait duration"]
+  SC --> HO["HALF_OPEN"]

@@ -1,0 +1,12 @@
+graph LR
+  subgraph HC["Hardcoded URL"]
+    O1["Order service"] -->|"http://localhost:8082"| P1["Product instance 1 only"]
+  end
+  subgraph SD["With Eureka"]
+    O2["Order service"] -->|"where is product-service?"| E["Eureka server: the phone book"]
+    E -->|"instance list"| O2
+    O2 --> PA["Product instance 1"]
+    O2 --> PB["Product instance 2"]
+    PA -->|"register + heartbeat"| E
+    PB -->|"register + heartbeat"| E
+  end

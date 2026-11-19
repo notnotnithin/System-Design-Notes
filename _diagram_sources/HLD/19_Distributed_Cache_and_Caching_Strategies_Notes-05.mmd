@@ -1,0 +1,9 @@
+sequenceDiagram
+  participant C as Client
+  participant S as Server
+  participant D as DB
+  participant K as Cache
+  C->>S: write (PUT / PATCH)
+  S->>D: write directly to DB
+  S->>K: invalidate the cached entry
+  S-->>C: done

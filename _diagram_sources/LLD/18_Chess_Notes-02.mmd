@@ -1,0 +1,16 @@
+flowchart TD
+  A["playMove(player, start, end)"] --> B["Find the start and end cells, build a Move"]
+  B --> C{"Is there a piece on the start cell?"}
+  C -->|"no"| X["return false"]
+  C -->|"yes"| D{"Is it the player's own colour?"}
+  D -->|"no"| X
+  D -->|"yes"| E{"piece.isValidMove(board, start, end)?"}
+  E -->|"no"| X
+  E -->|"yes"| F{"Opponent piece on the end cell?"}
+  F -->|"yes"| G["mark it captured, record pieceKilled"]
+  F -->|"no"| H["just move"]
+  G --> H
+  H --> I["place the piece on the end cell, empty the start cell, add the move to history"]
+  I --> J{"Captured piece is a King?"}
+  J -->|"yes"| K["status = WHITE_WIN or BLACK_WIN"]
+  J -->|"no"| L["switch the turn to the other player"]

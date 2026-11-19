@@ -1,0 +1,11 @@
+classDiagram
+  class DBConnection {
+    -DBConnection instance$
+    -DBConnection()
+    +getInstance() DBConnection$
+    +displayMessage()
+  }
+  class Client1
+  class Client2
+  Client1 --> DBConnection : getInstance()
+  Client2 --> DBConnection : getInstance()

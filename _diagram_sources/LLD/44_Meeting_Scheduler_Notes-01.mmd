@@ -1,0 +1,70 @@
+classDiagram
+  class Calendar {
+    -Map~TimeInterval,Meeting~ meetings
+    +addMeeting() void
+    +removeMeeting() void
+  }
+  class Meeting {
+    -String meetingId
+    -String subject
+    -TimeInterval timeInterval
+    -User organizer
+  }
+  class MeetingRoom {
+    -int id
+    -String name
+    -int capacity
+    -List~TimeInterval~ bookedSlots
+    +viewCalendar() void
+    +addBookedSlot() void
+    +removeBookedSlot() void
+  }
+  class MeetingScheduler {
+    -List~MeetingRoom~ allMeetingRooms
+    +scheduleMeeting() Meeting
+    +cancelMeeting() void
+    +addMeetingRoom() void
+  }
+  class Notification {
+    -int notificationId
+    -String message
+    +sendMeetingInviteNotification() void
+    +sendCancelMeetingNotification() void
+  }
+  class ParticipantResponse {
+    <<enumeration>>
+    ACCEPTED
+    DECLINED
+    TENTATIVE
+    NOT_RESPONDED
+  }
+  class ParticipantType {
+    <<enumeration>>
+    ORGANIZER
+    ATTENDEE
+  }
+  class TimeInterval {
+    -LocalDateTime startTime
+    -LocalDateTime endTime
+    +overlapsWith() boolean
+  }
+  class User {
+    -String name
+    -String email
+    -Calendar calendar
+    -ParticipantType participantType
+    +viewCalendar() void
+    +respondToInvitation() void
+  }
+  Calendar --> "*" Meeting
+  Calendar --> "*" TimeInterval
+  Meeting --> MeetingRoom
+  Meeting --> "*" ParticipantResponse
+  Meeting --> TimeInterval
+  Meeting --> User
+  Meeting --> "*" User
+  MeetingRoom --> Calendar
+  MeetingRoom --> "*" TimeInterval
+  MeetingScheduler --> "*" MeetingRoom
+  User --> Calendar
+  User --> ParticipantType

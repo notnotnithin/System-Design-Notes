@@ -1,0 +1,4 @@
+stateDiagram-v2
+    [*] --> PENDING: validate balance + receiver instrument, save txn
+    PENDING --> SUCCESS: processor calls back Txn Service
+    PENDING --> FAILURE: processor calls back Txn Service

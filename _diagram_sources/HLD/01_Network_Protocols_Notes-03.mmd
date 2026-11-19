@@ -1,0 +1,9 @@
+sequenceDiagram
+  participant C as Client
+  participant S as Server
+  C->>S: SYN
+  S->>C: SYN + ACK
+  C->>S: ACK
+  Note over C,S: connection established
+  C->>S: Data segment
+  S-->>C: ACK (resend if no ACK arrives)

@@ -12,11 +12,7 @@
 
 ### How the layers fit together (outer to inner)
 
-```mermaid
-graph LR
-  N1["Control: IPv4"] --> N2["TCP port 21"] --> N3["FTP commands and replies"]
-  N4["Data: IPv4"] --> N5["TCP passive port"] --> N6["File bytes"]
-```
+![Diagram](diagrams/30-ftp-01.png)
 
 ## In-depth explanation of the example (plain-language version)
 
@@ -148,35 +144,7 @@ The 4,000 bytes arrive as **three TCP segments** (1,460 + 1,460 + 1,080). **FTP 
 
 ### Sequence diagram
 
-```mermaid
-sequenceDiagram
-  participant P0 as Laptop 192.168.1.10
-  participant P1 as ftp.example.com 203.0.113.21
-  P0->>P1: 1. TCP: 52800 → 21 [SYN] Seq=0
-  P1->>P0: 2. TCP: 21 → 52800 [SYN, ACK] Seq=0 Ack=1
-  P0->>P1: 3. TCP: 52800 → 21 [ACK] Seq=1 Ack=1
-  P1->>P0: 4. FTP: 220 (vsFTPd 3.0.5)
-  P0->>P1: 5. FTP: USER alice
-  P1->>P0: 6. FTP: 331 Please specify the password.
-  P0->>P1: 7. FTP: PASS secret
-  P1->>P0: 8. FTP: 230 Login successful.
-  P0->>P1: 9. FTP: TYPE I
-  P1->>P0: 10. FTP: 200 Switching to Binary mode.
-  P0->>P1: 11. FTP: PASV
-  P1->>P0: 12. FTP: 227 Entering Passive Mode (203,0,113,21,195,149).
-  P0->>P1: 13. TCP: 52801 → 50069 [SYN] Seq=0
-  P1->>P0: 14. TCP: 50069 → 52801 [SYN, ACK] Seq=0 Ack=1
-  P0->>P1: 15. TCP: 52801 → 50069 [ACK] Seq=1 Ack=1
-  P0->>P1: 16. FTP: RETR report.pdf
-  P1->>P0: 17. FTP: 150 Opening BINARY mode data connection …
-  P1->>P0: 18. FTP-DATA: FTP Data: 1460 bytes (Seq=1)
-  P1->>P0: 19. FTP-DATA: FTP Data: 1460 bytes (Seq=1461)
-  P1->>P0: 20. FTP-DATA: FTP Data: 1080 bytes (Seq=2921)
-  P1->>P0: 21. TCP: 50069 → 52801 [FIN, ACK] Seq=4001 Ack=1
-  P1->>P0: 22. FTP: 226 Transfer complete.
-  P0->>P1: 23. FTP: QUIT
-  P1->>P0: 24. FTP: 221 Goodbye.
-```
+![Diagram](diagrams/30-ftp-02.png)
 
 *The lesson's own sequence diagram:*
 

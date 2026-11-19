@@ -19,13 +19,7 @@ Sources:
 <!-- diagram:40_41-0 -->
 **Diagram – Gateway as the single entry point**
 
-```mermaid
-graph LR
-  C["Client"] --> G["API gateway: routing, load balancing, auth, rate limit, resilience, transformation, monitoring"]
-  G -->|"/api/invoice"| I["Invoice MS"]
-  G -->|"/api/order"| O["Order MS"]
-  G -->|"/api/sales"| S["Sales MS"]
-```
+![Diagram](diagrams/40_41_API_Gateway_Part1_Part2_Notes-01.png)
 <!-- /diagram:40_41-0 -->
 
 
@@ -130,15 +124,7 @@ The Product service (port 8082, `/products/{id}`) and the Order service (port 80
 <!-- diagram:40_41-1 -->
 **Diagram – Gateway with Eureka and lb:// URIs**
 
-```mermaid
-graph LR
-  C["Client"] --> G["API gateway :8083"]
-  G -->|"lb://product-service"| P["Product service instances"]
-  G -->|"lb://order-service"| O["Order service instances"]
-  G -.->|"fetch instances"| E["Eureka server :8761"]
-  P -.->|"register"| E
-  O -.->|"register"| E
-```
+![Diagram](diagrams/40_41_API_Gateway_Part1_Part2_Notes-02.png)
 <!-- /diagram:40_41-1 -->
 
 
@@ -220,13 +206,7 @@ This part builds on the *Service Discovery* and *Client Side Load Balancer* note
 <!-- diagram:40_41-2 -->
 **Diagram – Request path through the gateway filters**
 
-```mermaid
-graph LR
-  C["Client"] --> DH["DispatcherHandler"] --> RM["RouteMappingHandler: finds route by predicate"]
-  RM --> GF["Global filters: pre logic"] --> RF["Route-specific filters: pre logic"]
-  RF --> RU["RouteToRequestUrlFilter (order 10000)"] --> NR["NettyRoutingFilter (last)"] --> MS["Microservice"]
-  MS -->|"response: post logic of each filter"| W["NettyWriteResponseFilter"] --> C
-```
+![Diagram](diagrams/40_41_API_Gateway_Part1_Part2_Notes-03.png)
 <!-- /diagram:40_41-2 -->
 
 
@@ -280,16 +260,7 @@ The answer to "why are some global filters after the route-specific filters?" is
 <!-- diagram:40_41-3 -->
 **Diagram – JWT global filter logic**
 
-```mermaid
-graph TD
-  R["Request"] --> A{"path starts with /auth?"}
-  A -->|"yes"| P["pass through"]
-  A -->|"no"| H{"Authorization header present?"}
-  H -->|"no"| U["401 Unauthorized"]
-  H -->|"yes"| V{"token valid?"}
-  V -->|"no"| U
-  V -->|"yes"| N["chain.filter: continue, then post-filter logic"]
-```
+![Diagram](diagrams/40_41_API_Gateway_Part1_Part2_Notes-04.png)
 <!-- /diagram:40_41-3 -->
 
 

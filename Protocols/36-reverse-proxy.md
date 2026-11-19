@@ -12,11 +12,7 @@
 
 ### How the layers fit together (outer to inner)
 
-```mermaid
-graph LR
-  N1["Visitor side: TCP 443"] --> N2["TLS (ends at the proxy)"] --> N3["HTTP"]
-  N4["Backend side: TCP 8080"] --> N5["Plain HTTP + X-Forwarded headers"]
-```
+![Diagram](diagrams/36-reverse-proxy-01.png)
 
 ## In-depth explanation of the example (plain-language version)
 
@@ -136,26 +132,7 @@ The proxy **re-encrypts** the answer inside its secure session with the laptop a
 
 ### Sequence diagram
 
-```mermaid
-sequenceDiagram
-  participant P0 as Laptop 192.168.1.10
-  participant P1 as Web server 203.0.113.10
-  participant P2 as Reverse proxy 10.0.0.10
-  participant P3 as App server 10.0.0.20
-  P0->>P1: 1. TCP: 52390 → 443 [SYN] Seq=0
-  P1->>P0: 2. TCP: 443 → 52390 [SYN, ACK] Seq=0 Ack=1
-  P0->>P1: 3. TCP: 52390 → 443 [ACK] Seq=1 Ack=1
-  P0->>P1: 4. TLSv1.3: Client Hello (SNI=www.example.com)
-  P1->>P0: 5. TLSv1.3: Server Hello + encrypted handshake, 2 segments
-  P0->>P1: 6. TLSv1.3: Change Cipher Spec, Finished (encrypted)
-  P0->>P1: 7. TLSv1.3: Application Data (HTTP request)
-  P2->>P3: 8. TCP: 45110 → 8080 [SYN] Seq=0
-  P3->>P2: 9. TCP: 8080 → 45110 [SYN, ACK] Seq=0 Ack=1
-  P2->>P3: 10. TCP: 45110 → 8080 [ACK] Seq=1 Ack=1
-  P2->>P3: 11. HTTP: GET / HTTP/1.1
-  P3->>P2: 12. HTTP: HTTP/1.1 200 OK (text/html), 9 segments
-  P1->>P0: 13. TLSv1.3: Application Data (HTTP response), 9 segments
-```
+![Diagram](diagrams/36-reverse-proxy-02.png)
 
 *The lesson's own sequence diagram:*
 

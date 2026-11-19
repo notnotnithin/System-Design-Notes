@@ -1,0 +1,11 @@
+sequenceDiagram
+  participant B as BallDetails
+  participant T as Teams (striker, non-striker)
+  participant BS as BattingScoreUpdater
+  participant WS as BowlingScoreUpdater
+  B->>B: wicket? else decide runs
+  B->>T: odd runs: swap striker and non-striker
+  B->>BS: update(ballDetails)
+  BS->>BS: striker: runs, balls, fours, sixes, strike rate
+  B->>WS: update(ballDetails)
+  WS->>WS: bowler: runs given, wickets, extras, economy

@@ -1,0 +1,13 @@
+sequenceDiagram
+  participant P0 as Laptop 192.168.1.10
+  participant P1 as Web server 203.0.113.10
+  P0->>P1: 1. QUIC: Initial, CRYPTO (Client Hello, part 1)
+  P0->>P1: 2. QUIC: Initial, CRYPTO (Client Hello, part 2), PADDING
+  P1->>P0: 3. QUIC: Initial, ACK, CRYPTO (Server Hello)
+  P1->>P0: 4. QUIC: Handshake, CRYPTO (Certificate, part 1)
+  P1->>P0: 5. QUIC: Handshake, CRYPTO (Certificate, part 2)
+  P1->>P0: 6. QUIC: Handshake, CRYPTO (Certificate Verify, Finished)
+  P0->>P1: 7. QUIC: Initial, ACK, PADDING, Handshake, ACK, CRYPTO (Finished)
+  P0->>P1: 8. QUIC: 1-RTT, HTTP/3 HEADERS (GET /)
+  P1->>P0: 9. QUIC: 1-RTT, HANDSHAKE_DONE, HTTP/3 HEADERS (200), DATA
+  P0->>P1: 10. QUIC: 1-RTT, ACK

@@ -21,46 +21,11 @@ A `PaymentProcessor` decides what to do with `if (type == "CARD") ... else if (t
 
 **Diagram – Payment example**
 
-```mermaid
-classDiagram
-  class ShoppingCart {
-    -PaymentStrategy paymentStrategy
-    +checkout() void
-  }
-  class CreditCardPayment {
-    -String cardNumber
-    +pay() void
-  }
-  class PayPalPayment {
-    -String email
-    +pay() void
-  }
-  class PaymentStrategy {
-    <<interface>>
-    +pay() void
-  }
-  class UPIPayment {
-    -String upiId
-    +pay() void
-  }
-  PaymentStrategy <|.. CreditCardPayment
-  PaymentStrategy <|.. PayPalPayment
-  PaymentStrategy <|.. UPIPayment
-  ShoppingCart --> PaymentStrategy
-```
+![Diagram](diagrams/02_Strategy_Pattern_Notes-01.png)
 
 **Diagram – what happens at checkout**
 
-```mermaid
-sequenceDiagram
-  participant C as Client
-  participant S as ShoppingCart (context)
-  participant P as PaymentStrategy
-  C->>S: new ShoppingCart(new UPIPayment(upiId))
-  C->>S: checkout(500)
-  S->>P: pay(500)
-  P-->>S: payment done by the chosen strategy
-```
+![Diagram](diagrams/02_Strategy_Pattern_Notes-02.png)
 
 *The context only knows the interface*
 
@@ -84,42 +49,7 @@ public class ShoppingCart {
 
 **Diagram – Drive mode example**
 
-```mermaid
-classDiagram
-  class GoodsVehicle {
-  }
-  class HybridVehicle {
-  }
-  class OffRoadVehicle {
-  }
-  class SportsVehicle {
-  }
-  class Vehicle {
-    +DriveStrategy driveStrategy
-    +drive() void
-  }
-  class DriveStrategy {
-    <<interface>>
-    +drive() void
-  }
-  class EVDrive {
-    +drive() void
-  }
-  class NormalDrive {
-    +drive() void
-  }
-  class SportsDrive {
-    +drive() void
-  }
-  DriveStrategy <|.. EVDrive
-  DriveStrategy <|.. NormalDrive
-  DriveStrategy <|.. SportsDrive
-  Vehicle --> DriveStrategy
-  Vehicle <|-- GoodsVehicle
-  Vehicle <|-- HybridVehicle
-  Vehicle <|-- OffRoadVehicle
-  Vehicle <|-- SportsVehicle
-```
+![Diagram](diagrams/02_Strategy_Pattern_Notes-03.png)
 
 ## When to use
 - One job can be done in several ways (payment, sorting, discount rules, routing, compression).

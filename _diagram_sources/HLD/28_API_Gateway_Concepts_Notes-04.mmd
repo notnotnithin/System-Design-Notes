@@ -1,0 +1,10 @@
+sequenceDiagram
+  participant C as Client
+  participant A as Authorization server
+  participant G as API gateway
+  participant S as Microservices
+  C->>A: get access token
+  A-->>C: token
+  C->>G: API request + token
+  G->>G: validate token
+  G->>S: forward only if valid

@@ -1,0 +1,7 @@
+flowchart TD
+  A["lockSeats(seatIds)"] --> B["Sort seat ids (avoid deadlock)"]
+  B --> C["Phase 1: lock each seat's ReentrantLock in order"]
+  C --> D{"Phase 2: all seats AVAILABLE?"}
+  D -->|"no"| X["return false (finally: unlock all)"]
+  D -->|"yes"| E["Phase 3: mark all seats LOCKED"]
+  E --> F["return true (finally: unlock all)"]

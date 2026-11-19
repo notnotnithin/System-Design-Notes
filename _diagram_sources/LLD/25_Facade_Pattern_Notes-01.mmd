@@ -1,0 +1,24 @@
+classDiagram
+  class InventoryService {
+    +checkStock() boolean
+  }
+  class NotificationService {
+    +sendConfirmation() void
+  }
+  class OrderFacade {
+    -InventoryService inventory
+    -PaymentService payment
+    -ShippingService shipping
+    -NotificationService notification
+    +placeOrder() void
+  }
+  class PaymentService {
+    +makePayment() boolean
+  }
+  class ShippingService {
+    +shipProduct() void
+  }
+  OrderFacade --> InventoryService
+  OrderFacade --> NotificationService
+  OrderFacade --> PaymentService
+  OrderFacade --> ShippingService

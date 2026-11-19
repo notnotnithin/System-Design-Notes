@@ -21,116 +21,15 @@ If `VendingMachine` handles every action with `if / else` on a `state` flag (ins
 
 **Diagram – Vending machine with states**
 
-```mermaid
-classDiagram
-  class VendingMachineAppDemo {
-  }
-  class Inventory {
-    +ItemShelf[] inventory
-    +initialEmptyInventory() void
-    +addItem() void
-    +updateSoldOutItem() void
-  }
-  class Item {
-    +ItemType type
-    +int price
-  }
-  class ItemShelf {
-    +int code
-    +Item item
-    +boolean soldOut
-  }
-  class ItemType {
-    <<enumeration>>
-    COKE
-    PEPSI
-    JUICE
-    SODA
-    +JUICE, SODA
-  }
-  class VendingMachine {
-    -State vendingMachineState
-    -Inventory inventory
-    -List~Coin~ coinList
-  }
-  class Coin {
-    <<enumeration>>
-    PENNY
-    NICKEL
-    DIME
-    QUARTER
-    +int value
-  }
-  class State {
-    <<abstract>>
-    +clickOnInsertCoinButton() void
-    +clickOnStartProductSelectionButton() void
-    +insertCoin() void
-    +chooseProduct() void
-  }
-  class DispenseState {
-    +dispenseProduct() Item
-  }
-  class HasMoneyState {
-    +clickOnStartProductSelectionButton() void
-    +insertCoin() void
-    +refundFullMoney() List~Coin~
-  }
-  class IdleState {
-    +clickOnInsertCoinButton() void
-    +updateInventory() void
-  }
-  class SelectionState {
-    +chooseProduct() void
-    +refundFullMoney() List~Coin~
-  }
-  Inventory --> "*" ItemShelf
-  Item --> ItemType
-  ItemShelf --> Item
-  State <|-- DispenseState
-  State <|-- HasMoneyState
-  State <|-- IdleState
-  State <|-- SelectionState
-  VendingMachine --> "*" Coin
-  VendingMachine --> Inventory
-  VendingMachine --> State
-```
+![Diagram](diagrams/16_Vending_Machine_State_Pattern_Notes-01.png)
 
 **Diagram – the state machine**
 
-```mermaid
-stateDiagram-v2
-  [*] --> Idle
-  Idle --> HasMoney: click insert coin button
-  HasMoney --> HasMoney: insert coin
-  HasMoney --> Selection: click start product selection
-  HasMoney --> Idle: refund money
-  Selection --> Dispense: choose product (enough money)
-  Selection --> Selection: choose product (not enough money, error)
-  Selection --> Idle: refund money
-  Dispense --> Idle: dispense product and return change
-```
+![Diagram](diagrams/16_Vending_Machine_State_Pattern_Notes-02.png)
 
 **Diagram – buying a drink**
 
-```mermaid
-sequenceDiagram
-  participant U as User
-  participant M as VendingMachine
-  participant S as current State
-  U->>M: click insert coin button
-  M->>S: IdleState.clickOnInsertCoinButton()
-  S->>M: set state to HasMoneyState
-  U->>M: insert coin (several times)
-  M->>S: HasMoneyState.insertCoin()
-  U->>M: click start product selection
-  S->>M: set state to SelectionState
-  U->>M: choose product, code 102
-  M->>S: SelectionState.chooseProduct(102)
-  S->>M: enough money, set state to DispenseState
-  M->>S: DispenseState.dispenseProduct(102)
-  S->>M: remove item, return change, set state to IdleState
-```
+![Diagram](diagrams/16_Vending_Machine_State_Pattern_Notes-03.png)
 
 *A state decides the next state*
 

@@ -1,0 +1,21 @@
+classDiagram
+  class ChefTasks {
+    <<interface>>
+    +prepareFood()
+    +decideMenu()
+  }
+  class WaiterTasks {
+    <<interface>>
+    +takeOrder()
+    +serveFoodAndDrinks()
+  }
+  class MaintenanceTasks {
+    <<interface>>
+    +cleanTheKitchen()
+    +reStockGroceries()
+  }
+  class Chef
+  class Waiter
+  ChefTasks <|.. Chef
+  WaiterTasks <|.. Waiter
+  MaintenanceTasks <|.. Waiter

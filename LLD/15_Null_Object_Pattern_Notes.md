@@ -23,55 +23,11 @@ Return a special `NullVehicle` that **extends the same `Vehicle` class** and imp
 
 **Diagram – Vehicles and the null vehicle**
 
-```mermaid
-classDiagram
-  class Bike {
-    -String model
-    -String color
-    +start() void
-    +stop() void
-  }
-  class Car {
-    -String model
-    -String color
-    +start() void
-    +stop() void
-  }
-  class Vehicle {
-    <<abstract>>
-    +start() void
-    +stop() void
-  }
-  class ProblemDemo {
-  }
-  class VehicleFactory {
-  }
-  class NullVehicle {
-    -String model
-    -String color
-    +start() void
-    +stop() void
-  }
-  class SolutionDemo {
-  }
-  Vehicle <|-- Bike
-  Vehicle <|-- Car
-  Vehicle <|-- NullVehicle
-```
+![Diagram](diagrams/15_Null_Object_Pattern_Notes-01.png)
 
 **Diagram – asking for an unknown vehicle**
 
-```mermaid
-sequenceDiagram
-  participant C as Client
-  participant F as VehicleFactory
-  participant N as NullVehicle
-  C->>F: getVehicle("truck")
-  F->>N: new NullVehicle()
-  F-->>C: NullVehicle (never null)
-  C->>N: start()
-  N-->>C: does nothing, no crash
-```
+![Diagram](diagrams/15_Null_Object_Pattern_Notes-02.png)
 
 *The factory never returns null*
 

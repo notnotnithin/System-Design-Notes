@@ -1,0 +1,4 @@
+graph LR
+  P["Put CAR-45"] --> S1["S1: coordinator"]
+  S1 -->|"async replicate"| S2["S2: backup"]
+  S1 -->|"async replicate"| S3["S3: backup"]

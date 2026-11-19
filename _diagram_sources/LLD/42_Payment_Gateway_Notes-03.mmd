@@ -1,0 +1,103 @@
+classDiagram
+  class BankInstrument {
+    +String bankAccountNumber
+    +String ifscCode
+  }
+  class BankService {
+    +addInstrument() InstrumentDO
+    +mapBankInstrumentToInstrumentDO() InstrumentDO
+  }
+  class CardInstrument {
+    +String cardNumber
+    +String cvv
+  }
+  class CardService {
+    +addInstrument() InstrumentDO
+  }
+  class Instrument {
+    <<abstract>>
+    +int instrumentID
+    +int userID
+    +InstrumentType instrumentType
+  }
+  class InstrumentController {
+    +InstrumentServiceFactory instrumentControllerFactory
+    +addInstrument() InstrumentDO
+  }
+  class InstrumentDO {
+    +int instrumentID
+    +int userID
+    +InstrumentType instrumentType
+  }
+  class InstrumentService {
+    <<abstract>>
+    +Map~Integer,List~ userVsInstruments
+    +addInstrument() InstrumentDO
+  }
+  class InstrumentServiceFactory {
+  }
+  class InstrumentType {
+    <<enumeration>>
+    BANK
+    CARD
+  }
+  class Processor {
+    +processPayment() void
+  }
+  class Transaction {
+    +int txnID
+    +int amount
+    +int senderId
+  }
+  class TransactionController {
+    +TransactionService txnService
+    +makePayment() TransactionDO
+  }
+  class TransactionDO {
+    +int txnID
+    +int senderId
+    +int receiverId
+  }
+  class TransactionService {
+    +Map~Integer,List~ userVsTransactionsList
+    +InstrumentController instrumentController
+    +Processor processor
+    +makePayment() TransactionDO
+  }
+  class TransactionStatus {
+    <<enumeration>>
+    SUCCESS
+    DENIED
+    PENDING
+  }
+  class User {
+    +int userID
+    +String userName
+    +String email
+  }
+  class UserController {
+    +UserService userService
+    +addUser() UserDO
+  }
+  class UserDO {
+    +int id
+    +String name
+    +String mail
+  }
+  class UserService {
+    +List~User~ usersList
+    +addUser() UserDO
+  }
+  Instrument --> InstrumentType
+  Instrument <|-- BankInstrument
+  Instrument <|-- CardInstrument
+  InstrumentController --> InstrumentServiceFactory
+  InstrumentDO --> InstrumentType
+  InstrumentService <|-- BankService
+  InstrumentService <|-- CardService
+  Transaction --> TransactionStatus
+  TransactionController --> TransactionService
+  TransactionDO --> TransactionStatus
+  TransactionService --> InstrumentController
+  TransactionService --> Processor
+  UserController --> UserService

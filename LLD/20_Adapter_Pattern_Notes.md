@@ -22,40 +22,11 @@ Your app expects a weighing machine that returns **kilograms**. A supplier gives
 
 **Diagram – Weighing machine adapter**
 
-```mermaid
-classDiagram
-  class ImperialWeighingMachine {
-    <<interface>>
-    +getWeightInPounds() double
-  }
-  class ImperialWeighingMachineImpl {
-    +double weightInPounds
-  }
-  class WeighingMachineAdapter {
-    <<interface>>
-    +getWeightInKg() double
-  }
-  class WeightMachineAdapterImpl {
-    +ImperialWeighingMachine imperialWeighingMachine
-  }
-  ImperialWeighingMachine <|.. ImperialWeighingMachineImpl
-  WeighingMachineAdapter <|.. WeightMachineAdapterImpl
-  WeightMachineAdapterImpl --> ImperialWeighingMachine
-```
+![Diagram](diagrams/20_Adapter_Pattern_Notes-01.png)
 
 **Diagram – a call through the adapter**
 
-```mermaid
-sequenceDiagram
-  participant C as Client
-  participant A as WeightMachineAdapterImpl
-  participant M as ImperialWeighingMachine
-  C->>A: getWeightInKg()
-  A->>M: getWeightInPounds()
-  M-->>A: 100 pounds
-  A->>A: pounds x 0.45
-  A-->>C: about 45 kg
-```
+![Diagram](diagrams/20_Adapter_Pattern_Notes-02.png)
 
 *The conversion lives in the adapter*
 

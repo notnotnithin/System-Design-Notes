@@ -1,0 +1,13 @@
+graph LR
+  subgraph B["Before: f(key) % 3"]
+    direction TB
+    K1["Himanshu"] --> N1["N1"]
+    K2["Rahul"] --> N2["N2"]
+    K3["Shivam"] --> N3["N3"]
+  end
+  subgraph A["After adding N4: f(key) % 4"]
+    direction TB
+    K4["Himanshu"] --> M2["N2 (moved)"]
+    K5["Rahul"] --> M3["N3 (moved)"]
+    K6["Shivam"] --> M1["N1 (moved)"]
+  end

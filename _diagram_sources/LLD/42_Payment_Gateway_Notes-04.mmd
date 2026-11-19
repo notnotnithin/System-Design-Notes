@@ -1,0 +1,11 @@
+sequenceDiagram
+  participant U as User
+  participant C as InstrumentController
+  participant F as InstrumentServiceFactory
+  participant S as BankService or CardService
+  U->>C: addInstrument(instrumentDO with type)
+  C->>F: getInstrumentService(type)
+  F-->>C: BankService (or CardService)
+  C->>S: addInstrument(instrumentDO)
+  S->>S: map the DO to BankInstrument or CardInstrument, store it per user
+  S-->>U: saved instrument

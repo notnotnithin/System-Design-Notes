@@ -1,0 +1,8 @@
+classDiagram
+    class WeightMachineAdaptor { <<interface>> +getWeightInKg() int }
+    class WeightMachineAdaptorImpl { +getWeightInKg() int "pounds * .45" }
+    class WeightMachine { <<interface>> +getWeightInPounds() int }
+    class WeightMachineImpl { +getWeightInPounds() int "returns 30" }
+    WeightMachineAdaptor <|.. WeightMachineAdaptorImpl
+    WeightMachine <|.. WeightMachineImpl
+    WeightMachineAdaptorImpl o-- WeightMachine : has-a

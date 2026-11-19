@@ -1,0 +1,14 @@
+sequenceDiagram
+  participant P as Person on floor 5
+  participant B as ExternalButton
+  participant D as ExternalDispatcher
+  participant S as ElevatorScheduler
+  participant ST as SelectionStrategy
+  participant C as ElevatorController (chosen)
+  P->>B: pressButton(5, UP)
+  B->>D: submitExternalRequest(5, UP)
+  D->>S: assignElevator(5, UP)
+  S->>ST: selectElevator(controllers, 5, UP)
+  ST-->>S: controller of elevator 2
+  S->>C: submitRequest(5)
+  C->>C: add floor 5 to its queue, wake up the elevator thread

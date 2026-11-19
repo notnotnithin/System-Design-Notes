@@ -1,0 +1,134 @@
+classDiagram
+  class Address {
+    +int pinCode
+    +String city
+    +String state
+  }
+  class CardPaymentMode {
+    +makePayment() boolean
+  }
+  class Cart {
+    +Map~Integer,Integer~ productCategoryIdVsCountMap
+    +addItemInCart() void
+    +removeItemFromCart() void
+    +emptyCart() void
+  }
+  class Inventory {
+    +List~ProductCategory~ productCategoryList
+    +addCategory() void
+    +addProduct() void
+    +removeItems() void
+  }
+  class Invoice {
+    +int totalItemPrice
+    +int totalTax
+    +int totalFinalPrice
+    +generateInvoice() void
+  }
+  class Main {
+  }
+  class NearestWarehouseSelectionStrategy {
+    +selectWarehouse() Warehouse
+  }
+  class Order {
+    +User user
+    +Address deliveryAddress
+    +Map~Integer,Integer~ productCategoryAndCountMap
+    +checkout() void
+    +makePayment() boolean
+    +generateOrderInvoice() void
+  }
+  class OrderController {
+    +List~Order~ orderList
+    +Map~Integer,List~ userIDVsOrders
+    +createNewOrder() Order
+    +removeOrder() void
+  }
+  class OrderStatus {
+    <<enumeration>>
+    DELIVERED
+    CANCELLED
+    RETURNED
+    UNDELIVERED
+    +RETURNED, UNDELIVERED
+  }
+  class Payment {
+    +PaymentMode paymentMode
+    +makePayment() boolean
+  }
+  class PaymentMode {
+    <<interface>>
+    +makePayment() boolean
+  }
+  class Product {
+    +int productId
+    +String productName
+  }
+  class ProductCategory {
+    +int productCategoryId
+    +String categoryName
+    +List~Product~ products
+    +addProduct() void
+    +removeProduct() void
+  }
+  class ProductDeliverySystem {
+    +UserController userController
+    +WarehouseController warehouseController
+    +OrderController orderController
+    +addProductToCart() void
+    +placeOrder() Order
+    +checkout() void
+  }
+  class UPIPaymentMode {
+    +makePayment() boolean
+  }
+  class User {
+    +int userId
+    +String userName
+    +Address address
+  }
+  class UserController {
+    +List~User~ userList
+    +addUser() void
+    +removeUser() void
+  }
+  class Warehouse {
+    +Inventory inventory
+    +Address address
+    +removeItemFromInventory() void
+    +addItemToInventory() void
+  }
+  class WarehouseController {
+    +List~Warehouse~ warehouseList
+    +WarehouseSelectionStrategy warehouseSelectionStrategy
+    +addNewWarehouse() void
+    +removeWarehouse() void
+    +selectWarehouse() Warehouse
+  }
+  class WarehouseSelectionStrategy {
+    <<abstract>>
+    +selectWarehouse() Warehouse
+  }
+  Inventory --> "*" ProductCategory
+  Order --> Address
+  Order --> Invoice
+  Order --> OrderStatus
+  Order --> Payment
+  Order --> User
+  Order --> Warehouse
+  OrderController --> "*" Order
+  Payment --> PaymentMode
+  PaymentMode <|.. CardPaymentMode
+  PaymentMode <|.. UPIPaymentMode
+  ProductCategory --> "*" Product
+  ProductDeliverySystem --> OrderController
+  ProductDeliverySystem --> UserController
+  ProductDeliverySystem --> WarehouseController
+  User --> Address
+  User --> Cart
+  UserController --> "*" User
+  Warehouse --> Address
+  Warehouse --> Inventory
+  WarehouseController --> "*" Warehouse
+  WarehouseController --> WarehouseSelectionStrategy
+  WarehouseSelectionStrategy <|-- NearestWarehouseSelectionStrategy

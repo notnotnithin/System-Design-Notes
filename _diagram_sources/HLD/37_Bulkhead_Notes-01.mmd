@@ -1,0 +1,3 @@
+graph LR
+  C["Clients"] -->|"rate limiter: requests per time window"| O["Order service"]
+  O -->|"bulkhead: concurrent calls and threads"| P["Product / Payment services"]

@@ -1,0 +1,9 @@
+graph TB
+  H["Header<br/>alg, type, kid"] --> B1["Base64"]
+  P["Payload<br/>iss, sub, aud, exp, email, roles"] --> B2["Base64"]
+  B1 --> M["header.payload (the message)"]
+  B2 --> M
+  M --> SG["Sign with RSA private key or HMAC secret"] --> B3["Base64 signature"]
+  B1 --> T["JWT = header . payload . signature"]
+  B2 --> T
+  B3 --> T

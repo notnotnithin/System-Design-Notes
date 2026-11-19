@@ -1,0 +1,18 @@
+classDiagram
+  class ImperialWeighingMachine {
+    <<interface>>
+    +getWeightInPounds() double
+  }
+  class ImperialWeighingMachineImpl {
+    +double weightInPounds
+  }
+  class WeighingMachineAdapter {
+    <<interface>>
+    +getWeightInKg() double
+  }
+  class WeightMachineAdapterImpl {
+    +ImperialWeighingMachine imperialWeighingMachine
+  }
+  ImperialWeighingMachine <|.. ImperialWeighingMachineImpl
+  WeighingMachineAdapter <|.. WeightMachineAdapterImpl
+  WeightMachineAdapterImpl --> ImperialWeighingMachine

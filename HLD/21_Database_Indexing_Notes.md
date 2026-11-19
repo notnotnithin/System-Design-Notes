@@ -30,15 +30,7 @@ A table like this (Emp ID, Name, Address with Row1…Row4) is **just a logical r
 
 If one table row is, say, 64 bytes, then **one data page can hold about 125 rows**.
 
-```mermaid
-flowchart TB
-    subgraph P["Data Page – PageID: 1 (8 KB)"]
-        H["Header (96 B): PageNo, free space, checksum"]
-        D["Data records (8060 B): Row1, Row2, Row3, Row4, Row5 ..."]
-        O["Offset array (36 B): slots point to the rows"]
-    end
-    O -. pointer .-> D
-```
+![Diagram](diagrams/21_Database_Indexing_Notes-01.png)
 
 **In simple words:** the table you imagine as a grid is really cut into 8 KB pages. A page has a small header, a big area holding the rows, and a small array at the end whose entries point to where each row sits inside the page. The rows in the data area need not be in order, because the offset array is what remembers where each one is.
 
@@ -67,11 +59,7 @@ The **DBMS maintains the mapping of data page and data block**, for example:
 
 ## 2. What types of indexing are present in RDBMS?
 
-```mermaid
-flowchart TB
-    I[Indexing] --> C[Clustered Indexing]
-    I --> N[Non-Clustered Indexing]
-```
+![Diagram](diagrams/21_Database_Indexing_Notes-02.png)
 
 Before understanding clustered and non-clustered indexing, the page first explains **what is indexing** and **what data structure it uses and how it works.**
 
@@ -105,16 +93,7 @@ Before understanding clustered and non-clustered indexing, the page first explai
 
 Final tree:
 
-```mermaid
-flowchart TB
-    R["75"] --> A["33 | 55"]
-    R --> B["126"]
-    A --> L1["9"]
-    A --> L2["41"]
-    A --> L3["72"]
-    B --> L4["98"]
-    B --> L5["214"]
-```
+![Diagram](diagrams/21_Database_Indexing_Notes-03.png)
 
 **In simple words:** whenever a node gets more keys than allowed, the middle key moves up to the parent and the node splits in two. Because the splits push upward, all leaves always stay at the same depth, which is why searching stays fast.
 
@@ -135,16 +114,7 @@ flowchart TB
 6. Insert 1: leaf `1 6`.
 7. Insert 5: the leaf would be `1 5 6`, so it splits and the root splits too. Final: root `17`; children `5` and `25`; leaves `1`, `5 6`, `17 19`, `25 30`, **all leaves linked to each other** (double arrows).
 
-```mermaid
-flowchart TB
-    R["17"] --> A["5"]
-    R --> B["25"]
-    A --> L1["1"]
-    A --> L2["5 | 6"]
-    B --> L3["17 | 19"]
-    B --> L4["25 | 30"]
-    L1 <--> L2 <--> L3 <--> L4
-```
+![Diagram](diagrams/21_Database_Indexing_Notes-04.png)
 
 **In simple words:** the upper nodes are only signposts. The leaves hold the real indexed values and point to the rows in the data pages. Because the leaves are chained together, the DBMS can walk through a range of values in order without going back up the tree.
 
@@ -156,22 +126,7 @@ flowchart TB
 
 In the data page (Page ID 1) the rows are stored `EmpID 1, 4, 5, 2`, and the offset array (slots) is `EMP5 (3), EMP4 (2), EMP2 (1), EMP1 (0)`. The slot array is what provides the sorted order: slot 0 → EmpID 1, slot 1 → EmpID 2, slot 2 → EmpID 4, slot 3 → EmpID 5, even though the rows physically sit in a different order inside the page.
 
-```mermaid
-flowchart LR
-    subgraph IDX[EMPID INDEX sorted]
-        i1[1] --> i2[2] --> i4[4] --> i5[5]
-    end
-    subgraph PG[Data Page ID 1]
-        r1[Row EmpID 1]
-        r4[Row EmpID 4]
-        r5[Row EmpID 5]
-        r2[Row EmpID 2]
-    end
-    s0[slot 0: EMP1] --> r1
-    s1[slot 1: EMP2] --> r2
-    s2[slot 2: EMP4] --> r4
-    s3[slot 3: EMP5] --> r5
-```
+![Diagram](diagrams/21_Database_Indexing_Notes-05.png)
 
 **So:**
 - **There can be only 1 clustered index per table**, because the ordering of pages can be done based on **one** index only.

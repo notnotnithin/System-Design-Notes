@@ -22,69 +22,11 @@ A `Library` stores `Book`s in a list. If the client loops over the internal list
 
 **Diagram – Library and iterators**
 
-```mermaid
-classDiagram
-  class Book {
-    -String title
-    -String author
-    -String isbn
-    -int price
-  }
-  class BookCollection {
-    <<interface>>
-    +createIterator() Iterator~Book~
-    +createReverseIterator() Iterator~Book~
-  }
-  class Iterator {
-    <<interface>>
-    +hasNext() boolean
-    +next() T
-  }
-  class Library {
-    -List~Book~ books
-    +createIterator() Iterator~Book~
-    +createReverseIterator() Iterator~Book~
-  }
-  class LibraryIterator {
-    -List~Book~ books
-    -int position
-    +hasNext() boolean
-    +next() Book
-  }
-  class LibraryIteratorDemo {
-  }
-  class ReverseLibraryIterator {
-    -List~Book~ books
-    -int position
-    +hasNext() boolean
-    +next() Book
-  }
-  BookCollection <|.. Library
-  Iterator <|.. LibraryIterator
-  Iterator <|.. ReverseLibraryIterator
-  Library --> "*" Book
-  LibraryIterator --> "*" Book
-  ReverseLibraryIterator --> "*" Book
-```
+![Diagram](diagrams/33_Iterator_Pattern_Notes-01.png)
 
 **Diagram – walking the library**
 
-```mermaid
-sequenceDiagram
-  participant C as Client
-  participant L as Library
-  participant I as LibraryIterator
-  C->>L: createIterator()
-  L-->>C: iterator (position 0)
-  loop while hasNext()
-    C->>I: hasNext()
-    I-->>C: true
-    C->>I: next()
-    I-->>C: book at position, then position + 1
-  end
-  C->>I: hasNext()
-  I-->>C: false (end)
-```
+![Diagram](diagrams/33_Iterator_Pattern_Notes-02.png)
 
 *The iterator remembers where it is*
 

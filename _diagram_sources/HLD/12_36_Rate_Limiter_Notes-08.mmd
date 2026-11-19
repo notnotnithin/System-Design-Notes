@@ -1,0 +1,4 @@
+graph LR
+  R["Requests"] --> Q[["Queue (bucket)"]]
+  Q -->|"processed at a fixed rate"| S["Service"]
+  Q -->|"queue full: overflow"| X["Rejected"]

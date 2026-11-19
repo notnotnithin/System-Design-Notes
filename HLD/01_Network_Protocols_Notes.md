@@ -32,17 +32,7 @@ The notes list five things a good protocol gives you: **interoperability** (a wa
 <!-- diagram:01-0 -->
 **Diagram – OSI layers and where the protocols live**
 
-```mermaid
-graph TD
-  L7["7 Application: HTTP, FTP, SMTP, IMAP/POP, WebSocket, WebRTC"] --> L6["6 Presentation"]
-  L6 --> L5["5 Session"]
-  L5 --> L4["4 Transport: TCP, UDP"]
-  L4 --> L3["3 Network: IP"]
-  L3 --> L2["2 Data link: Ethernet, Wi-Fi"]
-  L2 --> L1["1 Physical: cables, radio"]
-  classDef hi fill:#fde68a,stroke:#b45309,color:#000
-  class L7,L4 hi
-```
+![Diagram](diagrams/01_Network_Protocols_Notes-01.png)
 <!-- /diagram:01-0 -->
 
 
@@ -64,18 +54,7 @@ At the transport layer there are two choices. **TCP** is **connection-oriented a
 <!-- diagram:01-1 -->
 **Diagram – Three communication models**
 
-```mermaid
-graph LR
-  subgraph CS["Client-server: HTTP, FTP, SMTP"]
-    B["Browser"] <-->|"Request / Response"| W["Web server"]
-  end
-  subgraph WS["WebSocket: chat apps"]
-    C1["Client"] <-->|"one persistent two-way connection"| S1["Server"]
-  end
-  subgraph P2P["Peer-to-peer: WebRTC"]
-    PA["Peer A"] <-->|"direct"| PB["Peer B"]
-  end
-```
+![Diagram](diagrams/01_Network_Protocols_Notes-02.png)
 <!-- /diagram:01-1 -->
 
 
@@ -109,17 +88,7 @@ At the application layer the notes show two models:
 <!-- diagram:01-2 -->
 **Diagram – TCP three-way handshake**
 
-```mermaid
-sequenceDiagram
-  participant C as Client
-  participant S as Server
-  C->>S: SYN
-  S->>C: SYN + ACK
-  C->>S: ACK
-  Note over C,S: connection established
-  C->>S: Data segment
-  S-->>C: ACK (resend if no ACK arrives)
-```
+![Diagram](diagrams/01_Network_Protocols_Notes-03.png)
 <!-- /diagram:01-2 -->
 
 
@@ -185,13 +154,7 @@ UDP belongs to the same family as TCP but is **not reliable and connectionless.*
 <!-- diagram:01-3 -->
 **Diagram – A proxy sits between clients and servers**
 
-```mermaid
-graph LR
-  C1["Client 1"] --> P["Proxy server"]
-  C2["Client 2"] --> P
-  P --> S["Server"]
-  P -.- F["filtering, caching, load balancing, privacy"]
-```
+![Diagram](diagrams/01_Network_Protocols_Notes-04.png)
 <!-- /diagram:01-3 -->
 
 

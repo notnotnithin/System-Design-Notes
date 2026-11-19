@@ -1,0 +1,6 @@
+graph LR
+  U["User logs in once"] --> A["Authentication server"]
+  A -->|"JWT"| U
+  U -->|"same JWT"| A1["App 1 www.app1.com"]
+  U -->|"same JWT"| A2["App 2"]
+  U -->|"same JWT"| A3["App 3"]

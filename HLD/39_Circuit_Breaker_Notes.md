@@ -13,12 +13,7 @@ Source: https://drive.google.com/file/d/1ApUVMYBXzsEiW_tCL_ZpfX0IGKZQ2IZe/view?u
 <!-- diagram:39-0 -->
 **Diagram – Without and with a circuit breaker**
 
-```mermaid
-graph LR
-  O["Order service"] --> CB{"Circuit breaker"}
-  CB -->|"closed: calls pass"| P["Product service"]
-  CB -->|"open: fail immediately"| F["Fallback"]
-```
+![Diagram](diagrams/39_Circuit_Breaker_Notes-01.png)
 <!-- /diagram:39-0 -->
 
 
@@ -48,14 +43,7 @@ The flow in the picture: calls to Product fail → the **failure threshold is re
 <!-- diagram:39-1 -->
 **Diagram – Circuit breaker states**
 
-```mermaid
-stateDiagram-v2
-  [*] --> CLOSED
-  CLOSED --> OPEN: failure rate crosses the threshold
-  OPEN --> HALF_OPEN: wait duration completed
-  HALF_OPEN --> CLOSED: test calls 100% successful
-  HALF_OPEN --> OPEN: test calls not 100% successful
-```
+![Diagram](diagrams/39_Circuit_Breaker_Notes-02.png)
 <!-- /diagram:39-1 -->
 
 
@@ -211,13 +199,7 @@ By default the circuit breaker records **all `RuntimeException`s and `Error`s as
 <!-- diagram:39-2 -->
 **Diagram – Inside the framework**
 
-```mermaid
-graph LR
-  C["Call to the method"] --> AOP["AOP proxy"] --> SM["CircuitBreakerStateMachine"]
-  SM -->|"threshold exceeded while CLOSED"| OP["transitionToOpenState"]
-  OP --> SC["ScheduledThreadPoolExecutor (delay queue): toHalfOpenState after the wait duration"]
-  SC --> HO["HALF_OPEN"]
-```
+![Diagram](diagrams/39_Circuit_Breaker_Notes-03.png)
 <!-- /diagram:39-2 -->
 
 

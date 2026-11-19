@@ -1,0 +1,11 @@
+sequenceDiagram
+  participant O as Order service (RestTemplate @LoadBalanced)
+  participant L as Spring Cloud LoadBalancer
+  participant D as Service discovery
+  participant P as Product instance
+  O->>L: GET http://product-service/products/1
+  L->>D: instances of product-service
+  D-->>L: instance list
+  L->>L: apply algorithm (round robin by default)
+  L->>P: call the chosen instance
+  P-->>O: response

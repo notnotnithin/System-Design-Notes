@@ -1,0 +1,4 @@
+graph LR
+  C4["New request from Client 4"] --> LB["Load balancer"]
+  LB -->|"Server 2 has fewer active connections"| S2["Server 2: connection from Client 2"]
+  S1["Server 1: connections from Client 1 and 3"] -.- LB

@@ -12,10 +12,7 @@
 
 ### How the layers fit together (outer to inner)
 
-```mermaid
-graph LR
-  N1["IPv4"] --> N2["TCP port 445"] --> N3["SMB 2/3 header: command, message ID, session ID, tree ID"] --> N4["NEGOTIATE, SESSION_SETUP, TREE_CONNECT, CREATE, READ, CLOSE"]
-```
+![Diagram](diagrams/31-smb-01.png)
 
 ## In-depth explanation of the example (plain-language version)
 
@@ -154,28 +151,7 @@ The command is called **`CREATE`** (it can also create files). Here it **opens `
 
 ### Sequence diagram
 
-```mermaid
-sequenceDiagram
-  participant P0 as Laptop 192.168.1.10
-  participant P1 as NAS 192.168.1.20
-  P0->>P1: 1. TCP: 50532 → 445 [SYN] Seq=0
-  P1->>P0: 2. TCP: 445 → 50532 [SYN, ACK] Seq=0 Ack=1
-  P0->>P1: 3. TCP: 50532 → 445 [ACK] Seq=1 Ack=1
-  P0->>P1: 4. SMB2: Negotiate Protocol Request
-  P1->>P0: 5. SMB2: Negotiate Protocol Response
-  P0->>P1: 6. SMB2: Session Setup Request, NTLMSSP_NEGOTIATE
-  P1->>P0: 7. SMB2: Session Setup Response, NTLMSSP_CHALLENGE
-  P0->>P1: 8. SMB2: Session Setup Request, NTLMSSP_AUTH, User: \alex
-  P1->>P0: 9. SMB2: Session Setup Response
-  P0->>P1: 10. SMB2: Tree Connect Request Tree: \\nas\Documents
-  P1->>P0: 11. SMB2: Tree Connect Response
-  P0->>P1: 12. SMB2: Create Request File: report.pdf
-  P1->>P0: 13. SMB2: Create Response File: report.pdf
-  P0->>P1: 14. SMB2: Read Request Len:245760 Off:0 File: report.pdf
-  P1->>P0: 15. SMB2: Read Response, 169 segments
-  P0->>P1: 16. SMB2: Close Request File: report.pdf
-  P1->>P0: 17. SMB2: Close Response File: report.pdf
-```
+![Diagram](diagrams/31-smb-02.png)
 
 *The lesson's own sequence diagram:*
 

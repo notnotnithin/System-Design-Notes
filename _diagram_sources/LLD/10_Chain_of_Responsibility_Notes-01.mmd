@@ -1,0 +1,26 @@
+classDiagram
+  class DebugLogProcessor {
+    +write() void
+  }
+  class ErrorLogProcessor {
+    +write() void
+  }
+  class FatalLogProcessor {
+    +write() void
+  }
+  class InfoLogProcessor {
+    +write() void
+  }
+  class LogProcessor {
+    <<abstract>>
+    +int level
+    +LogProcessor nextLoggerProcessor
+    +logMessage() void
+    +write() void
+  }
+  class LoggerDemo {
+  }
+  LogProcessor <|-- DebugLogProcessor
+  LogProcessor <|-- ErrorLogProcessor
+  LogProcessor <|-- FatalLogProcessor
+  LogProcessor <|-- InfoLogProcessor

@@ -1,0 +1,15 @@
+graph TD
+  C["Client"] --> CDN["CDN"] --> LB["Load balancer"]
+  subgraph IN["India data centre"]
+    IA["App S1 - S3"] --> IC[("Cache")]
+    IA --> IM[["MQ"]]
+    IA --> ID[("Master DB with Slave DB")]
+  end
+  subgraph US["USA data centre"]
+    UA["App S1 - S3"] --> UC[("Cache")]
+    UA --> UM[["MQ"]]
+    UA --> UD[("Master DB with Slave DB")]
+  end
+  LB --> IA
+  LB --> UA
+  ID <-->|"replication between data centres"| UD

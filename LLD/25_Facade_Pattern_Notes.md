@@ -19,52 +19,11 @@ To place an order, an e-commerce app has to call four services in the right orde
 
 **Diagram – Order facade**
 
-```mermaid
-classDiagram
-  class InventoryService {
-    +checkStock() boolean
-  }
-  class NotificationService {
-    +sendConfirmation() void
-  }
-  class OrderFacade {
-    -InventoryService inventory
-    -PaymentService payment
-    -ShippingService shipping
-    -NotificationService notification
-    +placeOrder() void
-  }
-  class PaymentService {
-    +makePayment() boolean
-  }
-  class ShippingService {
-    +shipProduct() void
-  }
-  OrderFacade --> InventoryService
-  OrderFacade --> NotificationService
-  OrderFacade --> PaymentService
-  OrderFacade --> ShippingService
-```
+![Diagram](diagrams/25_Facade_Pattern_Notes-01.png)
 
 **Diagram – one call, four services**
 
-```mermaid
-sequenceDiagram
-  participant C as Client (ECommerceApp)
-  participant F as OrderFacade
-  participant I as InventoryService
-  participant P as PaymentService
-  participant S as ShippingService
-  participant N as NotificationService
-  C->>F: placeOrder(productId, paymentMethod)
-  F->>I: checkStock(productId)
-  I-->>F: in stock
-  F->>P: makePayment(paymentMethod)
-  P-->>F: paid
-  F->>S: shipProduct(productId)
-  F->>N: sendConfirmation(productId)
-  F-->>C: order placed
-```
+![Diagram](diagrams/25_Facade_Pattern_Notes-02.png)
 
 *The facade runs the workflow*
 

@@ -1,0 +1,16 @@
+sequenceDiagram
+  participant V as Vehicle
+  participant G as EntranceGate
+  participant B as ParkingBuilding
+  participant L as ParkingLevel
+  participant M as ParkingSpotManager
+  V->>G: enter(building, vehicle)
+  G->>B: allocate(vehicle)
+  B->>L: hasAvailability(type)?
+  L-->>B: yes
+  B->>L: park(type)
+  L->>M: park()
+  M->>M: lock, strategy.selectSpot(), occupySpot(), unlock
+  M-->>L: spot
+  B-->>G: Ticket (level, spot, entry time)
+  G-->>V: ticket

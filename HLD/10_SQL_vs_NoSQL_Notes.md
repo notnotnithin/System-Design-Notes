@@ -31,13 +31,7 @@ For SQL the notes say three things about structure: data is stored in **tables, 
 <!-- diagram:10-0 -->
 **Diagram – SQL: all data of an employee sits on one server**
 
-```mermaid
-graph LR
-  subgraph SRV["One server: DB Employee"]
-    E["Table 1: Employee<br/>id, name, dept"] --- S["Table 2: Salary"]
-    E --- AD["Table 3: Address"]
-  end
-```
+![Diagram](diagrams/10_SQL_vs_NoSQL_Notes-01.png)
 <!-- /diagram:10-0 -->
 
 
@@ -84,13 +78,7 @@ SQL follows **ACID**: **A**tomicity, **C**onsistency, **I**solation, **D**urabil
 <!-- diagram:10-1 -->
 **Diagram – The four NoSQL types**
 
-```mermaid
-graph TD
-  N["NoSQL"] --> KV["Key-value: DynamoDB<br/>Key | opaque value"]
-  N --> DOC["Document: MongoDB<br/>Key | JSON, queryable"]
-  N --> COL["Column-wise<br/>key: column to value pairs"]
-  N --> GR["Graph<br/>nodes and relationships"]
-```
+![Diagram](diagrams/10_SQL_vs_NoSQL_Notes-02.png)
 <!-- /diagram:10-1 -->
 
 
@@ -136,10 +124,7 @@ Each **key** maps to a set of **column → value pairs**, and different keys can
 <!-- diagram:10-2 -->
 **Diagram – Graph database example**
 
-```mermaid
-graph LR
-  H["Himanshu"] -->|"friend"| X["XYZ"] -->|"friend"| Y["..."]
-```
+![Diagram](diagrams/10_SQL_vs_NoSQL_Notes-03.png)
 <!-- /diagram:10-2 -->
 
 
@@ -169,13 +154,7 @@ Data is stored as **nodes and edges (relationships)**, for example `Himanshu —
 <!-- diagram:10-3 -->
 **Diagram – NoSQL: data spread across nodes**
 
-```mermaid
-graph LR
-  U["10 M users"] --> N1["Node 1: 2 M"]
-  U --> N2["Node 2: 2 M"]
-  U --> N3["Node 3: 2 M"]
-  U --> N4["Node 4 ... add nodes any time"]
-```
+![Diagram](diagrams/10_SQL_vs_NoSQL_Notes-04.png)
 <!-- /diagram:10-3 -->
 
 

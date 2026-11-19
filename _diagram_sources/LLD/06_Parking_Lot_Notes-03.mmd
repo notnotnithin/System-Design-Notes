@@ -1,0 +1,13 @@
+sequenceDiagram
+  participant V as Vehicle
+  participant X as ExitGate
+  participant C as CostComputation
+  participant P as Payment
+  participant B as ParkingBuilding
+  V->>X: completeExit(building, ticket, payment)
+  X->>C: compute(ticket)
+  C-->>X: price (PricingStrategy)
+  X->>P: pay(price)
+  P-->>X: success
+  X->>B: release(ticket)
+  B->>B: spot becomes free

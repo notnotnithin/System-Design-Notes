@@ -17,13 +17,7 @@ A service that **continues to work even when a downstream system fails**. Instea
 <!-- diagram:12_36-0 -->
 **Diagram – Cascading failure: one slow service blocks the others**
 
-```mermaid
-graph LR
-  C["Clients"] --> O["Order service<br/>all threads busy"]:::bad
-  O -->|"each call waits 60 s"| P["Product service<br/>slow: 60 s per response"]:::bad
-  C -. "clients of Order are blocked too" .-> O
-  classDef bad fill:#fecaca,stroke:#b91c1c,color:#000
-```
+![Diagram](diagrams/12_36_Rate_Limiter_Notes-01.png)
 <!-- /diagram:12_36-0 -->
 
 
@@ -56,10 +50,7 @@ This is a **cascading failure**: the problem is only in the Product service, but
 <!-- diagram:12_36-1 -->
 **Diagram – Recommended order of the patterns**
 
-```mermaid
-graph LR
-  RL["Rate limiter"] --> BH["Bulkhead"] --> TL["Time limiter"] --> CB["Circuit breaker"] --> RT["Retry"]
-```
+![Diagram](diagrams/12_36_Rate_Limiter_Notes-02.png)
 <!-- /diagram:12_36-1 -->
 
 
@@ -95,12 +86,7 @@ Controls **the number of requests allowed to a microservice in a given time wind
 <!-- diagram:12_36-2 -->
 **Diagram – Fixed window: the edge-of-window spike**
 
-```mermaid
-graph LR
-  W1["Window 1 (0-10 s)<br/>5 requests at 9-10 s"] --> W2["Window 2 (10-20 s)<br/>5 requests at 10-11 s"]
-  W2 --> X["10 requests within about 2 seconds<br/>although the limit is 5 per 10 s"]:::bad
-  classDef bad fill:#fecaca,stroke:#b91c1c,color:#000
-```
+![Diagram](diagrams/12_36_Rate_Limiter_Notes-03.png)
 <!-- /diagram:12_36-2 -->
 
 
@@ -120,14 +106,7 @@ The requests are counted in a **fixed window**; when the count crosses the limit
 <!-- diagram:12_36-3 -->
 **Diagram – Sliding log: count timestamps inside the window**
 
-```mermaid
-graph LR
-  R["New request at time t"] --> L["Log of accepted timestamps"]
-  L --> D["Drop timestamps older than t minus 10 s"]
-  D --> Q{"count in window is less than limit 5?"}
-  Q -->|"yes"| A["Accept and add timestamp"]
-  Q -->|"no"| X["Reject"]
-```
+![Diagram](diagrams/12_36_Rate_Limiter_Notes-04.png)
 <!-- /diagram:12_36-3 -->
 
 
@@ -153,11 +132,7 @@ For every **accepted** request, the **exact timestamp** is stored. For each new 
 <!-- diagram:12_36-4 -->
 **Diagram – Sliding window with sub-windows (10 s window, 2 s slices)**
 
-```mermaid
-graph LR
-  S1["SW1 0-2 s: 1"] --- S2["SW2 2-4 s: 1"] --- S3["SW3 4-6 s: 1"] --- S4["SW4 6-8 s: 1"] --- S5["SW5 8-10 s: 0"]
-  S5 --> T["Request at 9 s: 1+1+1+1+0 = 4, less than 5, allowed"]
-```
+![Diagram](diagrams/12_36_Rate_Limiter_Notes-05.png)
 <!-- /diagram:12_36-4 -->
 
 
@@ -180,12 +155,7 @@ The main window is divided into **equal sub-windows**, and the number of request
 <!-- diagram:12_36-5 -->
 **Diagram – Weighted sliding window**
 
-```mermaid
-graph LR
-  P["Previous window: 5 requests"] -->|"x 90% still inside the slider"| E["4.5"]
-  C["Current window: 0 requests"] --> SUM["0 + 4.5 is about 5<br/>limit reached, reject"]
-  E --> SUM
-```
+![Diagram](diagrams/12_36_Rate_Limiter_Notes-06.png)
 <!-- /diagram:12_36-5 -->
 
 
@@ -214,13 +184,7 @@ This simplifies the previous one by **removing the sub-windows and using an appr
 <!-- diagram:12_36-6 -->
 **Diagram – Token bucket**
 
-```mermaid
-graph LR
-  RF["Re-filler adds tokens at a fixed interval"] --> B(("Bucket of tokens<br/>full: extra tokens overflow"))
-  R["Request"] --> B
-  B -->|"token available: take one"| A["Allowed"]
-  B -->|"no token"| X["Denied"]
-```
+![Diagram](diagrams/12_36_Rate_Limiter_Notes-07.png)
 <!-- /diagram:12_36-6 -->
 
 
@@ -240,12 +204,7 @@ A bucket holds a limited number of **tokens.** **Each request uses one token**, 
 <!-- diagram:12_36-7 -->
 **Diagram – Leaky bucket**
 
-```mermaid
-graph LR
-  R["Requests"] --> Q[["Queue (bucket)"]]
-  Q -->|"processed at a fixed rate"| S["Service"]
-  Q -->|"queue full: overflow"| X["Rejected"]
-```
+![Diagram](diagrams/12_36_Rate_Limiter_Notes-08.png)
 <!-- /diagram:12_36-7 -->
 
 

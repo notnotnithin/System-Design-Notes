@@ -1,0 +1,5 @@
+sequenceDiagram
+  participant U as Participant
+  participant M as Meeting
+  U->>M: respondToInvitation(ACCEPTED / DECLINED / TENTATIVE)
+  M->>M: update attendees map: user to response

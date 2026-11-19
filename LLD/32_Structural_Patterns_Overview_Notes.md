@@ -12,21 +12,7 @@ The Zoho page says: a **structural design pattern is a way to combine or arrange
 
 ### 1. Decorator – add more functionality to an existing object without changing its structure
 
-```mermaid
-classDiagram
-    class BasePizza { <<abstract>> +cost() int }
-    class FarmhousePizza { +cost() int  "returns 200" }
-    class MargheritaPizza { +cost() int  "returns 100" }
-    class ToppingDecorator { <<abstract>> }
-    class ExtraCheese { +cost() int  "basePizza.cost + 10" }
-    class Mushroom { +cost() int  "basePizza.cost + 15" }
-    BasePizza <|-- FarmhousePizza
-    BasePizza <|-- MargheritaPizza
-    BasePizza <|-- ToppingDecorator
-    ToppingDecorator o-- BasePizza : has-a
-    ToppingDecorator <|-- ExtraCheese
-    ToppingDecorator <|-- Mushroom
-```
+![Diagram](diagrams/32_Structural_Patterns_Overview_Notes-01.png)
 
 `BasePizza pizza = new Mushroom(new ExtraCheese(new Farmhouse()));`
 
@@ -34,15 +20,7 @@ classDiagram
 
 ### 2. Proxy – provide controlled access to the original object
 
-```mermaid
-classDiagram
-    class EmployeeDao { <<interface>> +create() }
-    class EmployeeDaoImpl { +create() "row creation logic" }
-    class EmployeeDaoProxy { +create() "if ADMIN call real create, else throw exception" }
-    EmployeeDao <|.. EmployeeDaoImpl
-    EmployeeDao <|.. EmployeeDaoProxy
-    EmployeeDaoProxy o-- EmployeeDaoImpl : has-a
-```
+![Diagram](diagrams/32_Structural_Patterns_Overview_Notes-02.png)
 
 `EmployeeDao empProxyObj = new EmployeeDaoProxy(); empProxyObj.create();`
 
@@ -51,15 +29,7 @@ classDiagram
 ### 3. Composite – object inside object (tree-like structure)
 Examples on the page: **Delivery Box** (contains items and more delivery boxes) and **File System** (contains files and directories, which contain more files and directories).
 
-```mermaid
-classDiagram
-    class Component { <<interface>> +operation() }
-    class Leaf { +operation() }
-    class Composite { +operation() +add() }
-    Component <|.. Leaf
-    Component <|.. Composite
-    Composite o-- "*" Component
-```
+![Diagram](diagrams/32_Structural_Patterns_Overview_Notes-03.png)
 
 File system example: `interface FileSystem { ls(); }`, `File implements FileSystem` (`ls()` prints the file name), `Directory implements FileSystem` (keeps a `List<FileSystem>`, `add(fs)` adds to it, `ls()` loops over the list and calls `ls()` on each).
 
@@ -78,16 +48,7 @@ parentDir.add(childDir);
 ### 4. Adapter – a bridge between two incompatible interfaces
 Drawn as a plug (Client), a travel adapter (Adaptor) and a wall socket (Adaptee).
 
-```mermaid
-classDiagram
-    class WeightMachineAdaptor { <<interface>> +getWeightInKg() int }
-    class WeightMachineAdaptorImpl { +getWeightInKg() int "pounds * .45" }
-    class WeightMachine { <<interface>> +getWeightInPounds() int }
-    class WeightMachineImpl { +getWeightInPounds() int "returns 30" }
-    WeightMachineAdaptor <|.. WeightMachineAdaptorImpl
-    WeightMachine <|.. WeightMachineImpl
-    WeightMachineAdaptorImpl o-- WeightMachine : has-a
-```
+![Diagram](diagrams/32_Structural_Patterns_Overview_Notes-04.png)
 
 `WeightMachineAdaptor machineAdaptorObj = new WeightMachineAdaptorImpl(new WeightMachineImpl()); machineAdaptorObj.getWeightInKg();`
 
@@ -98,18 +59,7 @@ First the problem: `abstract LivingThings { abstract void breatheProcess(); }` w
 
 Solution:
 
-```mermaid
-classDiagram
-    class LivingThings { <<abstract>> BreatheImplementor breatheImplementor +breatheProcess() }
-    class BreatheImplementor { <<interface>> +breatheProcess() }
-    LivingThings <|-- Dog
-    LivingThings <|-- Fish
-    LivingThings <|-- Tree
-    LivingThings o-- BreatheImplementor : has-a
-    BreatheImplementor <|.. LandBreathe
-    BreatheImplementor <|.. WaterBreathe
-    BreatheImplementor <|.. TreeBreathe
-```
+![Diagram](diagrams/32_Structural_Patterns_Overview_Notes-05.png)
 
 Each of `Dog`, `Fish`, `Tree` takes a `BreatheImplementor` in its constructor and its `breatheProcess()` just calls `breatheImplementor.breatheProcess()`. `LandBreathe` = nose / oxygen in / CO2 out; `WaterBreathe` = gills / absorb oxygen / release CO2; `TreeBreathe` = leaves / absorb CO2 / release oxygen.
 
@@ -121,14 +71,7 @@ Each of `Dog`, `Fish`, `Tree` takes a `BreatheImplementor` in its constructor an
 - **Example 1: expose only the necessary details to the client.** `EmployeeClient` creates `EmployeeFacade` and calls `obj.insert()`. The facade holds an `EmployeeDAO` and forwards `insert()`, while the DAO also has `delete()` and `updateByID()` that the client does not see.
 - **Example 2: hide the system complexity.** The client creates `ACFacade` and calls `turnOnButtonClicked()`. Inside, the facade calls `internalUnit.acceptUserTempCmd()`, then `externalUnit.checkVoltage()`, `consumeNitrogen()` and `startCondensor()`. (The "complex system" is `ACExternalUnit` with `checkVoltage / consumeNitrogen / startCondensor` and `ACInternalUnit` with `acceptUserTempCmd / acceptUserOnCmd / acceptUserOffCmd`.)
 
-```mermaid
-flowchart LR
-    C["Client: obj.turnOnButtonClicked()"] --> F[ACFacade]
-    F --> I[ACInternalUnit.acceptUserTempCmd]
-    F --> E1[ACExternalUnit.checkVoltage]
-    F --> E2[ACExternalUnit.consumeNitrogen]
-    F --> E3[ACExternalUnit.startCondensor]
-```
+![Diagram](diagrams/32_Structural_Patterns_Overview_Notes-06.png)
 
 **In simple words:** one button press for the client, many calls behind the scenes.
 
@@ -141,16 +84,7 @@ flowchart LR
 - Extrinsic data is passed as a **parameter** to the flyweight class.
 - **Caching** can be used for the flyweight object and reused whenever required.
 
-```mermaid
-classDiagram
-    class IRobot { <<interface>> +display(x, y) }
-    class HumanoidRobot { String type, Sprites body +display(x, y) }
-    class RoboticDog { String type, Sprites body +display(x, y) }
-    class RoboticFactory { static Map~String,IRobot~ roboticObjectCache +createRobot(type) IRobot }
-    IRobot <|.. HumanoidRobot
-    IRobot <|.. RoboticDog
-    RoboticFactory ..> IRobot : creates or returns cached
-```
+![Diagram](diagrams/32_Structural_Patterns_Overview_Notes-07.png)
 
 `RoboticFactory.createRobot("HUMANOID")` returns the cached object if one exists for that type, otherwise creates it (with one `Sprite`), stores it in `roboticObjectCache` and returns it. Then `humanoidRobot1.display(1, 2)` and `humanoidRobot2.display(10, 20)` reuse the same object with different coordinates.
 
@@ -169,28 +103,12 @@ classDiagram
 | **Flyweight** | "I have too many similar objects." | share the common data | [30](30_Flyweight_Word_Processor_Notes.md) |
 | **Proxy** | "I need to control access to an object." | stand-in with the same interface | [13](13_Proxy_Pattern_Notes.md) |
 
-```mermaid
-graph TD
-  S["Structural patterns"] --> A["Adapter: fit incompatible interfaces"]
-  S --> B["Bridge: split two hierarchies"]
-  S --> C["Composite: tree of objects"]
-  S --> D["Decorator: add behaviour by wrapping"]
-  S --> F["Facade: simple entry point"]
-  S --> FW["Flyweight: share to save memory"]
-  S --> P["Proxy: control access"]
-```
+![Diagram](diagrams/32_Structural_Patterns_Overview_Notes-08.png)
 
 ## Look-alikes: which one do I need?
 Adapter, Decorator and Proxy all *wrap* an object. They differ in intent:
 
-```mermaid
-graph LR
-  W["I wrap an object"] --> Q1{"Do I change its interface?"}
-  Q1 -->|"yes"| AD["Adapter"]
-  Q1 -->|"no"| Q2{"Do I add new behaviour?"}
-  Q2 -->|"yes"| DE["Decorator"]
-  Q2 -->|"no, I control access"| PR["Proxy"]
-```
+![Diagram](diagrams/32_Structural_Patterns_Overview_Notes-09.png)
 
 - **Adapter** – different interface, same job.
 - **Decorator** – same interface, *more* behaviour (and you can stack wrappers).

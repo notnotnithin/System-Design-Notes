@@ -12,10 +12,7 @@
 
 ### How the layers fit together (outer to inner)
 
-```mermaid
-graph LR
-  N1["Ethernet frame"] --> N2["IPv4 packet"] --> N3["TCP port 502"] --> N4["MBAP header (7 bytes)"] --> N5["Function code and data"]
-```
+![Diagram](diagrams/39-modbus-01.png)
 
 ## In-depth explanation of the example (plain-language version)
 
@@ -140,22 +137,7 @@ Each action was a **tiny request with a short answer.** **No message contained a
 
 ### Sequence diagram
 
-```mermaid
-sequenceDiagram
-  participant P0 as Laptop 192.168.1.10
-  participant P1 as NAS 192.168.1.20
-  P0->>P1: 1. TCP: 51874 → 502 [SYN] Seq=0
-  P1->>P0: 2. TCP: 502 → 51874 [SYN, ACK] Seq=0 Ack=1
-  P0->>P1: 3. TCP: 51874 → 502 [ACK] Seq=1 Ack=1
-  P0->>P1: 4. Modbus/TCP: Query: Trans: 1, Unit: 1, Func: 3: Read Holding Registers
-  P1->>P0: 5. Modbus/TCP: Response: Trans: 1, Unit: 1, Func: 3: Read Holding Registers
-  P0->>P1: 6. Modbus/TCP: Query: Trans: 2, Unit: 1, Func: 6: Write Single Register
-  P1->>P0: 7. Modbus/TCP: Response: Trans: 2, Unit: 1, Func: 6: Write Single Register
-  P0->>P1: 8. Modbus/TCP: Query: Trans: 3, Unit: 1, Func: 5: Write Single Coil
-  P1->>P0: 9. Modbus/TCP: Response: Trans: 3, Unit: 1, Func: 5: Write Single Coil
-  P0->>P1: 10. Modbus/TCP: Query: Trans: 4, Unit: 1, Func: 3: Read Holding Registers
-  P1->>P0: 11. Modbus/TCP: Response: Trans: 4, Unit: 1, Func: 131: Exception: Illegal ...
-```
+![Diagram](diagrams/39-modbus-02.png)
 
 *The lesson's own sequence diagram:*
 

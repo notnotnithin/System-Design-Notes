@@ -36,15 +36,7 @@ The numbers: **2 billion total users**, **DAU = 50 million**, and one user sends
 <!-- diagram:11-0 -->
 **Diagram – Peer-to-peer versus a chat server**
 
-```mermaid
-graph LR
-  subgraph P["Peer-to-peer: no history, no groups, not scalable"]
-    A["User A"] <--> B["User B"]
-  end
-  subgraph S["With a chat server"]
-    A2["User A"] <--> CS["Chat server<br/>history, groups, availability"] <--> B2["User B"]
-  end
-```
+![Diagram](diagrams/11_Design_WhatsApp_Chat_App_Notes-01.png)
 <!-- /diagram:11-0 -->
 
 
@@ -62,21 +54,7 @@ User A and User B each have an IP address, so they could talk directly. But the 
 <!-- diagram:11-1 -->
 **Diagram – Polling versus WebSocket**
 
-```mermaid
-sequenceDiagram
-  participant C as Client
-  participant S as Server
-  Note over C,S: Polling: keep asking
-  C->>S: any new message?
-  S-->>C: no
-  C->>S: any new message?
-  S-->>C: yes, message
-  Note over C,S: WebSocket: one persistent two-way connection
-  C->>S: handshake (upgrade)
-  S-->>C: connection open
-  S->>C: message pushed any time
-  C->>S: message sent any time
-```
+![Diagram](diagrams/11_Design_WhatsApp_Chat_App_Notes-02.png)
 <!-- /diagram:11-1 -->
 
 
@@ -100,17 +78,7 @@ With normal HTTP the client sends a request, gets a response and the connection 
 <!-- diagram:11-2 -->
 **Diagram – Chat architecture**
 
-```mermaid
-graph TD
-  L["Login"] --> M["User-server mapping service<br/>ZooKeeper: user to server"]
-  UA["User A"] <-->|"WebSocket"| C1["Chat server 1"]
-  UB["User B"] <-->|"WebSocket"| C2["Chat server 2"]
-  C1 -.->|"which server holds B?"| M
-  C1 --> C2
-  C1 --> DB[("NoSQL DB: Cassandra")]
-  C2 --> DB
-  C1 --> P["Presence service: online / last seen"]
-```
+![Diagram](diagrams/11_Design_WhatsApp_Chat_App_Notes-03.png)
 <!-- /diagram:11-2 -->
 
 

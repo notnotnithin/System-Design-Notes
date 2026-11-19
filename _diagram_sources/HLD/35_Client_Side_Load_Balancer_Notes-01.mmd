@@ -1,0 +1,10 @@
+graph LR
+  subgraph SS["Server-side: Nginx / ELB"]
+    C1["Clients"] --> LB["Central load balancer"] --> A1["Instance 1"]
+    LB --> A2["Instance 2"]
+  end
+  subgraph CS["Client-side: inside the caller"]
+    O["Order service<br/>with load-balancer library"] --> P1["Product instance 1"]
+    O --> P2["Product instance 2"]
+    O -.->|"instance list"| D["Service discovery"]
+  end

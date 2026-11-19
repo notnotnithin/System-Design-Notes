@@ -1,0 +1,18 @@
+sequenceDiagram
+  participant A as Application
+  participant TC as Transaction coordinator
+  participant P1 as Participant 1 (Order)
+  participant P2 as Participant 2 (Inventory)
+  A->>TC: perform operation
+  TC->>P1: update query (lock)
+  TC->>P2: update query (lock)
+  Note over TC,P2: Phase 1: prepare (vote)
+  TC->>P1: PREPARE
+  TC->>P2: PREPARE
+  P1-->>TC: OK
+  P2-->>TC: OK
+  Note over TC,P2: Phase 2: decision
+  TC->>P1: COMMIT (or ABORT if any NO or timeout)
+  TC->>P2: COMMIT
+  P1-->>TC: done
+  P2-->>TC: done

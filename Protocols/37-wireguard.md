@@ -12,10 +12,7 @@
 
 ### How the layers fit together (outer to inner)
 
-```mermaid
-graph LR
-  N1["Outer: IPv4"] --> N2["UDP port 51820"] --> N3["WireGuard message: type, receiver index, counter"] --> N4["Encrypted inner IP packet"]
-```
+![Diagram](diagrams/37-wireguard-01.png)
 
 ## In-depth explanation of the example (plain-language version)
 
@@ -134,19 +131,7 @@ With nothing to send, a WireGuard tunnel is **completely silent.** Because the l
 
 ### Sequence diagram
 
-```mermaid
-sequenceDiagram
-  participant P0 as Laptop 192.168.1.10
-  participant P1 as VPN gateway 192.0.2.51
-  participant P2 as Web server 203.0.113.10
-  P0->>P1: 1. WireGuard: Handshake Initiation, sender=0x9d3c58e1
-  P1->>P0: 2. WireGuard: Handshake Response, sender=0x4f2a7c13, receiver=0x9d3c58e1
-  P0->>P1: 3. WireGuard: Transport Data, receiver=0x4f2a7c13, counter=0
-  P1->>P2: 4. TCP: 52344 → 443 [SYN] Seq=0
-  P2->>P1: 5. TCP: 443 → 52344 [SYN, ACK] Seq=0 Ack=1
-  P1->>P0: 6. WireGuard: Transport Data, receiver=0x9d3c58e1, counter=0
-  P0->>P1: 7. WireGuard: Keepalive, receiver=0x4f2a7c13, counter=1
-```
+![Diagram](diagrams/37-wireguard-02.png)
 
 *The lesson's own sequence diagram:*
 

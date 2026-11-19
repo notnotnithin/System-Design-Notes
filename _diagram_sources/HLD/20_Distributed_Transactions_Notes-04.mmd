@@ -1,0 +1,7 @@
+graph LR
+  P1["P1 update + commit"] --> P2["P2"] --> P3["P3"] --> P4["P4"] --> P5["P5 fails"]:::bad
+  P5 -. "compensate" .-> P4
+  P4 -. "compensate" .-> P3
+  P3 -. "compensate" .-> P2
+  P2 -. "compensate" .-> P1
+  classDef bad fill:#fecaca,stroke:#b91c1c,color:#000

@@ -12,10 +12,7 @@
 
 ### How the layers fit together (outer to inner)
 
-```mermaid
-graph LR
-  N1["Ethernet (broadcast)"] --> N2["IPv4 0.0.0.0 to 255.255.255.255"] --> N3["UDP ports 68 and 67"] --> N4["DHCP: Discover, Offer, Request, ACK"]
-```
+![Diagram](diagrams/17-dhcp-01.png)
 
 ## In-depth explanation of the example (plain-language version)
 
@@ -133,19 +130,7 @@ An address is only **leased**. To keep it:
 
 ### Sequence diagram
 
-```mermaid
-sequenceDiagram
-  participant P0 as 0.0.0.0
-  participant P1 as 255.255.255.255
-  participant P2 as Router 192.168.1.1
-  participant P3 as Laptop 192.168.1.10
-  P0->>P1: 1. DHCP: DHCP Discover - Transaction ID 0x3903f326
-  P2->>P3: 2. DHCP: DHCP Offer - Transaction ID 0x3903f326
-  P0->>P1: 3. DHCP: DHCP Request - Transaction ID 0x3903f326
-  P2->>P3: 4. DHCP: DHCP ACK - Transaction ID 0x3903f326
-  P3->>P2: 5. DHCP: DHCP Request - Transaction ID 0x7a1c22e5
-  P2->>P3: 6. DHCP: DHCP ACK - Transaction ID 0x7a1c22e5
-```
+![Diagram](diagrams/17-dhcp-02.png)
 
 *The lesson's own sequence diagram:*
 

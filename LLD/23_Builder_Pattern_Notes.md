@@ -22,51 +22,11 @@ A `Student` has many fields, and some are optional (`mobileNo`, `emailId`, `subj
 
 **Diagram – Student builders**
 
-```mermaid
-classDiagram
-  class EngineeringStudentBuilder {
-  }
-  class MBAStudentBuilder {
-  }
-  class Student {
-    +int rollNumber
-    +int age
-    +String name
-  }
-  class StudentBuilder {
-    <<abstract>>
-    +int rollNumber
-    +int age
-    +String name
-    +build() Student
-  }
-  class StudentRegistrationDirector {
-    +StudentBuilder studentBuilder
-    +createStudent() Student
-  }
-  StudentBuilder <|-- EngineeringStudentBuilder
-  StudentBuilder <|-- MBAStudentBuilder
-  StudentRegistrationDirector --> StudentBuilder
-```
+![Diagram](diagrams/23_Builder_Pattern_Notes-01.png)
 
 **Diagram – building an engineering student**
 
-```mermaid
-sequenceDiagram
-  participant C as Client
-  participant D as Director
-  participant B as EngineeringStudentBuilder
-  participant S as Student
-  C->>D: new Director(engineeringBuilder)
-  C->>D: createStudent()
-  D->>B: setRollNumber(1)
-  D->>B: setAge(22)
-  D->>B: setName("John")
-  D->>B: setSubjects()
-  D->>B: build()
-  B->>S: new Student(builder)
-  S-->>C: finished Student
-```
+![Diagram](diagrams/23_Builder_Pattern_Notes-02.png)
 
 *The director calls the steps in order*
 

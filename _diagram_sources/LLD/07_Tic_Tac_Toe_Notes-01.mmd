@@ -1,0 +1,43 @@
+classDiagram
+  class TicTacToeGame {
+    +Deque~Player~ players
+    +Board gameBoard
+    +Player winner
+    +initializeGame() void
+    +startGame() GameStatus
+    +checkForWinner() boolean
+  }
+  class Board {
+    +int size
+    +PlayingPiece[][] board
+    +addPiece() boolean
+    +printBoard() void
+  }
+  class GameStatus {
+    <<enumeration>>
+    DRAW
+    WIN
+  }
+  class PieceType {
+    <<enumeration>>
+    X
+    O
+  }
+  class Player {
+    +String name
+    +PlayingPiece playingPiece
+  }
+  class PlayingPiece {
+    +PieceType pieceType
+  }
+  class PlayingPieceO {
+  }
+  class PlayingPieceX {
+  }
+  Board --> "*" PlayingPiece
+  Player --> PlayingPiece
+  PlayingPiece --> PieceType
+  PlayingPiece <|-- PlayingPieceO
+  PlayingPiece <|-- PlayingPieceX
+  TicTacToeGame --> Board
+  TicTacToeGame --> Player

@@ -1,0 +1,8 @@
+sequenceDiagram
+  participant C as Client
+  participant S as ShoppingCart (context)
+  participant P as PaymentStrategy
+  C->>S: new ShoppingCart(new UPIPayment(upiId))
+  C->>S: checkout(500)
+  S->>P: pay(500)
+  P-->>S: payment done by the chosen strategy

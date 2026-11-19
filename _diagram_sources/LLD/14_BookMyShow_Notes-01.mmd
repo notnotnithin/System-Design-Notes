@@ -1,0 +1,102 @@
+classDiagram
+  class BookMyShowApp {
+    -TheatreController theatreController
+    -BookingController bookingController
+  }
+  class BookingController {
+    -BookingService bookingService
+    +createBooking() Booking
+  }
+  class TheatreController {
+    -TheatreService theatreService
+    +addTheatre() void
+  }
+  class Booking {
+    -UUID bookingId
+    -User user
+    -Show show
+    -List~Integer~ seats
+  }
+  class Movie {
+    -String name
+  }
+  class Payment {
+    -UUID paymentId
+    -PaymentStatus status
+  }
+  class Screen {
+    -int screenId
+    -List~Seat~ seats
+    -Map~LocalDate,List~ showsByDate
+    +addShow() void
+  }
+  class Seat {
+    -int seatId
+    -SeatCategory category
+  }
+  class Show {
+    -Movie movie
+    -LocalDate showDate
+    -LocalTime startTime
+    -Map~Integer,SeatStatus~ seatStatusMap
+    +lockSeats() boolean
+    +confirmSeats() void
+    +releaseSeats() void
+  }
+  class Theatre {
+    -String name
+    -City city
+    -List~Screen~ screens
+  }
+  class User {
+    -String userId
+    -String name
+  }
+  class City {
+    <<enumeration>>
+    BANGALORE
+    DELHI
+  }
+  class PaymentStatus {
+    <<enumeration>>
+    SUCCESS
+    FAILED
+  }
+  class SeatCategory {
+    <<enumeration>>
+    SILVER
+    GOLD
+    PLATINUM
+  }
+  class SeatStatus {
+    <<enumeration>>
+    AVAILABLE
+    LOCKED
+    BOOKED
+  }
+  class BookingService {
+    -Map~UUID,Booking~ bookings
+    +book() Booking
+  }
+  class TheatreService {
+    -Map~City,List~ cityTheatres
+    +addTheatre() void
+  }
+  BookMyShowApp --> BookingController
+  BookMyShowApp --> TheatreController
+  Booking --> Payment
+  Booking --> Show
+  Booking --> User
+  BookingController --> BookingService
+  BookingService --> "*" Booking
+  Payment --> PaymentStatus
+  Screen --> "*" Seat
+  Screen --> "*" Show
+  Seat --> SeatCategory
+  Show --> Movie
+  Show --> "*" SeatStatus
+  Theatre --> City
+  Theatre --> "*" Screen
+  TheatreController --> TheatreService
+  TheatreService --> "*" City
+  TheatreService --> "*" Theatre

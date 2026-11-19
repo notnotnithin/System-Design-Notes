@@ -51,17 +51,7 @@ JWT gives **a secure way of transmitting information between parties as a JSON o
 <!-- diagram:26-0 -->
 **Diagram – JWT login and request flow**
 
-```mermaid
-sequenceDiagram
-  participant C as Client
-  participant A as Authentication server
-  participant R as Resource server
-  C->>A: 1 login with username and password
-  A-->>C: 2 generates and returns a JWT
-  C->>R: 3 GET /details with Authorization: Bearer JWT
-  R->>A: verify(token) / public key (JWKS)
-  R-->>C: 4 response after validating the token
-```
+![Diagram](diagrams/26_JWT_Explained_Notes-01.png)
 <!-- /diagram:26-0 -->
 
 
@@ -96,19 +86,7 @@ Three uses: **(1) authenticating** (confirming the user's identity), **(2) autho
 <!-- diagram:26-1 -->
 **Diagram – Session ID flow (stateful)**
 
-```mermaid
-sequenceDiagram
-  participant C as Client
-  participant A as Authorization server
-  participant DB as DB
-  participant R as Resource server
-  C->>A: 1 login with username and password
-  A->>DB: 2 create session id and save user info
-  A-->>C: 3 session id in a cookie
-  C->>R: 4 request with the cookie
-  R->>DB: 5 look up the session id and validate (extra latency)
-  R-->>C: 6 response
-```
+![Diagram](diagrams/26_JWT_Explained_Notes-02.png)
 <!-- /diagram:26-1 -->
 
 
@@ -145,17 +123,7 @@ Before JWT there was the **session ID (JSESSIONID):** the authorization server g
 <!-- diagram:26-2 -->
 **Diagram – JWT = header . payload . signature**
 
-```mermaid
-graph LR
-  H["Header<br/>alg, type, kid"] --> B1["Base64"]
-  P["Payload<br/>iss, sub, aud, exp, email, roles"] --> B2["Base64"]
-  B1 --> M["header.payload (the message)"]
-  B2 --> M
-  M --> SG["Sign with RSA private key or HMAC secret"] --> B3["Base64 signature"]
-  B1 --> T["JWT = header . payload . signature"]
-  B2 --> T
-  B3 --> T
-```
+![Diagram](diagrams/26_JWT_Explained_Notes-03.png)
 <!-- /diagram:26-2 -->
 
 
@@ -261,14 +229,7 @@ The client sends the token in the header: `Authorization: Bearer <JWT>` (the sam
 <!-- diagram:26-3 -->
 **Diagram – Single sign-on**
 
-```mermaid
-graph LR
-  U["User logs in once"] --> A["Authentication server"]
-  A -->|"JWT"| U
-  U -->|"same JWT"| A1["App 1 www.app1.com"]
-  U -->|"same JWT"| A2["App 2"]
-  U -->|"same JWT"| A3["App 3"]
-```
+![Diagram](diagrams/26_JWT_Explained_Notes-04.png)
 <!-- /diagram:26-3 -->
 
 

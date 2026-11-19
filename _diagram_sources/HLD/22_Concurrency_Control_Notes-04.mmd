@@ -1,0 +1,9 @@
+sequenceDiagram
+    participant T1
+    participant T2
+    participant DB as DB rows A, B
+    T1->>DB: Read A (shared lock on A)
+    T2->>DB: Read B (shared lock on B)
+    T1->>DB: Update B (waits for T2 to release shared lock on B)
+    T2->>DB: Update A (waits for T1 to release shared lock on A)
+    Note over T1,T2: Deadlock, one transaction is aborted

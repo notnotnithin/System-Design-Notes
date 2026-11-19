@@ -1,0 +1,17 @@
+classDiagram
+  class InvoiceDao {
+    <<interface>>
+    +save()
+  }
+  class DatabaseInvoiceDao {
+    +save()
+  }
+  class FileInvoiceDao {
+    +save()
+  }
+  class MongoInvoiceDao {
+    +save()
+  }
+  InvoiceDao <|.. DatabaseInvoiceDao
+  InvoiceDao <|.. FileInvoiceDao
+  InvoiceDao <|.. MongoInvoiceDao

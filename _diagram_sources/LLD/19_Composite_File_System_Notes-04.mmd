@@ -1,0 +1,26 @@
+classDiagram
+  class ArithmeticExpression {
+    <<interface>>
+    +evaluate() int
+  }
+  class Expression {
+    +ArithmeticExpression leftExpression
+    +ArithmeticExpression rightExpression
+    +OperationType operation
+    +evaluate() int
+  }
+  class Number {
+    +int value
+    +evaluate() int
+  }
+  class OperationType {
+    <<enumeration>>
+    ADD
+    SUBTRACT
+    MULTIPLY
+    DIVIDE
+  }
+  ArithmeticExpression <|.. Expression
+  ArithmeticExpression <|.. Number
+  Expression --> ArithmeticExpression
+  Expression --> OperationType
