@@ -27,7 +27,7 @@ Design a **two-player Tic-Tac-Toe** game on a 3×3 board. Players choose X or O 
 
 ## Step 2 – Class diagram
 
-**Diagram – Tic Tac Toe**
+**Tic Tac Toe**
 
 ![Diagram](diagrams/07_Tic_Tac_Toe_Notes-01.png)
 

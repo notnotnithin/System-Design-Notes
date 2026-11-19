@@ -95,7 +95,7 @@ After 75 quiet seconds the server sends an encrypted **`close_notify`** alert so
 - **Removed in 1.3.** RSA key exchange, static Diffie-Hellman, CBC and RC4 ciphers, compression and renegotiation. SSL 2/3 and TLS 1.0/1.1 are obsolete.
 - **Variants.** **mTLS** (client certificates too), **DTLS** (over UDP, used in WebRTC), and **QUIC** (TLS 1.3 built in).
 
-## Step-by-step walkthrough (screenshots from the lesson)
+## Step-by-step walkthrough
 
 ### Step 1: CLIENT HELLO – Everything the browser supports
 

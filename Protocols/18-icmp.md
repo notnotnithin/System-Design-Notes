@@ -85,7 +85,7 @@ A program sends a UDP packet to port 9999 where **nothing is listening** (packet
 - **Do not block everything.** Blocking all ICMP breaks Path MTU Discovery (connections stall on big packets) and IPv6 neighbour discovery.
 - **Abuse.** Ping floods, the *Smurf* attack (echo requests to a broadcast address with a forged source), scans and covert tunnels. Rate-limit rather than blindly block.
 
-## Step-by-step walkthrough (screenshots from the lesson)
+## Step-by-step walkthrough
 
 ### Step 1: PING – Echo request
 

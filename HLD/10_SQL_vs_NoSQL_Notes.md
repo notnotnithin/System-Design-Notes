@@ -4,7 +4,7 @@
 ⬅ [09 Key Value DB](09_Key_Value_DB_Notes.md) · [Index](00_HLD_Index.md) · [11 Design WhatsApp Chat App](11_Design_WhatsApp_Chat_App_Notes.md) ➡
 <!-- nav -->
 
-Source (handwritten, 7 pages): https://drive.google.com/file/d/1CuxKzs00W6meH_6PdF2la8xBkXnyvhcO/view?usp=drive_link
+Source: https://drive.google.com/file/d/1CuxKzs00W6meH_6PdF2la8xBkXnyvhcO/view?usp=drive_link
 
 **Compared on 4 dimensions:** 1. **Structure** · 2. **Nature** · 3. **Scalability** · 4. **Properties**
 
@@ -22,14 +22,14 @@ Source (handwritten, 7 pages): https://drive.google.com/file/d/1CuxKzs00W6meH_6P
 <!-- isw:10-0 -->
 **In simple words**
 
-For SQL the notes say three things about structure: data is stored in **tables, rows and columns**; the **schema is predetermined**, which means it must be defined **before you start using it** (for example `Table(name: String, roll: Number(20))`); and **we plan the schema before the insert and update operations.**
+SQL has three things to say about structure: data is stored in **tables, rows and columns**; the **schema is predetermined**, which means it must be defined **before you start using it** (for example `Table(name: String, roll: Number(20))`); and **we plan the schema before the insert and update operations.**
 <!-- /isw:10-0 -->
 
 
 ## 2. Nature – *concentrated / centralized*
 
 <!-- diagram:10-0 -->
-**Diagram – SQL: all data of an employee sits on one server**
+**SQL: all data of an employee sits on one server**
 
 ![Diagram](diagrams/10_SQL_vs_NoSQL_Notes-01.png)
 <!-- /diagram:10-0 -->
@@ -54,7 +54,7 @@ We want to scale a `User` table with e.g. **10 million users**:
 <!-- isw:10-2 -->
 **In simple words**
 
-The notes want to scale a `User` table with, for example, **10 million users**. Two options: **(1) vertical scaling**, which means increasing the machine's **RAM and storage capacity**; the notes say vertical scaling **fits SQL much better**. **(2) horizontal scaling (sharding)**, by rows and columns, which is **not well supported in SQL.**
+Suppose we want to scale a `User` table with, for example, **10 million users**. Two options: **(1) vertical scaling**, which means increasing the machine's **RAM and storage capacity**; vertical scaling **fits SQL much better**. **(2) horizontal scaling (sharding)**, by rows and columns, which is **not well supported in SQL.**
 <!-- /isw:10-2 -->
 
 
@@ -76,7 +76,7 @@ SQL follows **ACID**: **A**tomicity, **C**onsistency, **I**solation, **D**urabil
 ## 1. Structure
 
 <!-- diagram:10-1 -->
-**Diagram – The four NoSQL types**
+**The four NoSQL types**
 
 ![Diagram](diagrams/10_SQL_vs_NoSQL_Notes-02.png)
 <!-- /diagram:10-1 -->
@@ -122,7 +122,7 @@ Each **key** maps to a set of **column → value pairs**, and different keys can
 ### ④ Graph DB
 
 <!-- diagram:10-2 -->
-**Diagram – Graph database example**
+**Graph database example**
 
 ![Diagram](diagrams/10_SQL_vs_NoSQL_Notes-03.png)
 <!-- /diagram:10-2 -->
@@ -136,7 +136,7 @@ Each **key** maps to a set of **column → value pairs**, and different keys can
 <!-- isw:10-4 -->
 **In simple words**
 
-NoSQL works on **unstructured data**, and the notes list four types, explained next.
+NoSQL works on **unstructured data**, and it has four types, explained next.
 <!-- /isw:10-4 -->
 
 <!-- isw:10-8 -->
@@ -152,7 +152,7 @@ Data is stored as **nodes and edges (relationships)**, for example `Himanshu —
 ## 2. Nature – *distributed*
 
 <!-- diagram:10-3 -->
-**Diagram – NoSQL: data spread across nodes**
+**NoSQL: data spread across nodes**
 
 ![Diagram](diagrams/10_SQL_vs_NoSQL_Notes-04.png)
 <!-- /diagram:10-3 -->
@@ -207,7 +207,7 @@ NoSQL follows **BASE** instead of ACID. The table explains each letter:
 <!-- isw:10-12 -->
 **In simple words**
 
-The notes compare the two. Choose **SQL** when you need **flexible query functionality**, when the data is **relational in nature** (parent–child) and when you need **data integrity (ACID)**. NoSQL has **only basic query and search** (or you must know in advance which column needs search capability) and does not give ACID; the notes say **NoSQL was developed to handle large amounts of data**, so choose it for **high availability, high performance, search (query) with some (eventual) consistency.**
+Choose **SQL** when you need **flexible query functionality**, when the data is **relational in nature** (parent–child) and when you need **data integrity (ACID)**. NoSQL has **only basic query and search** (or you must know in advance which column needs search capability) and does not give ACID; **NoSQL was developed to handle large amounts of data**, so choose it for **high availability, high performance, search (query) with some (eventual) consistency.**
 <!-- /isw:10-12 -->
 
 
@@ -224,7 +224,7 @@ The notes compare the two. Choose **SQL** when you need **flexible query functio
 
 ---
 
-## Extra from the 36-page handwritten compendium (pages 30–32)
+## More points
 These pages are in the same PDF as notes #1, #7, #9 and #11 (https://drive.google.com/file/d/1iegvlzgcLJtcGvbjJbPqF4hZaB5u_nrh/view?usp=drive_link); kept here because they belong to this topic.
 
 (Full version: [10_SQL_vs_NoSQL_Notes.md](10_SQL_vs_NoSQL_Notes.md).)

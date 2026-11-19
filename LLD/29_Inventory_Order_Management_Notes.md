@@ -29,7 +29,7 @@ Design an Amazon-style product delivery system with **warehouses and inventory**
 
 ## Step 2 – Class diagram
 
-**Diagram – Order management**
+**Order management**
 
 ![Diagram](diagrams/29_Inventory_Order_Management_Notes-01.png)
 
@@ -39,7 +39,7 @@ Design an Amazon-style product delivery system with **warehouses and inventory**
 
 ![Diagram](diagrams/29_Inventory_Order_Management_Notes-03.png)
 
-*The enum `OrderStatus` has `DELIVERED`, `CANCELLED`, `RETURNED`, `UNDELIVERED`. The earlier states in the diagram are the natural flow around them.*
+*The enum `OrderStatus` has `DELIVERED`, `CANCELLED`, `RETURNED`, `UNDELIVERED`. The earlier states are the natural flow around them.*
 
 ## Step 4 – Strategies
 

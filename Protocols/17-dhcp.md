@@ -87,7 +87,7 @@ An address is only **leased**. To keep it:
 - **Security issues.** DHCP is unauthenticated. A *rogue DHCP server* can hand out a malicious gateway or DNS. *DHCP snooping* on switches allows replies only from trusted ports. *Starvation* attacks exhaust the pool; *port security* and rate limits help.
 - **IPv6.** Usually uses SLAAC, with DHCPv6 (ports 546/547) as an option.
 
-## Step-by-step walkthrough (screenshots from the lesson)
+## Step-by-step walkthrough
 
 ### Step 1: NO ADDRESS YET – The laptop joins the network
 

@@ -89,7 +89,7 @@ The command is called **`CREATE`** (it can also create files). Here it **opens `
 - **SMB1.** Obsolete and dangerous. The 2017 **WannaCry** worm spread through an SMB1 flaw (EternalBlue). Disable it.
 - **Newer features.** **SMB over QUIC** (UDP 443) gives secure file access without a VPN; *multichannel* and *SMB Direct* improve speed.
 
-## Step-by-step walkthrough (screenshots from the lesson)
+## Step-by-step walkthrough
 
 ### Step 1: PORT 445 – A TCP connection to the NAS
 

@@ -78,7 +78,7 @@ A small error is fixed by **slewing**: running the clock slightly faster or slow
 - **Why it matters.** Certificates have validity dates, tokens and logs depend on time, Kerberos fails if clocks differ by more than 5 minutes, and distributed systems order events by time.
 - **Security.** Plain NTP is unauthenticated, so time can be spoofed, and old servers could be abused for amplification. **NTS** (RFC 8915) adds authentication. Accuracy: milliseconds over the internet, microseconds on a LAN; PTP is better still.
 
-## Step-by-step walkthrough (screenshots from the lesson)
+## Step-by-step walkthrough
 
 ### Step 1: CLOCKS DRIFT – The laptop’s clock is a little slow
 

@@ -4,16 +4,13 @@
 ⬅ [01 Network Protocols](01_Network_Protocols_Notes.md) · [Index](00_HLD_Index.md) · [03 & 04 Microservices Design Patterns](03_04_Microservices_Design_Patterns_Notes.md) ➡
 <!-- nav -->
 
-> Transcribed from the 4-page handwritten PDF:
-> https://drive.google.com/file/d/1rEs7p_Hrgdu57xakTyxgO1k3Zyp3zu-C/view?usp=drive_link
-> Page references (p1–p4) point to the original pages.
+Source: https://drive.google.com/file/d/1rEs7p_Hrgdu57xakTyxgO1k3Zyp3zu-C/view?usp=drive_link
 
 ---
 
-## 1. What is the CAP Theorem? (p1)
-
+## 1. What is the CAP Theorem?
 - CAP describes the **desirable properties of a distributed system with replicated data**.
-  - Sketch in notes: a **Master DB** replicating to a **Slave DB**.
+  - Example: a **Master DB** replicating to a **Slave DB**.
 - The three properties:
 
 | Letter | Property |
@@ -28,9 +25,9 @@
 <!-- isw:02-0 -->
 **In simple words**
 
-CAP is about a **distributed system with replicated data**: the same data is kept on more than one database (in the notes' sketch, a **Master DB** copies its data to a **Slave DB**). For such a system the notes name three properties we would like to have: **C** (Consistency), **A** (Availability) and **P** (Partition tolerance).
+CAP is about a **distributed system with replicated data**: the same data is kept on more than one database (for example a **Master DB** that copies its data to a **Slave DB**). Such a system has three properties we would like to have: **C** (Consistency), **A** (Availability) and **P** (Partition tolerance).
 
-The key rule is that **we cannot use all three together, we can only use two of them**, so the possible choices are **CA, CP or AP**. In the Venn picture (three overlapping circles) each overlap of two circles is one of these pairs, and the middle part where all three meet is crossed out because it cannot be achieved.
+The key rule is that **we cannot use all three together, we can only use two of them**, so the possible choices are **CA, CP or AP**. Think of a Venn diagram with three overlapping circles: each overlap of two circles is one of these pairs, and the middle part where all three meet is crossed out because it cannot be achieved.
 <!-- /isw:02-0 -->
 
 
@@ -39,7 +36,7 @@ The key rule is that **we cannot use all three together, we can only use two of 
 ## 2. Running example used throughout
 
 <!-- diagram:02-0 -->
-**Diagram – Three nodes with replicated data**
+**Three nodes with replicated data**
 
 ![Diagram](diagrams/02_CAP_Theorem_Notes-01.png)
 <!-- /diagram:02-0 -->
@@ -58,19 +55,18 @@ Three nodes holding the same data, replicated:
 
 - **A** = the application node issuing queries.
 - **B** = DB node in **India**, **C** = DB node in **US**.
-- B and C replicate data between each other (the dashed arrow B → C in the notes).
+- B and C replicate data between each other (the dashed arrow B → C).
 
 <!-- isw:02-1 -->
 **In simple words**
 
-The notes use one example for everything: an **application A** and two database nodes that hold the same data. **Node B is in India** and **node C is in the US**. B and C copy data to each other (replication). The data item in the example is `a`: it starts as `4` and is updated to `5` (and later `6`). Keep this picture in mind for the next sections.
+One example is used throughout: an **application A** and two database nodes that hold the same data. **Node B is in India** and **node C is in the US**. B and C copy data to each other (replication). The data item in the example is `a`: it starts as `4` and is updated to `5` (and later `6`). Keep this setup in mind for the next sections.
 <!-- /isw:02-1 -->
 
 
 ---
 
-## 3. C – Consistency (p1)
-
+## 3. C – Consistency
 - **Scenario:** Suppose node B has data `a = 4`.
   1. Application **writes** an update query: `a = 5` to node B.
   2. B updates its data `a = 4 → a = 5`.
@@ -92,12 +88,11 @@ Take node B holding `a = 4`. The application writes the update `a = 5` to B. B c
 
 ---
 
-## 4. A – Availability (p2)
-
+## 4. A – Availability
 - **Both node B or C – at least one response.**
 - **All nodes should respond – at least a success or a failure.**
   - i.e. every request to a working node gets a response (it can't hang/ignore); the response may be success or failure, but there must be one.
-- Diagram: App A connected to B and C; a query to either node gets a response.
+- App A is connected to B and C; a query to either node gets a response.
 
 <!-- isw:02-3 -->
 **In simple words**
@@ -108,10 +103,9 @@ Take node B holding `a = 4`. The application writes the update `a = 5` to B. B c
 
 ---
 
-## 5. P – Partition Tolerance (p2)
-
+## 5. P – Partition Tolerance
 <!-- diagram:02-1 -->
-**Diagram – The system keeps working when the B–C link breaks**
+**The system keeps working when the B–C link breaks**
 
 ![Diagram](diagrams/02_CAP_Theorem_Notes-02.png)
 <!-- /diagram:02-1 -->
@@ -121,13 +115,13 @@ Take node B holding `a = 4`. The application writes the update `a = 5` to B. B c
 - The system is **hidden** from the user:
   - The user **doesn't know** data is replicated (or not).
   - The user only knows they are **querying "the system"**.
-- Diagram: the DB nodes B and C sit inside a "hidden" box; the application talks to the box. A **breakage** is drawn on the B–C link.
+- The DB nodes B and C sit inside a "hidden" box; the application talks to the box. The B–C link can **break**.
 - **Definition:** Partition tolerance tells us that **if B and C have a communication break, even then the application continues querying** → that is partition tolerance.
 
 <!-- isw:02-4 -->
 **In simple words**
 
-*Partition tolerance* means **the system stays up even though the network between the nodes is broken.** In the picture B and C sit inside a "hidden" box: the user does not know that the data is replicated, the user only knows they are querying "the system". A break is drawn on the link between B and C.
+*Partition tolerance* means **the system stays up even though the network between the nodes is broken.** B and C sit inside a "hidden" box: the user does not know that the data is replicated, the user only knows they are querying "the system". The link between B and C can break.
 
 So if B and C cannot talk to each other, the application can **still send its queries and the system keeps working**. That is partition tolerance.
 <!-- /isw:02-4 -->
@@ -135,10 +129,9 @@ So if B and C cannot talk to each other, the application can **still send its qu
 
 ---
 
-## 6. Which combinations are possible? (p3)
-
+## 6. Which combinations are possible?
 <!-- diagram:02-2 -->
-**Diagram – The CAP triangle: pick any two**
+**The CAP triangle: pick any two**
 
 ![Diagram](diagrams/02_CAP_Theorem_Notes-03.png)
 <!-- /diagram:02-2 -->
@@ -154,39 +147,36 @@ So if B and C cannot talk to each other, the application can **still send its qu
 <!-- isw:02-5 -->
 **In simple words**
 
-The table says that **CA, CP and AP are each possible**, but **all three together (CAP) are not possible**. The note next to CA says "system up", meaning CA is possible only as long as the system is up, that is, when there is no network break between the nodes.
+The table says that **CA, CP and AP are each possible**, but **all three together (CAP) are not possible**. CA means "system up": it is possible only as long as the system is up, that is, when there is no network break between the nodes.
 <!-- /isw:02-5 -->
 
 
 ---
 
-## 7. Why can't C, A and P co-exist? (p3)
-
+## 7. Why can't C, A and P co-exist?
 <!-- diagram:02-3 -->
-**Diagram – During a partition C must choose: stale answer or no answer**
+**During a partition C must choose: stale answer or no answer**
 
 ![Diagram](diagrams/02_CAP_Theorem_Notes-04.png)
 <!-- /diagram:02-3 -->
 
 
-Setup: A writes `a = 6`; the link between B and C is **broken** (partition, drawn as `$$ / Break`).
+Setup: A writes `a = 6`; the link between B and C is **broken** (a partition).
 
 - B gets the write → `a = 6`.
 - C could not receive the replication → still `a = 5`.
 
-Now a **read query** hits C (**Available + Partition Tolerance** case, drawn on the left of the page):
+Now a **read query** hits C (**Available + Partition Tolerance** case):
 
 - If C **answers (success)** with `a = 5` → the answer is **stale → Consistency is broken**.
 - If C **refuses (failure)** to avoid returning stale data → it is **not responding with data → Availability is broken**.
 
 So during a partition you must **give up either C or A**. You can't keep all three.
 
-(Sketch labels on the page: "Success / failure" next to B and C, with values `a=5→6` on B and `a=5` on C.)
-
 <!-- isw:02-6 -->
 **In simple words**
 
-The notes explain it with the example: the application writes `a = 6`, but the **link between B and C is broken** (the "break" symbol on the page).
+Example: the application writes `a = 6`, but the **link between B and C is broken**.
 - **B** receives the write, so B has `a = 6`.
 - **C** could not receive the replication, so it still has `a = 5`.
 
@@ -200,40 +190,36 @@ There is no third option, because C simply does not have the new value. That is 
 
 ---
 
-## 8. Pairs in practice (p4)
-
+## 8. Pairs in practice
 ### CP-style loss example – "I do not lose consistency"
 - Write `d = 6` goes to B; C is **down** (still has `d = 5`).
-- Notes' reading: with C down and a failed replication, the system sacrifices something – the figure is labelled "**CAP → ✗**" (not all three), showing that when a node can't be reached you can't have everything.
+- With C down and a failed replication, the system has to sacrifice something: **CAP → ✗** (not all three). When a node can't be reached you can't have everything.
 
 ### "I do Consistency and Availability" → **CA**
-- Diagram: A is **down** / link between B and C is shown with the break symbol and ✗.
-- Reading: CA = consistent + available, but **no partition tolerance**; it works only while the network between nodes is healthy.
-
-> ⚠️ Page 4's two small diagrams are rough sketches (rotated, partly scribbled). The interpretation above follows the sketches and the captions; double-check against the original page if you need exact wording.
+- The link between B and C is broken (✗).
+- CA = consistent + available, but **no partition tolerance**; it works only while the network between nodes is healthy.
 
 <!-- isw:02-7 -->
 **In simple words**
 
-This page contains two small, rough sketches (the notes themselves warn that they are rotated and scribbled). **First sketch:** the write `d = 6` goes to B while C is down and still has `d = 5`; the figure is marked "CAP ✗", which shows that when a node cannot be reached you cannot have everything. **Second sketch ("I do Consistency and Availability" → CA):** the link between B and C is broken (the break symbol and a ✗). This is the CA pair: it gives consistency and availability, but it works only while the network between the nodes is healthy, so it does not tolerate a partition.
+**First case:** the write `d = 6` goes to B while C is down and still has `d = 5`. That is marked "CAP ✗": when a node cannot be reached you cannot have everything. **Second case ("I do Consistency and Availability" → CA):** the link between B and C is broken (✗). This is the CA pair: it gives consistency and availability, but it works only while the network between the nodes is healthy, so it does not tolerate a partition.
 <!-- /isw:02-7 -->
 
 
 ---
 
-## 9. Trade-off conclusion (p4)
-
+## 9. Trade-off conclusion
 - **"We never trade off partition tolerance."**
   - In a real distributed system, network partitions *will* happen, so **P is mandatory**.
   - Therefore the real choice is between:
     - **CP** – keep consistency, sacrifice availability during a partition.
     - **AP** – keep availability, sacrifice consistency during a partition.
-  - (The notes box lists: `CP`, `AP` as the practical choices; `CA` is circled beside it as the option that drops P.)
+  - `CP` and `AP` are the practical choices; `CA` is the option that drops P.
 
 <!-- isw:02-8 -->
 **In simple words**
 
-The conclusion on the last page is **"we never trade off partition tolerance."** The notes' reasoning is that in a real distributed system the network between nodes *will* break at some point, so partition tolerance is always needed. That leaves a real choice between **CP** (keep consistency and give up availability during a partition) and **AP** (keep availability and give up consistency during a partition). The notes' box lists CP and AP as the practical choices, with CA circled beside it as the option that drops partition tolerance.
+The conclusion is **"we never trade off partition tolerance."** The reasoning is that in a real distributed system the network between nodes *will* break at some point, so partition tolerance is always needed. That leaves a real choice between **CP** (keep consistency and give up availability during a partition) and **AP** (keep availability and give up consistency during a partition). CP and AP are the practical choices; CA is the option that drops partition tolerance.
 <!-- /isw:02-8 -->
 
 
@@ -246,12 +232,11 @@ The conclusion on the last page is **"we never trade off partition tolerance."**
 - **P** – system keeps working when nodes can't talk to each other.
 - Only **2 of 3** at a time → **CA / CP / AP**.
 - Partition tolerance is non-negotiable in distributed systems → choose **CP vs AP**.
-- Proof sketch: A writes `a=6` to B, B–C link breaks, C still has `a=5`; reading from C must either return stale data (lose C) or refuse (lose A).
+- Proof: A writes `a=6` to B, B–C link breaks, C still has `a=5`; reading from C must either return stale data (lose C) or refuse (lose A).
 
 ---
 
-## Extra from the 36-page handwritten compendium (pages 5–6)
-These pages are in the same PDF as notes #1, #7, #9 and #11 (https://drive.google.com/file/d/1iegvlzgcLJtcGvbjJbPqF4hZaB5u_nrh/view?usp=drive_link); kept here because they belong to this topic.
+## More points on CAP
 
 - **CAP** = desirable properties of a **distributed system with replicated data**: **C**onsistency, **A**vailability, **P**artition tolerance (Venn: CA, CP, AP).
 - **In a distributed system we can't use all 3 properties.** Causes: (1) if we make the application consistent and available, a **partition is not possible**, because to be consistent the DB instances must be connected; (2) if you partition, then **forget about consistency or availability.**
@@ -259,7 +244,6 @@ These pages are in the same PDF as notes #1, #7, #9 and #11 (https://drive.googl
 - **Availability:** all nodes must be responsive, even though data is inconsistent.
 - **Partition:** B and C are not connected, yet A still gets a response → that's fault tolerance.
 - *"Always compromise between consistency & availability" – **Brewer's theorem.***
-(See [02_CAP_Theorem_Notes.md](02_CAP_Theorem_Notes.md).)
 
 **ACID** (SQL): **Atomicity** – a transaction must happen in one shot; **Consistency** – data must be the same on all nodes; **Isolation** – instances must work individually; **Durability** – instances must be backed up.
 **BASE (AP databases):** **BA**sically **A**vailable · **S**oft state · **E**ventually consistent.

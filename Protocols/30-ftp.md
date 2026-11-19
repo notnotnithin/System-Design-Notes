@@ -83,7 +83,7 @@ The 4,000 bytes arrive as **three TCP segments** (1,460 + 1,460 + 1,080). **FTP 
 - **Secure alternatives.** **FTPS** is FTP with TLS (explicit `AUTH TLS` on port 21, or implicit on 990); NAT helpers then cannot read the `227` reply. **SFTP** is a different protocol that runs over SSH on port 22 and uses a single connection.
 - **Still used for.** Legacy systems, public software mirrors and some device firmware or log transfers.
 
-## Step-by-step walkthrough (screenshots from the lesson)
+## Step-by-step walkthrough
 
 ### Step 1: CONTROL CONNECTION – Port 21, plain text
 

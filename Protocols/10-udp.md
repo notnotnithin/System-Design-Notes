@@ -79,7 +79,7 @@ Sound started with the very first packet (zero set-up time), each packet travell
 - **Typical users.** DNS (port 53), DHCP (67/68), NTP (123), VoIP and video, games, VPNs (WireGuard), QUIC/HTTP-3, SNMP, syslog, streaming.
 - **Risks.** Easy to spoof the source address, so open UDP services can be abused for *reflection and amplification* attacks. Firewalls often rate-limit it.
 
-## Step-by-step walkthrough (screenshots from the lesson)
+## Step-by-step walkthrough
 
 ### Step 1: SEND RIGHT AWAY – No handshake, data goes first
 

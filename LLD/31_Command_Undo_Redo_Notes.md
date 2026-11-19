@@ -20,11 +20,11 @@ A remote control with buttons for an air conditioner. If each button calls the A
 - **Receiver** – `AirConditioner`: does the real work (`turnOn`, `turnOff`, `setTemperature`).
 - **Invoker** – `RemoteController`: stores the current command and a **history stack** of executed commands. It doesn't know what the commands do.
 
-**Diagram – Remote control with undo**
+**Remote control with undo**
 
 ![Diagram](diagrams/31_Command_Undo_Redo_Notes-01.png)
 
-**Diagram – execute then undo**
+**execute then undo**
 
 ![Diagram](diagrams/31_Command_Undo_Redo_Notes-02.png)
 

@@ -5,8 +5,8 @@
 <!-- nav -->
 
 Sources:
-- Handwritten PDF (14 pages): https://drive.google.com/file/d/1eQxotRxC4q1c12uXn7IY4oLcuZgt-iBx/view?usp=drive_link
-- Typed Zoho note (checked, same content as this note): https://notebook.zohopublic.in/public/notes/9wn9of886c95da92e4778b0d3bc23cb0b8106
+- PDF: https://drive.google.com/file/d/1eQxotRxC4q1c12uXn7IY4oLcuZgt-iBx/view?usp=drive_link
+- Zoho: https://notebook.zohopublic.in/public/notes/9wn9of886c95da92e4778b0d3bc23cb0b8106
 - (Spring Cloud Gateway hands-on: [40_41_API_Gateway_Part1_Part2_Notes.md](40_41_API_Gateway_Part1_Part2_Notes.md))
 
 ## Questions this note answers
@@ -18,7 +18,7 @@ Sources:
 ## 1. What is an API Gateway?
 
 <!-- diagram:28-0 -->
-**Diagram – API gateway routes by endpoint**
+**API gateway routes by endpoint**
 
 ![Diagram](diagrams/28_API_Gateway_Concepts_Notes-01.png)
 <!-- /diagram:28-0 -->
@@ -30,7 +30,7 @@ It **accepts the client's API request and routes it to the correct backend servi
 ### Isn't that what a load balancer does too?
 
 <!-- diagram:28-1 -->
-**Diagram – Load balancer: instances of one service only**
+**Load balancer: instances of one service only**
 
 ![Diagram](diagrams/28_API_Gateway_Concepts_Notes-02.png)
 <!-- /diagram:28-1 -->
@@ -62,7 +62,7 @@ An API gateway **accepts the client's API request and routes it to the correct b
 ### ① API Composition *(very rarely used – e.g. in Netflix)*
 
 <!-- diagram:28-2 -->
-**Diagram – API composition: one call, many services**
+**API composition: one call, many services**
 
 ![Diagram](diagrams/28_API_Gateway_Concepts_Notes-03.png)
 <!-- /diagram:28-2 -->
@@ -84,7 +84,7 @@ The problem: the **"My Orders" page** on a **mobile client** calls REST APIs to 
 ### ② Authentication (like the OAuth 2.0 flow)
 
 <!-- diagram:28-3 -->
-**Diagram – Authentication at the gateway**
+**Authentication at the gateway**
 
 ![Diagram](diagrams/28_API_Gateway_Concepts_Notes-04.png)
 <!-- /diagram:28-3 -->
@@ -118,7 +118,7 @@ The rules you can set: **manage burst limit** (the **maximum number of concurren
 ### ④ Service discovery
 
 <!-- diagram:28-4 -->
-**Diagram – Service discovery behind the gateway**
+**Service discovery behind the gateway**
 
 ![Diagram](diagrams/28_API_Gateway_Concepts_Notes-05.png)
 <!-- /diagram:28-4 -->
@@ -148,7 +148,7 @@ The gateway has several more capabilities, listed below.
 <!-- isw:28-7 -->
 **In simple words**
 
-The notes also list **request / response transformation, response caching and logging.**
+Other capabilities: **request / response transformation, response caching and logging.**
 <!-- /isw:28-7 -->
 
 
@@ -160,7 +160,7 @@ The notes also list **request / response transformation, response caching and lo
 ## 3. "If the API Gateway is a single entry point, how does it handle millions of requests per second?"
 
 <!-- diagram:28-5 -->
-**Diagram – Scaling the gateway across zones and regions**
+**Scaling the gateway across zones and regions**
 
 ![Diagram](diagrams/28_API_Gateway_Concepts_Notes-06.png)
 <!-- /diagram:28-5 -->
@@ -178,7 +178,7 @@ So the "single" entry point is really a **fleet of gateways, replicated per AZ/r
 <!-- isw:28-8 -->
 **In simple words**
 
-The question is how a single entry point handles **millions of requests per second.** The answer is **horizontal scaling + multi-AZ + multi-region + DNS routing.** The picture is `Client → API Gateway (many instances) → Load Balancer → N instances of Invoice MS / Order MS`, with **service discovery** next to the gateway. A **region** (for example **Mumbai**) contains **Availability Zones (AZ1, AZ2, AZ3), dedicated data centres in different areas** (for example Bandra, Santacruz, Andheri), and a second region (**Bangalore**) has its own AZs. Each **region** has its own **service discovery and API gateway,** and each **AZ** has **load balancers → microservice instances.**
+The question is how a single entry point handles **millions of requests per second.** The answer is **horizontal scaling + multi-AZ + multi-region + DNS routing.** The setup is `Client → API Gateway (many instances) → Load Balancer → N instances of Invoice MS / Order MS`, with **service discovery** next to the gateway. A **region** (for example **Mumbai**) contains **Availability Zones (AZ1, AZ2, AZ3), dedicated data centres in different areas** (for example Bandra, Santacruz, Andheri), and a second region (**Bangalore**) has its own AZs. Each **region** has its own **service discovery and API gateway,** and each **AZ** has **load balancers → microservice instances.**
 
 The **client reaches the system through DNS** (**AWS Route 53, Azure Traffic Manager**), which **routes the traffic by region** to the right region's gateway. So the "single" entry point is really a **fleet of gateways, replicated per AZ and region,** fronted by DNS routing. On the question of order: the **gateway sits in front and routes by API path; behind it, per-service load balancers (or a client-side LB) spread the traffic across the instances.**
 <!-- /isw:28-8 -->
@@ -189,13 +189,13 @@ The **client reaches the system through DNS** (**AWS Route 53, Azure Traffic Man
 ## 4. How do two microservices communicate with each other?
 
 <!-- diagram:28-6 -->
-**Diagram – What Microservice A needs to call Microservice B**
+**What Microservice A needs to call Microservice B**
 
 ![Diagram](diagrams/28_API_Gateway_Concepts_Notes-07.png)
 <!-- /diagram:28-6 -->
 
 
-Need: **Microservice A must communicate with Microservice B.** (Diagram: API Gateway + Service Discovery + Application Load Balancers in front of Microservice A and Microservice B instances; a **Service Mesh** is hinted as the better solution.)
+Need: **Microservice A must communicate with Microservice B.** (An API gateway + service discovery + Application Load Balancers in front of Microservice A and Microservice B instances; a **Service Mesh** is hinted as the better solution.)
 
 ### ① Service discovery capability
 A wants to call B → it needs B's **location (IP address and port).** Service discovery functionality lets A **get the locations of B's different instances.**
@@ -236,7 +236,7 @@ M1 → M2: if M2 is failing (e.g. **fails 10 times in 1 min**), stop calling it 
 <!-- isw:28-13 -->
 **In simple words**
 
-If M2 keeps failing (for example **fails 10 times in 1 minute**), M1 should **stop calling it.** The notes put a **Resilience4j circuit breaker** inside the caller, together with the client-side load balancer (see the [Circuit Breaker](39_Circuit_Breaker_Notes.md) note).
+If M2 keeps failing (for example **fails 10 times in 1 minute**), M1 should **stop calling it.** Put a **Resilience4j circuit breaker** inside the caller, together with the client-side load balancer (see the [Circuit Breaker](39_Circuit_Breaker_Notes.md) note).
 <!-- /isw:28-13 -->
 
 
@@ -280,13 +280,13 @@ Now **every microservice** has to embed: client-side load balancer + deployment-
 <!-- isw:28-9 -->
 **In simple words**
 
-The need: **Microservice A must communicate with Microservice B** (the picture has an API gateway, service discovery and application load balancers in front of the instances; a **service mesh** is hinted at as the better solution).
+The need: **Microservice A must communicate with Microservice B** (an API gateway, service discovery and application load balancers sit in front of the instances; a **service mesh** is the better solution).
 <!-- /isw:28-9 -->
 
 <!-- isw:28-17 -->
 **In simple words**
 
-Now **every microservice** has to include a client-side load balancer, deployment-strategy support, circuit breaker, retry, telemetry and authorization, which means **duplicated code in every service.** The notes ask: *any better solution?* and answer: **Service Mesh** (covered in HLD #29: [Service Mesh](29_Service_Mesh_Notes.md)).
+Now **every microservice** has to include a client-side load balancer, deployment-strategy support, circuit breaker, retry, telemetry and authorization, which means **duplicated code in every service.** *Any better solution?* Yes: **Service Mesh** (covered in HLD #29: [Service Mesh](29_Service_Mesh_Notes.md)).
 <!-- /isw:28-17 -->
 
 

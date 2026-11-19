@@ -91,7 +91,7 @@ Bob hangs up: **`BYE`** goes through the server to Alice, her phone replies **`2
 - **RTP voice.** 160 bytes of sound every 20 ms (8,000 samples/s x 0.02 s). The 12-byte RTP header carries the payload type, a sequence number (+1) and a timestamp (+160), so the receiver can spot loss and compute jitter. It runs over UDP because late voice is useless.
 - **Security.** `SIPS` (SIP over TLS, port 5061) protects signalling; `SRTP` protects the voice. The plain version shown here is readable by anyone on the path.
 
-## Step-by-step walkthrough (screenshots from the lesson)
+## Step-by-step walkthrough
 
 ### Step 1: SIGN IN – The phone tells the server where it is
 

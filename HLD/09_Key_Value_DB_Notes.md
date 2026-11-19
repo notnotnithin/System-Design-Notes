@@ -4,7 +4,7 @@
 ⬅ [08 Back of the Envelope Estimation](08_Back_of_the_Envelope_Estimation_Notes.md) · [Index](00_HLD_Index.md) · [10 SQL vs NoSQL](10_SQL_vs_NoSQL_Notes.md) ➡
 <!-- nav -->
 
-Source (handwritten, pages 27–30 of the 36-page PDF): https://drive.google.com/file/d/1iegvlzgcLJtcGvbjJbPqF4hZaB5u_nrh/view?usp=drive_link
+Source: https://drive.google.com/file/d/1iegvlzgcLJtcGvbjJbPqF4hZaB5u_nrh/view?usp=drive_link
 
 ---
 
@@ -14,14 +14,14 @@ Source (handwritten, pages 27–30 of the 36-page PDF): https://drive.google.com
 <!-- isw:09-0 -->
 **In simple words**
 
-The lecture designs a key-value database like **DynamoDB**, which Amazon uses for its **"Add to cart" feature.** The three goals are **scalability, decentralization and eventual consistency.** The design is built in five steps: **partition, replication, get and put operations, data versioning and the gossip protocol.**
+We design a key-value database like **DynamoDB**, which Amazon uses for its **"Add to cart" feature.** The three goals are **scalability, decentralization and eventual consistency.** The design is built in five steps: **partition, replication, get and put operations, data versioning and the gossip protocol.**
 <!-- /isw:09-0 -->
 
 
 ### 1. Partition
 
 <!-- diagram:09-0 -->
-**Diagram – Partitioning with a ring and virtual nodes**
+**Partitioning with a ring and virtual nodes**
 
 ![Diagram](diagrams/09_Key_Value_DB_Notes-01.png)
 <!-- /diagram:09-0 -->
@@ -32,14 +32,14 @@ A plain mapping (person → cart list) doesn't scale: when users grow we can't h
 <!-- isw:09-1 -->
 **In simple words**
 
-A simple map (person → cart list) **does not scale**: as users grow we cannot keep all the data in one place, and the map itself would have to be stored on several systems. The **solution is to partition the requests with consistent hashing**: a **virtual ring** handles **ranges** (S1 takes keys 1–50, S2 takes 51–100, then S3, S4, …). To **avoid bombarding only one server**, the notes use **virtual nodes**, so each server appears at several points on the ring. (See the [Consistent Hashing](06_Consistent_Hashing_Notes.md) note.)
+A simple map (person → cart list) **does not scale**: as users grow we cannot keep all the data in one place, and the map itself would have to be stored on several systems. The **solution is to partition the requests with consistent hashing**: a **virtual ring** handles **ranges** (S1 takes keys 1–50, S2 takes 51–100, then S3, S4, …). To **avoid bombarding only one server**, we use **virtual nodes**, so each server appears at several points on the ring. (See the [Consistent Hashing](06_Consistent_Hashing_Notes.md) note.)
 <!-- /isw:09-1 -->
 
 
 ### 2. Replication (avoid single point of failure)
 
 <!-- diagram:09-1 -->
-**Diagram – Replication: coordinator and backups (preference list)**
+**Replication: coordinator and backups (preference list)**
 
 ![Diagram](diagrams/09_Key_Value_DB_Notes-02.png)
 <!-- /diagram:09-1 -->
@@ -57,7 +57,7 @@ To avoid a single point of failure, the data is copied. In the example the key *
 ### 3. Get & Put operations
 
 <!-- diagram:09-2 -->
-**Diagram – Quorum: R + W > N**
+**Quorum: R + W > N**
 
 ![Diagram](diagrams/09_Key_Value_DB_Notes-03.png)
 <!-- /diagram:09-2 -->
@@ -70,7 +70,7 @@ To avoid a single point of failure, the data is copied. In the example the key *
 <!-- isw:09-3 -->
 **In simple words**
 
-**Put:** `Put(CAR)` finds the key (45) and stores it in **S1**, which keeps it and **replicates asynchronously** to S2 and S3. The notes use a **quorum rule: R + W > N** – wait for the required number of successful responses (**W for writes, R for reads, N = the number of replica nodes**). A **Put is successful only if W nodes acknowledge**, and a **Get returns a successful response only if R nodes respond.**
+**Put:** `Put(CAR)` finds the key (45) and stores it in **S1**, which keeps it and **replicates asynchronously** to S2 and S3. We use a **quorum rule: R + W > N** – wait for the required number of successful responses (**W for writes, R for reads, N = the number of replica nodes**). A **Put is successful only if W nodes acknowledge**, and a **Get returns a successful response only if R nodes respond.**
 
 **Get:** a request reaches a **load balancer** that must route it. Two kinds:
 1. **Generic load balancer** – simple to build but has **high latency**: it may send the request to any server, and then the **preference list** applies and the **coordinator** serves it; if the coordinator is down, the next nodes on the preference list take over.
@@ -81,7 +81,7 @@ To avoid a single point of failure, the data is copied. In the example the key *
 ### 4. Data versioning
 
 <!-- diagram:09-3 -->
-**Diagram – Versions with vector clocks**
+**Versions with vector clocks**
 
 ![Diagram](diagrams/09_Key_Value_DB_Notes-04.png)
 <!-- /diagram:09-3 -->
@@ -92,9 +92,9 @@ Why: (1) `Put(CAR-45)` → S1 `[45-CAR]`, replicated to S2, S3. (2) `Put(CART-45
 <!-- isw:09-4 -->
 **In simple words**
 
-The notes explain why versions are needed with an example. (1) `Put(CAR-45)` goes to S1 and is replicated to S2 and S3. (2) `Put(CART-45)` arrives while **S1 is down**, so it goes to the next server on the preference list, S2. (3) S1 comes back and a Get arrives: S1 still holds the old value `[45-CAR]` (not updated), so it **must talk to all** (S2, S3) to reconcile.
+Here is why versions are needed. (1) `Put(CAR-45)` goes to S1 and is replicated to S2 and S3. (2) `Put(CART-45)` arrives while **S1 is down**, so it goes to the next server on the preference list, S2. (3) S1 comes back and a Get arrives: S1 still holds the old value `[45-CAR]` (not updated), so it **must talk to all** (S2, S3) to reconcile.
 
-To do this the notes use a **vector clock** (a server and a counter) for each version. Example: v1 `[45-CAR]-1` on all; v2 `[45-CART]-2` on all; v3 `[45-CARM]-3` on S2 and S3 while S1 is down; v4 `[45-CARR]-4` written at the same time on S3. On a Get the coordinator sees CART (2), CARM (3) and CARR (4): **conflicting concurrent versions.** The notes conclude: *"eventual consistency – because here we can't compromise availability and partition tolerance, so we compromise consistency (AP)"*, and the conflicts are resolved by the client or application using the vector clocks.
+To do this we use a **vector clock** (a server and a counter) for each version. Example: v1 `[45-CAR]-1` on all; v2 `[45-CART]-2` on all; v3 `[45-CARM]-3` on S2 and S3 while S1 is down; v4 `[45-CARR]-4` written at the same time on S3. On a Get the coordinator sees CART (2), CARM (3) and CARR (4): **conflicting concurrent versions.** Conclusion: *"eventual consistency – because here we can't compromise availability and partition tolerance, so we compromise consistency (AP)"*, and the conflicts are resolved by the client or application using the vector clocks.
 <!-- /isw:09-4 -->
 
 
@@ -104,7 +104,7 @@ To do this the notes use a **vector clock** (a server and a counter) for each ve
 <!-- isw:09-5 -->
 **In simple words**
 
-The notes only name the gossip protocol in the list of steps and do not explain it on these pages.
+The gossip protocol is the fifth step of this design; it is not worked out in detail here.
 <!-- /isw:09-5 -->
 
 

@@ -20,11 +20,11 @@ You must evaluate expressions such as `a + b` or `(a + b) * c` where the values 
 - **Terminal expression** – `NumberTerminalExpression`: a leaf (a variable or number); returns its value from the context.
 - **Non-terminal expressions** – `AddNonTerminalExpression`, `MultiplyNonTerminalExpression`, `BinaryNonTerminalExpression`: hold a left and right `AbstractExpression` and combine their results.
 
-**Diagram – Expression tree**
+**Expression tree**
 
 ![Diagram](diagrams/41_Interpreter_Pattern_Notes-01.png)
 
-**Diagram – the tree for (a + b) * c**
+**the tree for (a + b) * c**
 
 ![Diagram](diagrams/41_Interpreter_Pattern_Notes-02.png)
 

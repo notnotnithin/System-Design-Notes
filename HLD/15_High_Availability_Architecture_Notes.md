@@ -4,7 +4,7 @@
 ⬅ [14 Idempotent POST API](14_Idempotent_POST_API_Notes.md) · [Index](00_HLD_Index.md) · [16 Distributed Messaging Queue](16_Distributed_Messaging_Queue_Notes.md) ➡
 <!-- nav -->
 
-Source (handwritten, 6 pages): https://drive.google.com/file/d/1k7OUopYnC2fpEHDLw-zbFDdyNvoba4mo/view?usp=drive_link
+Source: https://drive.google.com/file/d/1k7OUopYnC2fpEHDLw-zbFDdyNvoba4mo/view?usp=drive_link
 
 ---
 
@@ -21,7 +21,7 @@ Source (handwritten, 6 pages): https://drive.google.com/file/d/1k7OUopYnC2fpEHDL
 <!-- isw:15-0 -->
 **In simple words**
 
-The same question can be asked in different ways: design a **data-resiliency** architecture (think "five nines"), design for **99.999 % availability**, design to **avoid a single point of failure**, or explain **active-passive vs active-active.** The notes define **resiliency as the capability to come out of a failure.** The question to answer is: why are these goals **not achieved with a single node**, and how can we achieve them?
+The same question can be asked in different ways: design a **data-resiliency** architecture (think "five nines"), design for **99.999 % availability**, design to **avoid a single point of failure**, or explain **active-passive vs active-active.** **Resiliency is the capability to come out of a failure.** The question to answer is: why are these goals **not achieved with a single node**, and how can we achieve them?
 <!-- /isw:15-0 -->
 
 
@@ -30,7 +30,7 @@ The same question can be asked in different ways: design a **data-resiliency** a
 ## 2. Single node
 
 <!-- diagram:15-0 -->
-**Diagram – A single database is a single point of failure**
+**A single database is a single point of failure**
 
 ![Diagram](diagrams/15_High_Availability_Architecture_Notes-01.png)
 <!-- /diagram:15-0 -->
@@ -51,7 +51,7 @@ The same question can be asked in different ways: design a **data-resiliency** a
 <!-- isw:15-1 -->
 **In simple words**
 
-The picture shows a client (mobile / PC), a **load balancer**, several applications (X, Y, Z) and **one primary DB.** If the **DB goes down** (the failure), reads and writes both fail, and the notes' answer is: **the whole application is down.** The single DB is the single point of failure.
+Take a client (mobile / PC), a **load balancer**, several applications (X, Y, Z) and **one primary DB.** If the **DB goes down** (the failure), reads and writes both fail, and the answer is: **the whole application is down.** The single DB is the single point of failure.
 <!-- /isw:15-1 -->
 
 
@@ -63,7 +63,7 @@ The picture shows a client (mobile / PC), a **load balancer**, several applicati
 ### ① Active-Passive
 
 <!-- diagram:15-1 -->
-**Diagram – Active-passive: one live primary, one replica**
+**Active-passive: one live primary, one replica**
 
 ![Diagram](diagrams/15_High_Availability_Architecture_Notes-02.png)
 <!-- /diagram:15-1 -->
@@ -108,14 +108,14 @@ The picture shows a client (mobile / PC), a **load balancer**, several applicati
 ### ② Active-Active
 
 <!-- diagram:15-2 -->
-**Diagram – Active-active: both data centres read and write**
+**Active-active: both data centres read and write**
 
 ![Diagram](diagrams/15_High_Availability_Architecture_Notes-03.png)
 <!-- /diagram:15-2 -->
 
 
 - **Cassandra (or other NoSQL) supports multi-master.**
-- Diagram: Client → Load Balancer → **DC1 (Mumbai)** and **DC2 (Pune)**; each DC has its own app microservices and its own **Primary / Live DB**; **Sync-up is bidirectional**; **read or write** can go to either DC.
+- Client → Load Balancer → **DC1 (Mumbai)** and **DC2 (Pune)**; each DC has its own app microservices and its own **Primary / Live DB**; **Sync-up is bidirectional**; **read or write** can go to either DC.
 
 **Advantages**
 - **DBs (data centres) are fully utilized** very well.
@@ -141,7 +141,7 @@ With more than one node there are two types: **① Active-Passive** and **② Ac
 
 **Advantages:** **the DBs (data centres) are fully used**, more traffic can be handled **because both DBs accept reads and writes**, and every update in DC1 goes to DC2 and every update in DC2 goes to DC1.
 
-**Disadvantages (conflicts):** the **same row can be changed at the same time in both data centres**, and when they replicate to each other **there will be a conflict.** Also a **write on DC1 and a read on DC2 at the same moment, before the sync, gives stale data.** The notes sum it up: **a whole lot of things go into the synchronisation, and managing conflicts is difficult.**
+**Disadvantages (conflicts):** the **same row can be changed at the same time in both data centres**, and when they replicate to each other **there will be a conflict.** Also a **write on DC1 and a read on DC2 at the same moment, before the sync, gives stale data.** In short: **a whole lot of things go into the synchronisation, and managing conflicts is difficult.**
 <!-- /isw:15-4 -->
 
 

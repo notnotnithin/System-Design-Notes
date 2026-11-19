@@ -34,7 +34,7 @@ Design a multi-level parking lot. Vehicles enter at a gate, get a spot and a tic
 
 ## Step 2 – Class diagram
 
-**Diagram – Parking lot**
+**Parking lot**
 
 ![Diagram](diagrams/06_Parking_Lot_Notes-01.png)
 

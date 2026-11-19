@@ -39,11 +39,11 @@ Code like `if (type == CIRCLE) shape = new Circle(); else if ...` is repeated in
 ## Factory Method
 `ShapeFactory` becomes a base class with an overridable `createShape()`. Each subclass (`CircleCreator`, `RectangleCreator`, `SquareCreator`) builds exactly one kind of shape. A new shape is a new creator class, and no existing code is edited (Open/Closed).
 
-**Diagram – Shapes, simple factory and factory-method creators**
+**Shapes, simple factory and factory-method creators**
 
 ![Diagram](diagrams/05_Factory_Method_Notes-01.png)
 
-**Diagram – asking a creator for a shape**
+**asking a creator for a shape**
 
 ![Diagram](diagrams/05_Factory_Method_Notes-02.png)
 

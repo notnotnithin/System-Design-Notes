@@ -23,11 +23,11 @@ Opening a database connection is slow and expensive. If every request creates a 
 - `getDBConnection()` moves one from *free* to *in use* (creating a new one only if the pool is below the max).
 - `releaseDBConnection(conn)` moves it back to *free*.
 
-**Diagram – Connection pool**
+**Connection pool**
 
 ![Diagram](diagrams/43_Object_Pool_Pattern_Notes-01.png)
 
-**Diagram – borrow and return**
+**borrow and return**
 
 ![Diagram](diagrams/43_Object_Pool_Pattern_Notes-02.png)
 

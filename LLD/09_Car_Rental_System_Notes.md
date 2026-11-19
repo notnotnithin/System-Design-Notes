@@ -32,7 +32,7 @@ A Zoomcar-style rental service. A user picks a **store** by location, searches v
 
 ## Step 2 – Class diagram
 
-**Diagram – Car rental**
+**Car rental**
 
 ![Diagram](diagrams/09_Car_Rental_System_Notes-01.png)
 

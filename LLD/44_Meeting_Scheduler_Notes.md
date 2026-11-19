@@ -31,7 +31,7 @@ Design a system like a calendar and room-booking tool. An organiser invites peop
 
 ## Step 2 – Class diagram
 
-**Diagram – Meeting scheduler**
+**Meeting scheduler**
 
 ![Diagram](diagrams/44_Meeting_Scheduler_Notes-01.png)
 

@@ -19,11 +19,11 @@ A logger must route messages by level: `DEBUG`, `INFO`, `ERROR`, `FATAL`. With o
 - **Concrete handlers** – `DebugLogProcessor`, `InfoLogProcessor`, `ErrorLogProcessor`, `FatalLogProcessor` implement `write()`.
 - The **client** builds the chain once (`debug → info → error → fatal`) and sends everything to the first handler.
 
-**Diagram – Log processors chain**
+**Log processors chain**
 
 ![Diagram](diagrams/10_Chain_of_Responsibility_Notes-01.png)
 
-**Diagram – a message travelling the chain**
+**a message travelling the chain**
 
 ![Diagram](diagrams/10_Chain_of_Responsibility_Notes-02.png)
 

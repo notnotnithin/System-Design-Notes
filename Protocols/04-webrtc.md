@@ -91,7 +91,7 @@ Over that direct path, the two browsers run a security handshake (**DTLS**, whic
 - **Adaptation.** RTCP reports (loss, jitter, round-trip time) let each side lower or raise the video bitrate. Modern senders use congestion control based on delay (Google Congestion Control or transport-wide feedback).
 - **Why UDP.** A retransmitted media packet arrives too late to play. Losses are hidden with forward error correction, retransmission requests (NACK) for key frames, and concealment.
 
-## Step-by-step walkthrough (screenshots from the lesson)
+## Step-by-step walkthrough
 
 ### Step 1: JOIN THE CALL – Through a signalling server
 

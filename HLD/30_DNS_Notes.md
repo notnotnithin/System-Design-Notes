@@ -46,7 +46,7 @@ The browser wants to talk to `www.conceptandcoding.com`.
 
 ![Diagram](diagrams/30_DNS_Notes-02.png)
 
-Points on the page:
+Points:
 - If we want to use Google's public DNS resolver, its IP is **8.8.8.8**.
 - The **root domain** holds the DNS records for each top-level domain (there are **1000+ TLDs** and the number keeps changing).
 - The **TLD** (`.edu`, `.com`, `.in`) maintains the DNS records for the **authoritative name servers**.
@@ -64,7 +64,7 @@ Points on the page:
 
 ## 7. Checking the DNS cache
 
-In a terminal, the list of DNS records cached by the DNS client can be seen with `ipconfig/displaydns`. The page shows a Windows example whose entries look like:
+In a terminal, the list of DNS records cached by the DNS client can be seen with `ipconfig/displaydns`. A Windows example looks like:
 
 | Record Name | Record Type | Time To Live | Data Length | Section | Value |
 |---|---|---|---|---|---|

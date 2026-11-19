@@ -21,11 +21,11 @@ A car needs an interior and an exterior. If the client code does `new LuxuryInte
 - **Concrete factories** – `EconomyCarFactory`, `LuxuryCarFactory`, each creating only its own family.
 - **Provider** – `CarFactoryProvider` returns the right factory for a `CarType` (`ECONOMY`, `PREMIUM`, `LUXURY`).
 
-**Diagram – Car factories**
+**Car factories**
 
 ![Diagram](diagrams/05_Abstract_Factory_Notes-01.png)
 
-**Diagram – building a luxury car**
+**building a luxury car**
 
 ![Diagram](diagrams/05_Abstract_Factory_Notes-02.png)
 

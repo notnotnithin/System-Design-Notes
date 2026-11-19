@@ -4,14 +4,14 @@
 ⬅ [17 Proxy vs Reverse Proxy](17_Proxy_vs_Reverse_Proxy_Notes.md) · [Index](00_HLD_Index.md) · [19 Distributed Cache and Caching Strategies](19_Distributed_Cache_and_Caching_Strategies_Notes.md) ➡
 <!-- nav -->
 
-Source (handwritten, 7 pages): https://drive.google.com/file/d/1dAg77qQ1t9mlHXc1VvO-dZXvaGWnvmaZ/view?usp=drive_link
+Source: https://drive.google.com/file/d/1dAg77qQ1t9mlHXc1VvO-dZXvaGWnvmaZ/view?usp=drive_link
 
 ---
 
 ## 1. Why a load balancer?
 
 <!-- diagram:18-0 -->
-**Diagram – Load balancer spreads the traffic**
+**Load balancer spreads the traffic**
 
 ![Diagram](diagrams/18_Load_Balancer_and_Algorithms_Notes-01.png)
 <!-- /diagram:18-0 -->
@@ -24,14 +24,14 @@ Clients send requests; **not all requests should go to only one server** – one
 <!-- isw:18-0 -->
 **In simple words**
 
-Clients send requests, and **not all requests should go to only one server**, because one server must not be overloaded. So a **load balancer (LB)** is placed between the clients and the servers (S1, S2, …). The notes say it can do logging and other things, but its **main purpose is to distribute the traffic properly across all the servers so that no single server is overburdened.**
+Clients send requests, and **not all requests should go to only one server**, because one server must not be overloaded. So a **load balancer (LB)** is placed between the clients and the servers (S1, S2, …). It can do logging and other things, but its **main purpose is to distribute the traffic properly across all the servers so that no single server is overburdened.**
 <!-- /isw:18-0 -->
 
 
 ## 2. Layers: L4 vs L7 (OSI model)
 
 <!-- diagram:18-1 -->
-**Diagram – L4 versus L7 load balancing**
+**L4 versus L7 load balancing**
 
 ![Diagram](diagrams/18_Load_Balancer_and_Algorithms_Notes-02.png)
 <!-- /diagram:18-1 -->
@@ -78,7 +78,7 @@ For the network LB the algorithms are **static** (Round Robin, Weighted Round Ro
 ## ① Round Robin
 
 <!-- diagram:18-2 -->
-**Diagram – Round robin**
+**Round robin**
 
 ![Diagram](diagrams/18_Load_Balancer_and_Algorithms_Notes-03.png)
 <!-- /diagram:18-2 -->
@@ -104,7 +104,7 @@ Requests are handed to the servers **in turn:** with 4 clients and 2 servers, re
 ## ② Weighted Round Robin
 
 <!-- diagram:18-3 -->
-**Diagram – Weighted round robin: server 1 weight 3, server 2 weight 1**
+**Weighted round robin: server 1 weight 3, server 2 weight 1**
 
 ![Diagram](diagrams/18_Load_Balancer_and_Algorithms_Notes-04.png)
 <!-- /diagram:18-3 -->
@@ -129,7 +129,7 @@ Each server has a **weight, which is its capacity.** For example Server 1 weight
 ## ③ IP Hash
 
 <!-- diagram:18-4 -->
-**Diagram – IP hash: same client, same server**
+**IP hash: same client, same server**
 
 ![Diagram](diagrams/18_Load_Balancer_and_Algorithms_Notes-05.png)
 <!-- /diagram:18-4 -->
@@ -159,7 +159,7 @@ The LB computes **Hash(source IP address)** and uses that value to **assign the 
 ## ① Least Connection
 
 <!-- diagram:18-5 -->
-**Diagram – Least connection**
+**Least connection**
 
 ![Diagram](diagrams/18_Load_Balancer_and_Algorithms_Notes-06.png)
 <!-- /diagram:18-5 -->
@@ -184,7 +184,7 @@ The LB **checks which server has fewer active connections** and sends the new re
 ## ② Weighted Least Connection
 
 <!-- diagram:18-6 -->
-**Diagram – Weighted least connection**
+**Weighted least connection**
 
 ![Diagram](diagrams/18_Load_Balancer_and_Algorithms_Notes-07.png)
 <!-- /diagram:18-6 -->
@@ -204,7 +204,7 @@ The LB **checks which server has fewer active connections** and sends the new re
 ## ③ Least Response Time
 
 <!-- diagram:18-7 -->
-**Diagram – Least response time**
+**Least response time**
 
 ![Diagram](diagrams/18_Load_Balancer_and_Algorithms_Notes-08.png)
 <!-- /diagram:18-7 -->
@@ -213,12 +213,11 @@ The LB **checks which server has fewer active connections** and sends the new re
 - Uses **TTFB (Time To First Byte)** = the **time interval between sending a request and receiving the first byte of the response from the server.**
 - **Picks the server which has fewer active connections and the least TTFB**; **if there is a clash, follow round robin.**
 - Example: S1 → TTFB 3 × 2 active connections = **6**; S2 → TTFB 1 × 4 active connections = **4**; S3 → TTFB 2 × (0–1 active connection) = **2**/lowest → choose the smallest score.
-  *(the S3 figures are partly illegible in the scan)*
 
 <!-- isw:18-8 -->
 **In simple words**
 
-This uses **TTFB (Time To First Byte): the time between sending a request and receiving the first byte of the response.** It **picks the server with fewer active connections and the least TTFB**, and **if there is a tie it follows round robin.** In the example the score is TTFB × active connections: S1 = 3 × 2 = 6, S2 = 1 × 4 = 4, and S3 has the lowest score (its figures are partly illegible in the scan); the smallest score is chosen.
+This uses **TTFB (Time To First Byte): the time between sending a request and receiving the first byte of the response.** It **picks the server with fewer active connections and the least TTFB**, and **if there is a tie it follows round robin.** In the example the score is TTFB × active connections: S1 = 3 × 2 = 6, S2 = 1 × 4 = 4, and S3 has the lowest score ; the smallest score is chosen.
 <!-- /isw:18-8 -->
 
 

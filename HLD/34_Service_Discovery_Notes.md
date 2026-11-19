@@ -11,7 +11,7 @@ Source: https://drive.google.com/file/d/11DAZgXFoArZ17xVLhkIxTYQtUYAJNnr-/view?u
 ## 1. Why Service Discovery?
 
 <!-- diagram:34-0 -->
-**Diagram – Hardcoded URL versus service discovery**
+**Hardcoded URL versus service discovery**
 
 ![Diagram](diagrams/34_Service_Discovery_Notes-01.png)
 <!-- /diagram:34-0 -->
@@ -36,7 +36,7 @@ Example: *Order service* hardcodes the URL of *Product service*. This is fine on
 <!-- isw:34-0 -->
 **In simple words**
 
-In microservices, service instances are **created and deleted dynamically,** so you **cannot hardcode the URL** of an instance; it is not scalable or feasible. The example: the *Order service* hardcodes the URL of the *Product service.* That works only while Product has a single instance. With several instances (or when an instance is removed), the table in the notes lists the problems:
+In microservices, service instances are **created and deleted dynamically,** so you **cannot hardcode the URL** of an instance; it is not scalable or feasible. The example: the *Order service* hardcodes the URL of the *Product service.* That works only while Product has a single instance. With several instances (or when an instance is removed), the table lists the problems:
 - **Single point of failure:** if the hardcoded instance dies, Order cannot reach any other instance.
 - **No load balancing:** only one Product instance is overburdened and the others sit idle.
 - **Tight coupling:** Order cannot change or move Product without being updated.
@@ -174,7 +174,7 @@ public void callProductAPI(String id) {
 <!-- isw:34-4 -->
 **In simple words**
 
-**Without service discovery** the URL is hardcoded: `restTemplate.getForObject("http://localhost:8082/products/" + id, String.class)`. **With service discovery** you inject the **`DiscoveryClient`,** call `getInstances("product-service")`, take `instances.get(0).getUri()` and call that URI. The notes point out: **with RestTemplate the load-balancing logic (choosing an instance) must be handled by you.**
+**Without service discovery** the URL is hardcoded: `restTemplate.getForObject("http://localhost:8082/products/" + id, String.class)`. **With service discovery** you inject the **`DiscoveryClient`,** call `getInstances("product-service")`, take `instances.get(0).getUri()` and call that URI. Note: **with RestTemplate the load-balancing logic (choosing an instance) must be handled by you.**
 <!-- /isw:34-4 -->
 
 
@@ -233,7 +233,7 @@ Order now calls Product in two possible ways, shown below.
 ### Q1. How does Eureka know a client is UP or DOWN?
 
 <!-- diagram:34-1 -->
-**Diagram – Registration, heartbeat and eviction**
+**Registration, heartbeat and eviction**
 
 ![Diagram](diagrams/34_Service_Discovery_Notes-02.png)
 <!-- /diagram:34-1 -->
@@ -281,7 +281,7 @@ With the above test config: client sends a heartbeat after 60 s, but server wait
 
 Two ways: **(a) the client's de-registration request** (on a graceful shutdown the Eureka client sends a de-registration request and the server marks it **DOWN;** visible in both logs); **(b) the client heartbeat** (the client regularly sends a heartbeat; if it dies without de-registering, for example from a network issue, the server waits for a heartbeat for a certain interval decided at registration, and if none arrives **the server removes the instance itself**).
 
-The client properties: **`lease-renewal-interval-in-seconds`** (after this many seconds the client sends a new heartbeat; **default 30 s**) and **`lease-expiration-duration-in-seconds`** (how long the server waits for a heartbeat before removing the instance; **default 90 s**). On the server side, **by default the server does NOT remove clients even if heartbeats are missed (self-preservation)**; you turn it off with `eureka.server.enable-self-preservation=false` so the server can remove clients, and `eviction-interval-timer-in-ms` sets how often the eviction task runs. In the notes' test configuration the client sends a heartbeat after 60 s but the server waits only 5 s, so the server **removes the instance even though the client is running and up.**
+The client properties: **`lease-renewal-interval-in-seconds`** (after this many seconds the client sends a new heartbeat; **default 30 s**) and **`lease-expiration-duration-in-seconds`** (how long the server waits for a heartbeat before removing the instance; **default 90 s**). On the server side, **by default the server does NOT remove clients even if heartbeats are missed (self-preservation)**; you turn it off with `eureka.server.enable-self-preservation=false` so the server can remove clients, and `eviction-interval-timer-in-ms` sets how often the eviction task runs. In the test configuration the client sends a heartbeat after 60 s but the server waits only 5 s, so the server **removes the instance even though the client is running and up.**
 <!-- /isw:34-7 -->
 
 
@@ -300,7 +300,7 @@ The client properties: **`lease-renewal-interval-in-seconds`** (after this many 
 ### Q3. What if Eureka Server goes down?
 
 <!-- diagram:34-2 -->
-**Diagram – Three-node Eureka cluster**
+**Three-node Eureka cluster**
 
 ![Diagram](diagrams/34_Service_Discovery_Notes-03.png)
 <!-- /diagram:34-2 -->
@@ -338,7 +338,7 @@ Yes, a **single Eureka server is a single point of failure.** Usually a **3-node
 ### Q4. Latency – 2 hops per call?
 
 <!-- diagram:34-3 -->
-**Diagram – The client caches the registry locally**
+**The client caches the registry locally**
 
 ![Diagram](diagrams/34_Service_Discovery_Notes-04.png)
 <!-- /diagram:34-3 -->
@@ -363,7 +363,7 @@ Valid scenario – **it's a trade-off** (availability/performance vs. freshness)
 <!-- isw:34-6 -->
 **In simple words**
 
-The notes list five doubts. **Registration:** (1) How does Eureka Server know whether a client is UP or DOWN? (2) Where and how is the data stored? (3) What if Eureka Server itself goes down; is it a single point of failure? **Discovery:** (4) Latency: does each call now need 2 hops (Eureka Server, then the actual call)? (5) What if the local cache is stale; can it lead to calling a dead instance? The answers follow.
+There are five doubts. **Registration:** (1) How does Eureka Server know whether a client is UP or DOWN? (2) Where and how is the data stored? (3) What if Eureka Server itself goes down; is it a single point of failure? **Discovery:** (4) Latency: does each call now need 2 hops (Eureka Server, then the actual call)? (5) What if the local cache is stale; can it lead to calling a dead instance? The answers follow.
 <!-- /isw:34-6 -->
 
 <!-- isw:34-11 -->
@@ -383,8 +383,6 @@ This is a valid scenario: **it is a trade-off** (availability and performance ve
 - HA = **3-node Eureka cluster** where each node is also a client.
 - RestTemplate → manual instance selection; FeignClient (+ spring-cloud-starter-loadbalancer) → automatic LB.
 - Local registry cache trades freshness for fewer hops.
-
-> Note: diagrams in the original PDF (architecture pictures, dashboard/log screenshots) are not reproduced here; all text and code is.
 
 ---
 

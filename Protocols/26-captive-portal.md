@@ -81,7 +81,7 @@ Windows repeats the test. Now the firewall lets the connection through to the **
 - **Standards.** RFC 8910 and RFC 8908 let networks announce the portal URL through DHCP or router advertisements and provide an API, avoiding interception.
 - **Security notes.** Open guest Wi-Fi is usually unencrypted (unless WPA3 OWE is used). Don't type sensitive data on a portal served over HTTP. Portals interfere with VPNs, DNS over HTTPS and HTTPS-only modes until you log in. MAC allow-lists can be spoofed, so a portal gives access control, not strong identity.
 
-## Step-by-step walkthrough (screenshots from the lesson)
+## Step-by-step walkthrough
 
 ### Step 1: JOINED, OFFLINE – An address, but no way out
 

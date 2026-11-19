@@ -21,11 +21,11 @@ Return a special `NullVehicle` that **extends the same `Vehicle` class** and imp
 - **Real objects** – `Car`, `Bike`.
 - **Null object** – `NullVehicle`: default values (model "Default", seats 0) and empty behaviour.
 
-**Diagram – Vehicles and the null vehicle**
+**Vehicles and the null vehicle**
 
 ![Diagram](diagrams/15_Null_Object_Pattern_Notes-01.png)
 
-**Diagram – asking for an unknown vehicle**
+**asking for an unknown vehicle**
 
 ![Diagram](diagrams/15_Null_Object_Pattern_Notes-02.png)
 

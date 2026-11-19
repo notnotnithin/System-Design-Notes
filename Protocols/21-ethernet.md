@@ -86,7 +86,7 @@ The router **removes the Ethernet frame**, lowers the TTL (128 → 127), applies
 - **Other features.** *STP* (spanning tree) blocks redundant links to prevent loops; link aggregation joins several cables; PoE powers devices over the cable.
 - **Attacks.** *MAC flooding* fills the switch table so it acts like a hub (sniffing becomes possible); *ARP spoofing* poisons caches. Port security and dynamic ARP inspection help.
 
-## Step-by-step walkthrough (screenshots from the lesson)
+## Step-by-step walkthrough
 
 ### Step 1: WHO HAS THE NAS? – A broadcast asks for a MAC address
 

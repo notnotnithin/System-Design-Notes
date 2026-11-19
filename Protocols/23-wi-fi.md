@@ -89,7 +89,7 @@ Anyone nearby can **record the four handshake messages** (they can even force a 
 - **Offline-guess weakness.** Someone who captures the 4-way handshake (or forces a reconnect with a *deauthentication* frame) can test guesses offline: compute PMK to PTK to MIC for each guess. Use a long random passphrase. WPA3 removes this weakness.
 - **Management frame protection.** Management frames (such as deauthentication) are unprotected unless **802.11w (PMF)** is enabled; WPA3 requires it.
 
-## Step-by-step walkthrough (screenshots from the lesson)
+## Step-by-step walkthrough
 
 ### Step 1: FIND THE NETWORK – A beacon, then a probe
 

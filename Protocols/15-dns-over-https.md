@@ -83,7 +83,7 @@ The resolver replies `200 OK` with a tiny 49-byte body: the ordinary DNS answer 
 - **Discovery.** Browsers use a built-in list of providers, or automatically upgrade to DoH if the configured resolver supports it (*DDR*).
 - **Privacy add-ons.** Padding of DNS messages and *Encrypted Client Hello* hide more of what remains visible.
 
-## Step-by-step walkthrough (screenshots from the lesson)
+## Step-by-step walkthrough
 
 ### Step 1: PLAIN DNS – Readable by anyone on the way
 

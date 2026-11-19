@@ -6,7 +6,7 @@
 
 Source: Typed Zoho note – https://notebook.zohopublic.in/public/notes/74tdo7871dd86eb99414bb94d8737a8b73b84
 
-The page first lists the things to understand before seeing how indexing works:
+Before seeing how indexing works, a few things need to be understood first:
 1. How table data (rows) are actually stored?
 2. What type of indexing is present?
 3. The data structure used for indexing and how it works?
@@ -61,7 +61,7 @@ The **DBMS maintains the mapping of data page and data block**, for example:
 
 ![Diagram](diagrams/21_Database_Indexing_Notes-02.png)
 
-Before understanding clustered and non-clustered indexing, the page first explains **what is indexing** and **what data structure it uses and how it works.**
+Before understanding clustered and non-clustered indexing, first understand **what is indexing** and **what data structure it uses and how it works.**
 
 ### What is indexing?
 
@@ -135,7 +135,7 @@ In the data page (Page ID 1) the rows are stored `EmpID 1, 4, 5, 2`, and the off
 
 **In simple words:** a clustered index means the table's rows themselves are kept in the order of that key, so it is "the table sorted by that column". A table can be sorted in only one way, so only one clustered index is possible.
 
-The page ends at this point; the non-clustered indexing branch shown in the tree is not explained on the page.
+Non-clustered indexing is not covered here.
 
 ---
 

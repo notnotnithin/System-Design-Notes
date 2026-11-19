@@ -88,7 +88,7 @@ The laptop opens a website. The router **translates** the private address to its
 - **Security.** CHAP protects the password only. The session is not encrypted, so PPPoE is not a VPN.
 - **Alternatives.** IPoE with DHCP (often with DHCP option 82 or 802.1X) on many fibre networks.
 
-## Step-by-step walkthrough (screenshots from the lesson)
+## Step-by-step walkthrough
 
 ### Step 1: ANYONE THERE? – The router looks for an access server
 

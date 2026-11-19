@@ -91,7 +91,7 @@ The page calls `socket.close()`. The browser sends a **Close** frame with code `
 - **Same-origin and security.** Browsers send an `Origin` header, but WebSocket is not restricted by the same-origin policy, so the server must check it (to avoid *cross-site WebSocket hijacking*). Use `wss://` (TLS) in production.
 - **Scaling note.** WebSocket servers keep one open TCP connection per user, so load balancers need sticky routing or a shared message layer (for example Redis pub/sub) to deliver a message to the right server. See the chat-app design in the HLD notes.
 
-## Step-by-step walkthrough (screenshots from the lesson)
+## Step-by-step walkthrough
 
 ### Step 1: TCP CONNECTION – TCP to the server, as for HTTP
 

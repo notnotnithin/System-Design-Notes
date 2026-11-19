@@ -19,11 +19,11 @@ An `EmployeeDao` can read, create, update and delete employees. Not everyone sho
 - **Real subject** – `EmployeeDaoImpl`: does the actual work.
 - **Proxy** – `EmployeeDaoProxy`: has the same interface, **holds** the real DAO and the caller's role. For each call it checks the role, then either forwards to the real DAO or throws "Access Denied".
 
-**Diagram – Employee DAO with a protection proxy**
+**Employee DAO with a protection proxy**
 
 ![Diagram](diagrams/13_Proxy_Pattern_Notes-01.png)
 
-**Diagram – allowed and denied**
+**allowed and denied**
 
 ![Diagram](diagrams/13_Proxy_Pattern_Notes-02.png)
 

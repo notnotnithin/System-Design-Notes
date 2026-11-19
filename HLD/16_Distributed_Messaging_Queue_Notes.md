@@ -4,7 +4,7 @@
 ⬅ [15 High Availability Architecture](15_High_Availability_Architecture_Notes.md) · [Index](00_HLD_Index.md) · [17 Proxy vs Reverse Proxy](17_Proxy_vs_Reverse_Proxy_Notes.md) ➡
 <!-- nav -->
 
-Source (handwritten, 10 pages): https://drive.google.com/file/d/1kfnXbRlobCeK-U9kT56nyXI-4VY9EBAo/view?usp=drive_link
+Source: https://drive.google.com/file/d/1kfnXbRlobCeK-U9kT56nyXI-4VY9EBAo/view?usp=drive_link
 
 ## Questions this note answers
 1. What is a messaging queue? Why is it needed & its advantages?
@@ -23,7 +23,7 @@ Source (handwritten, 10 pages): https://drive.google.com/file/d/1kfnXbRlobCeK-U9
 ## 1. Messaging queue & why it's needed
 
 <!-- diagram:16-0 -->
-**Diagram – Producer, queue, consumer**
+**Producer, queue, consumer**
 
 ![Diagram](diagrams/16_Distributed_Messaging_Queue_Notes-01.png)
 <!-- /diagram:16-0 -->
@@ -62,7 +62,7 @@ The advantages listed: (1) **latency improves,** because the user is not blocked
 ## 2. Point-to-Point (P2P) vs Pub/Sub
 
 <!-- diagram:16-1 -->
-**Diagram – Point-to-point versus publish/subscribe**
+**Point-to-point versus publish/subscribe**
 
 ![Diagram](diagrams/16_Distributed_Messaging_Queue_Notes-02.png)
 <!-- /diagram:16-1 -->
@@ -86,7 +86,7 @@ The advantages listed: (1) **latency improves,** because the user is not blocked
 ### Components
 
 <!-- diagram:16-2 -->
-**Diagram – Kafka: topic, partitions and consumer group**
+**Kafka: topic, partitions and consumer group**
 
 ![Diagram](diagrams/16_Distributed_Messaging_Queue_Notes-03.png)
 <!-- /diagram:16-2 -->
@@ -107,7 +107,7 @@ The advantages listed: (1) **latency improves,** because the user is not blocked
 <!-- isw:16-3 -->
 **In simple words**
 
-Kafka's parts, as listed in the notes: **producer** (sends messages), **consumer** (**reads from a partition**), **consumer group** (each consumer is part of one), **topic** (a category or channel where data is stored and organised; data is kept on partitions only), **partition** (a small part of a topic that helps distribute and process data efficiently; partitions can have different lengths), **offset** (the position of a message inside a partition, like an index: 0, 1, 2, …, and each partition has its own), **broker** (a **Kafka server**; the producer talks to it), **cluster** (**a group of brokers**, each on a different machine) and **ZooKeeper** (helps the brokers interact and keeps metadata, for example which partition of Topic 1 lives on which broker).
+Kafka's parts: **producer** (sends messages), **consumer** (**reads from a partition**), **consumer group** (each consumer is part of one), **topic** (a category or channel where data is stored and organised; data is kept on partitions only), **partition** (a small part of a topic that helps distribute and process data efficiently; partitions can have different lengths), **offset** (the position of a message inside a partition, like an index: 0, 1, 2, …, and each partition has its own), **broker** (a **Kafka server**; the producer talks to it), **cluster** (**a group of brokers**, each on a different machine) and **ZooKeeper** (helps the brokers interact and keeps metadata, for example which partition of Topic 1 lives on which broker).
 
 **The rule:** inside one consumer group, **one partition is consumed by only one consumer.** Example: Topic A has partitions P0 and P1; if consumer 1 uses P0, consumer 2 takes P1, but consumer 2 cannot also take P0. If P0 must be read by another consumer, that consumer must be in a **different consumer group.**
 <!-- /isw:16-3 -->
@@ -128,7 +128,7 @@ A message has a **key** (optional), a **value** (the actual message), a **partit
 ### Cluster, leader & followers (replication)
 
 <!-- diagram:16-3 -->
-**Diagram – Leader and follower replicas across brokers**
+**Leader and follower replicas across brokers**
 
 ![Diagram](diagrams/16_Distributed_Messaging_Queue_Notes-04.png)
 <!-- /diagram:16-3 -->
@@ -150,7 +150,7 @@ Partitions can live on **different Kafka servers** (Broker 1 has P0 of Topic 1, 
 ### 7. What happens when a consumer can't process a message?
 
 <!-- diagram:16-4 -->
-**Diagram – Retries and the dead letter queue**
+**Retries and the dead letter queue**
 
 ![Diagram](diagrams/16_Distributed_Messaging_Queue_Notes-05.png)
 <!-- /diagram:16-4 -->
@@ -166,7 +166,7 @@ Example: partition offsets 0…6 processed properly; **offset 7 = a buggy messag
 <!-- isw:16-6 -->
 **In simple words**
 
-Offsets 0 to 6 are processed fine; **offset 7 is a buggy message**, so the consumer polls it and fails. The **committed offset stays at 6** (it does not move to 7), so the message would be delivered again. **Retry = 3:** every message is retried 3 times. After the retries are used up, the message is moved to a **failure / Dead Letter Queue (DLQ)** so the consumer can move on. The notes add that **RabbitMQ is push-based and Kafka is pull-based** (consumers poll).
+Offsets 0 to 6 are processed fine; **offset 7 is a buggy message**, so the consumer polls it and fails. The **committed offset stays at 6** (it does not move to 7), so the message would be delivered again. **Retry = 3:** every message is retried 3 times. After the retries are used up, the message is moved to a **failure / Dead Letter Queue (DLQ)** so the consumer can move on. Also, **RabbitMQ is push-based and Kafka is pull-based** (consumers poll).
 <!-- /isw:16-6 -->
 
 
@@ -175,7 +175,7 @@ Offsets 0 to 6 are processed fine; **offset 7 is a buggy message**, so the consu
 ## 4. RabbitMQ
 
 <!-- diagram:16-5 -->
-**Diagram – RabbitMQ: exchange routes by key**
+**RabbitMQ: exchange routes by key**
 
 ![Diagram](diagrams/16_Distributed_Messaging_Queue_Notes-06.png)
 <!-- /diagram:16-5 -->

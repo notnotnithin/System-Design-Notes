@@ -20,11 +20,11 @@ In an auction, every bidder would have to know every other bidder to announce ne
 - **Colleague interface** – `IColleague` (`placeBid`, `receiveBidNotification`).
 - **Concrete colleagues** – `Bidder`: knows only the mediator. It sends bids to it and receives notifications from it.
 
-**Diagram – Auction house**
+**Auction house**
 
 ![Diagram](diagrams/34_Mediator_Pattern_Notes-01.png)
 
-**Diagram – a new bid**
+**a new bid**
 
 ![Diagram](diagrams/34_Mediator_Pattern_Notes-02.png)
 

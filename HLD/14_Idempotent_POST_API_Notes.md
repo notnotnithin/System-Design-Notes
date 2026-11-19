@@ -4,7 +4,7 @@
 ⬅ [12 & 36 Rate Limiter](12_36_Rate_Limiter_Notes.md) · [Index](00_HLD_Index.md) · [15 High Availability Architecture](15_High_Availability_Architecture_Notes.md) ➡
 <!-- nav -->
 
-Source (handwritten, 4 pages): https://drive.google.com/file/d/1pzl_Pr0iUD3jyRUtS58Sq9DyCsrr2dmE/view?usp=drive_link
+Source: https://drive.google.com/file/d/1pzl_Pr0iUD3jyRUtS58Sq9DyCsrr2dmE/view?usp=drive_link
 
 ---
 
@@ -18,7 +18,7 @@ Example operation: **adding an item into a cart** – `POST` followed by a dupli
 <!-- isw:14-0 -->
 **In simple words**
 
-**Concurrency** means many requests reach the **same resource at the same time** (the notes' example is a BookMyShow seat). **Idempotency** is about **duplicate requests**: it lets a client **safely retry an operation without worrying about the side effects.** The example operation is **adding an item to a cart**: a `POST` followed by a duplicate `POST` would **create another row.**
+**Concurrency** means many requests reach the **same resource at the same time** (for example a BookMyShow seat). **Idempotency** is about **duplicate requests**: it lets a client **safely retry an operation without worrying about the side effects.** The example operation is **adding an item to a cart**: a `POST` followed by a duplicate `POST` would **create another row.**
 <!-- /isw:14-0 -->
 
 
@@ -49,7 +49,7 @@ Example operation: **adding an item into a cart** – `POST` followed by a dupli
 ## 3. How can duplicate POSTs come? (two types of side effect)
 
 <!-- diagram:14-0 -->
-**Diagram – Sequential and parallel duplicates**
+**Sequential and parallel duplicates**
 
 ![Diagram](diagrams/14_Idempotent_POST_API_Notes-01.png)
 <!-- /diagram:14-0 -->
@@ -81,7 +81,7 @@ Use an **Idempotency Key** – a **unique UUID**, appended/associated with the o
 ### Flow – sequential duplicates
 
 <!-- diagram:14-1 -->
-**Diagram – Idempotency key flow**
+**Idempotency key flow**
 
 ![Diagram](diagrams/14_Idempotent_POST_API_Notes-02.png)
 <!-- /diagram:14-1 -->
@@ -113,14 +113,14 @@ For `POST /addItem` with the header `IK: IK1`:
 5. **If the IK is in the DB,** check its **status:** `Created` (still being processed) → **HTTP 409** (conflict); `Consumed` (already completed) → **HTTP 200** (return the earlier result, do not do the work again).
 6. **If the IK is not in the DB,** the server **puts an entry** (`Key = IK1, Status = Created`) and performs the operation. When it **succeeds,** the key is **consumed** (status → `Consumed`) and the server returns **HTTP 201.**
 
-The DB table is `| Key | Status |`, for example `IK1 | Created → Consumed`. *(Transcription caveat: pages 3–4 of the PDF are rotated hand-drawn flowcharts, so the exact status codes were read from the diagram and are the most likely interpretation.)*
+The DB table is `| Key | Status |`, for example `IK1 | Created → Consumed`.
 <!-- /isw:14-4 -->
 
 
 ### Flow – parallel duplicates
 
 <!-- diagram:14-2 -->
-**Diagram – Parallel duplicates: only one request wins**
+**Parallel duplicates: only one request wins**
 
 ![Diagram](diagrams/14_Idempotent_POST_API_Notes-03.png)
 <!-- /diagram:14-2 -->
@@ -134,8 +134,6 @@ Two requests `POST /addItem` with **the same IK (IK1)** arrive simultaneously.
 4. Server reads the IK from the DB – the **check-and-insert must be a *critical section***, protected by a **Mutex / synchronized** (or an atomic DB operation such as a unique key insert), so that **only one request wins**:
    - The winner **puts the entry in DB** (`IK1, Created`), executes the operation, then marks it `Consumed` → **HTTP 201**.
    - The other request sees the IK already present (`Created`/`Consumed`) → handled per the table above (409 / 200) – **never processed twice**.
-
-> ⚠️ Pages 3–4 of the original are rotated hand-drawn flowcharts; the exact status-code labels (409 for Created, 200 for Consumed, 201 for first success, 400 for missing key) were read from the diagram and are the most likely interpretation.
 
 <!-- isw:14-3 -->
 **In simple words**

@@ -87,7 +87,7 @@ With nothing to send, a WireGuard tunnel is **completely silent.** Because the l
 - **Roaming.** If the laptop's IP address changes, the tunnel continues as soon as a valid packet arrives from the new address.
 - **Compared with others.** IPsec/IKEv2 is standardised and flexible but complex; OpenVPN is TLS-based in user space. WireGuard is small, fast and in the Linux kernel.
 
-## Step-by-step walkthrough (screenshots from the lesson)
+## Step-by-step walkthrough
 
 ### Step 1: SET UP ONCE – Keys, not passwords
 

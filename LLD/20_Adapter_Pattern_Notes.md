@@ -20,11 +20,11 @@ Your app expects a weighing machine that returns **kilograms**. A supplier gives
 - **Adapter** – `WeightMachineAdapterImpl` implements the target, **holds** the adaptee, and converts pounds to kilograms.
 - The **client** only ever talks to the target interface.
 
-**Diagram – Weighing machine adapter**
+**Weighing machine adapter**
 
 ![Diagram](diagrams/20_Adapter_Pattern_Notes-01.png)
 
-**Diagram – a call through the adapter**
+**a call through the adapter**
 
 ![Diagram](diagrams/20_Adapter_Pattern_Notes-02.png)
 

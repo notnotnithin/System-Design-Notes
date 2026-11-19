@@ -5,15 +5,15 @@
 <!-- nav -->
 
 Sources:
-- Handwritten PDF (7 pages): https://drive.google.com/file/d/1kPHF4MMoqc2xFXNXaXHfqqrEDdeU0kLO/view?usp=drive_link
-- Typed Zoho note (checked, same content as this note): https://notebook.zohopublic.in/public/notes/u3i1sc0949c83b482441887cc4eba8031560e
+- PDF: https://drive.google.com/file/d/1kPHF4MMoqc2xFXNXaXHfqqrEDdeU0kLO/view?usp=drive_link
+- Zoho: https://notebook.zohopublic.in/public/notes/u3i1sc0949c83b482441887cc4eba8031560e
 
 ---
 
 ## 1. What is a transaction?
 A **set of operations (a group of tasks) that must be performed against the DB.** It has **4 properties (ACID):**
 
-| Property | Meaning | Example in the notes |
+| Property | Meaning | Example |
 |---|---|---|
 | **Atomicity** | **All operations in a single transaction succeed, or all fail.** | Txn: ① Debit A 100 Rs, ② Credit B 100 Rs – if step ② fails, step ① must not stay applied. |
 | **Consistency** | DB is in a **consistent state before and after** the transaction. | A=100, B=50 (total 150) → after transfer A=0, B=150 (total still 150). |
@@ -47,7 +47,7 @@ A **local transaction** is written as: Begin → withdraw from A → deposit to 
 ## 2. The problem in a distributed system
 
 <!-- diagram:20-0 -->
-**Diagram – ACID is local to each database**
+**ACID is local to each database**
 
 ![Diagram](diagrams/20_Distributed_Transactions_Notes-01.png)
 <!-- /diagram:20-0 -->
@@ -94,7 +94,7 @@ There are three ways: **2-Phase Commit** (very popular, **synchronous**), **3-Ph
 ## 3. Two-Phase Commit (2PC)
 
 <!-- diagram:20-1 -->
-**Diagram – Two-phase commit**
+**Two-phase commit**
 
 ![Diagram](diagrams/20_Distributed_Transactions_Notes-02.png)
 <!-- /diagram:20-1 -->
@@ -131,7 +131,7 @@ There are two phases: **1. voting / prepare** and **2. decision / commit.** The 
 <!-- isw:20-4 -->
 **In simple words**
 
-Two things can fail: **the coordinator or a participant.** The message-loss cases in the notes:
+Two things can fail: **the coordinator or a participant.** The message-loss cases:
 1. **The prepare message is lost → abort the transaction** (the coordinator times out waiting for the vote and then aborts).
 2. **The OK message is lost →** the coordinator waits; **if the timeout is over, it aborts the transaction.**
 3. **The COMMIT / ABORT message is lost →** a participant had said OK to prepare and now hears nothing. **It cannot decide on its own;** it has to **wait and ask the coordinator what happened,** because **only the coordinator holds the decision.** This is the **blocking** weakness of 2PC: participants stay locked while the coordinator is down.
@@ -146,7 +146,7 @@ Two things can fail: **the coordinator or a participant.** The message-loss case
 ## 4. Three-Phase Commit (3PC) – a **non-blocking** protocol
 
 <!-- diagram:20-2 -->
-**Diagram – Three-phase commit adds a pre-commit step**
+**Three-phase commit adds a pre-commit step**
 
 ![Diagram](diagrams/20_Distributed_Transactions_Notes-03.png)
 <!-- /diagram:20-2 -->
@@ -160,7 +160,7 @@ Three phases: **1. Prepare phase** [same as 2PC] · **2. Pre-Commit phase** · *
 3. **Phase 2 begins (Pre-Commit phase):** coordinator makes the decision and sends **Pre-Commit: Commit** – *"we are just sharing information about what the coordinator has taken"* – participants **Acknowledge.**
 4. **Phase 3 begins:** **COMMIT** → participants reply **DONE**; **close transaction.**
 
-Why it helps: because every participant **already knows the decision (from the pre-commit)** before the final commit, if the coordinator fails after the pre-commit message a participant can still proceed (the diagram shows the coordinator `C` crashing after sending *Prepare : Commit* to participant `P` – the participants hold the decision). **But it's more complex → rarely used.**
+Why it helps: because every participant **already knows the decision (from the pre-commit)** before the final commit, if the coordinator fails after the pre-commit message a participant can still proceed (for example the coordinator `C` crashes after sending *Prepare : Commit* to participant `P`: the participants already hold the decision). **But it's more complex → rarely used.**
 
 <!-- isw:20-5 -->
 **In simple words**
@@ -169,7 +169,7 @@ It is a **non-blocking** protocol with three phases: **1. Prepare** (same as 2PC
 
 **Flow:** (1) the application asks the coordinator, which **starts the transaction** and sends the update queries. (2) **Phase 1:** PREPARE → the participants reply **OK.** (3) **Phase 2 (pre-commit):** the coordinator makes the decision and sends **Pre-Commit: Commit** (*"we are just sharing information about what the coordinator has decided"*), and the participants **acknowledge.** (4) **Phase 3:** **COMMIT** → the participants reply **DONE** and the transaction is closed.
 
-**Why it helps:** every participant **already knows the decision from the pre-commit** before the final commit, so if the coordinator fails after the pre-commit message, a participant can still go on (the notes' diagram shows the coordinator crashing after sending "Prepare: Commit" to a participant). **But it is more complex, so it is rarely used.**
+**Why it helps:** every participant **already knows the decision from the pre-commit** before the final commit, so if the coordinator fails after the pre-commit message, a participant can still go on (for example the coordinator crashes after sending "Prepare: Commit" to a participant). **But it is more complex, so it is rarely used.**
 <!-- /isw:20-5 -->
 
 
@@ -178,7 +178,7 @@ It is a **non-blocking** protocol with three phases: **1. Prepare** (same as 2PC
 ## 5. SAGA pattern (asynchronous)
 
 <!-- diagram:20-3 -->
-**Diagram – SAGA: chain of local transactions and compensations**
+**SAGA: chain of local transactions and compensations**
 
 ![Diagram](diagrams/20_Distributed_Transactions_Notes-04.png)
 <!-- /diagram:20-3 -->

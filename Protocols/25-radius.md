@@ -91,7 +91,7 @@ Both the AP and the laptop now hold the same master key, so they run **the same 
 - **AAA.** Authentication (who are you), Authorization (what may you do) and Accounting (usage records).
 - **Also protects.** Wired switch ports (802.1X) and VPN logins.
 
-## Step-by-step walkthrough (screenshots from the lesson)
+## Step-by-step walkthrough
 
 ### Step 1: WHO ARE YOU? – The access point asks for an identity
 

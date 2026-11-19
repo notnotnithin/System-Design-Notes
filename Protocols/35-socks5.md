@@ -76,7 +76,7 @@ After the success reply, **SOCKS steps aside**: the proxy just copies bytes both
 - **Versus an HTTP proxy.** An HTTP proxy understands web requests (caching, URL filtering, `Via` headers). SOCKS5 is lower level and handles any protocol. For HTTPS the HTTP proxy's `CONNECT` and SOCKS5's `CONNECT` both end up as an opaque tunnel.
 - **Where you meet it.** `ssh -D 1080` creates a local SOCKS5 proxy; the Tor client exposes one; many corporate gateways and VPN products offer one.
 
-## Step-by-step walkthrough (screenshots from the lesson)
+## Step-by-step walkthrough
 
 ### Step 1: TO THE PROXY – TCP to port 1080
 

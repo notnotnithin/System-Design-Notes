@@ -86,7 +86,7 @@ The proxy copies bytes both ways until one side closes. (Some company proxies do
 - **Configuration.** Set in the operating system or browser, or discovered through a **PAC** script or **WPAD**.
 - **Variants.** *Forward* proxy (client-side, this note), *reverse* proxy (server-side, next notes), *transparent* proxy (intercepts without client configuration), and **SOCKS5** (protocol-agnostic).
 
-## Step-by-step walkthrough (screenshots from the lesson)
+## Step-by-step walkthrough
 
 ### Step 1: PROXY SETTINGS – The browser sends everything there
 

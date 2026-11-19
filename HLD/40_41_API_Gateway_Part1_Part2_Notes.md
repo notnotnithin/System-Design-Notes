@@ -8,7 +8,7 @@ Sources:
 - Part 1: https://drive.google.com/file/d/1CbIz2ZgwcinR0y69Q7O-MRSgWgu-b-Ze/view?usp=drive_link
 - Part 2: https://drive.google.com/file/d/14bbYUgLn3q5CXVKL90pMYb9TbAuu0GKd/view?usp=drive_link
 
-(For the conceptual API Gateway handwritten note, see HLD #28.)
+(For the conceptual side of the API Gateway, see HLD #28.)
 
 ---
 
@@ -17,7 +17,7 @@ Sources:
 ## 1. What is an API Gateway?
 
 <!-- diagram:40_41-0 -->
-**Diagram – Gateway as the single entry point**
+**Gateway as the single entry point**
 
 ![Diagram](diagrams/40_41_API_Gateway_Part1_Part2_Notes-01.png)
 <!-- /diagram:40_41-0 -->
@@ -122,7 +122,7 @@ The Product service (port 8082, `/products/{id}`) and the Order service (port 80
 ## 3. API Gateway + Load Balancer
 
 <!-- diagram:40_41-1 -->
-**Diagram – Gateway with Eureka and lb:// URIs**
+**Gateway with Eureka and lb:// URIs**
 
 ![Diagram](diagrams/40_41_API_Gateway_Part1_Part2_Notes-02.png)
 <!-- /diagram:40_41-1 -->
@@ -191,7 +191,7 @@ eureka.client.service-url.defaultZone=http://localhost:8761/eureka
 <!-- isw:40_41-3 -->
 **In simple words**
 
-This part builds on the *Service Discovery* and *Client Side Load Balancer* notes (HLD #34 and #35). The Product and Order services get the `spring-cloud-starter-netflix-eureka-client` dependency and register with the **Eureka server** (port 8761), and the gateway also gets the Eureka client. In the gateway's routes the **hardcoded URI is replaced by `lb://product-service`** (and `lb://order-service`). The note explains: **internally it uses the Spring Cloud LoadBalancer framework, which first fetches the instances from service discovery and then applies the load-balancing algorithm.**
+This part builds on *Service Discovery* and *Client Side Load Balancer* (HLD #34 and #35). The Product and Order services get the `spring-cloud-starter-netflix-eureka-client` dependency and register with the **Eureka server** (port 8761), and the gateway also gets the Eureka client. In the gateway's routes the **hardcoded URI is replaced by `lb://product-service`** (and `lb://order-service`). Internally, **it uses the Spring Cloud LoadBalancer framework, which first fetches the instances from service discovery and then applies the load-balancing algorithm.**
 <!-- /isw:40_41-3 -->
 
 
@@ -204,7 +204,7 @@ This part builds on the *Service Discovery* and *Client Side Load Balancer* note
 ## 4. Filters in API Gateway
 
 <!-- diagram:40_41-2 -->
-**Diagram – Request path through the gateway filters**
+**Request path through the gateway filters**
 
 ![Diagram](diagrams/40_41_API_Gateway_Part1_Part2_Notes-03.png)
 <!-- /diagram:40_41-2 -->
@@ -223,7 +223,7 @@ A filter can **intercept and modify the HTTP request and response** as they pass
 <!-- isw:40_41-5 -->
 **In simple words**
 
-The flow in the notes' diagram: the client → `DispatcherHandler` → `RouteMappingHandler` (finds the route by predicate, for example `Path=/products/**`) → **global filters (pre-filter logic)** → **route-specific filters (pre-filter logic, then the next filter in the chain)** → global filter **`RouteToRequestUrlFilter`** → global filter **`NettyRoutingFilter`** → the microservice. Then the response travels back through the **post-filter logic** of each filter and finally the global **`NettyWriteResponseFilter`** → the client.
+The request flow: the client → `DispatcherHandler` → `RouteMappingHandler` (finds the route by predicate, for example `Path=/products/**`) → **global filters (pre-filter logic)** → **route-specific filters (pre-filter logic, then the next filter in the chain)** → global filter **`RouteToRequestUrlFilter`** → global filter **`NettyRoutingFilter`** → the microservice. Then the response travels back through the **post-filter logic** of each filter and finally the global **`NettyWriteResponseFilter`** → the client.
 <!-- /isw:40_41-5 -->
 
 
@@ -258,7 +258,7 @@ The answer to "why are some global filters after the route-specific filters?" is
 ## 5. Custom Global Filter – JWT Authentication
 
 <!-- diagram:40_41-3 -->
-**Diagram – JWT global filter logic**
+**JWT global filter logic**
 
 ![Diagram](diagrams/40_41_API_Gateway_Part1_Part2_Notes-04.png)
 <!-- /diagram:40_41-3 -->

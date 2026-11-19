@@ -5,20 +5,20 @@
 <!-- nav -->
 
 Sources:
-- Handwritten PDF (9 pages): https://drive.google.com/file/d/1C7f5kvsWQ45ECA3sR0jgpym1cy96CgR0/view?usp=drive_link
-- Typed Zoho note (this link is dead: Zoho says "there's no note here", so the note may have been removed): https://notebook.zohopublic.in/public/notes/u3i1s6d12db6764b94cff9ad7f4ddef5b5348
+- PDF: https://drive.google.com/file/d/1C7f5kvsWQ45ECA3sR0jgpym1cy96CgR0/view?usp=drive_link
+- Zoho: https://notebook.zohopublic.in/public/notes/u3i1s6d12db6764b94cff9ad7f4ddef5b5348
 
-## Agenda (as listed on page 1)
+## Agenda
 - What is caching? · What is distributed caching and how is it done?
 - Caching strategies: **Cache-aside, Read-through, Write-around, Write-through, Write-back**
-- Cache eviction policies: **LRU, FIFO, LFU, etc.** *(listed in the agenda; the handwritten PDF ends after Write-back – eviction policies are not written out in these 9 pages)*
+- Cache eviction policies: **LRU, FIFO, LFU, etc.** *(not covered further here)*
 
 ---
 
 ## 1. What is caching?
 
 <!-- diagram:19-0 -->
-**Diagram – Caching in the request path**
+**Caching in the request path**
 
 ![Diagram](diagrams/19_Distributed_Cache_and_Caching_Strategies_Notes-01.png)
 <!-- /diagram:19-0 -->
@@ -33,7 +33,7 @@ Sources:
 - **Load balancer**
 - **Server-side application caching** (like **Redis**, etc.)
 
-Basic picture: `Client → LB → App servers → Cache (Redis) → DB`.
+Basic setup: `Client → LB → App servers → Cache (Redis) → DB`.
 
 <!-- isw:19-0 -->
 **In simple words**
@@ -47,7 +47,7 @@ Caching is **a technique to store frequently used data in fast-access memory ins
 ## 2. What is distributed caching?
 
 <!-- diagram:19-1 -->
-**Diagram – Distributed cache pool with a cache client**
+**Distributed cache pool with a cache client**
 
 ![Diagram](diagrams/19_Distributed_Cache_and_Caching_Strategies_Notes-02.png)
 <!-- /diagram:19-1 -->
@@ -77,7 +77,7 @@ With a **single cache service** all app servers (1, 2, 3) use one cache with **l
 ### ① Cache-Aside (lazy loading)
 
 <!-- diagram:19-2 -->
-**Diagram – Cache-aside**
+**Cache-aside**
 
 ![Diagram](diagrams/19_Distributed_Cache_and_Caching_Strategies_Notes-03.png)
 <!-- /diagram:19-2 -->
@@ -109,7 +109,7 @@ Flow (`Client → Server → Cache → DB`):
 ### ② Read-Through
 
 <!-- diagram:19-3 -->
-**Diagram – Read-through**
+**Read-through**
 
 ![Diagram](diagrams/19_Distributed_Cache_and_Caching_Strategies_Notes-04.png)
 <!-- /diagram:19-3 -->
@@ -140,7 +140,7 @@ The application first checks the cache. On a **hit** it returns the data. On a *
 ### ③ Write-Around
 
 <!-- diagram:19-4 -->
-**Diagram – Write-around**
+**Write-around**
 
 ![Diagram](diagrams/19_Distributed_Cache_and_Caching_Strategies_Notes-05.png)
 <!-- /diagram:19-4 -->
@@ -170,7 +170,7 @@ It **writes directly into the DB and does not touch the cache.** It does not upd
 ### ④ Write-Through
 
 <!-- diagram:19-5 -->
-**Diagram – Write-through**
+**Write-through**
 
 ![Diagram](diagrams/19_Distributed_Cache_and_Caching_Strategies_Notes-06.png)
 <!-- /diagram:19-5 -->
@@ -201,7 +201,7 @@ It **first writes the data into the cache and then synchronously writes it into 
 ### ⑤ Write-Back (Write-Behind)
 
 <!-- diagram:19-6 -->
-**Diagram – Write-back**
+**Write-back**
 
 ![Diagram](diagrams/19_Distributed_Cache_and_Caching_Strategies_Notes-07.png)
 <!-- /diagram:19-6 -->
@@ -223,7 +223,7 @@ It **first writes the data into the cache and then synchronously writes it into 
 <!-- isw:19-6 -->
 **In simple words**
 
-It **first writes the data into the cache and then writes it into the DB asynchronously.** Flow: client → write (POST) → server → write into the cache first → **push a message to a queue** → later **write into the DB.** The notes' example: if the DB is down, the **cache (turn-around / TTL about 24 h)** keeps the data and the **queue holds the writes for, say, 2 h; when the DB comes back the queue writes into it,** which **brings fault tolerance.**
+It **first writes the data into the cache and then writes it into the DB asynchronously.** Flow: client → write (POST) → server → write into the cache first → **push a message to a queue** → later **write into the DB.** Example: if the DB is down, the **cache (turn-around / TTL about 24 h)** keeps the data and the **queue holds the writes for, say, 2 h; when the DB comes back the queue writes into it,** which **brings fault tolerance.**
 
 **Pros:** **good for write-heavy applications;** it **improves write latency** because the DB write is asynchronous; the **cache hit chance increases a lot;** and it gives **much better performance when used with a read-through cache.** **Cons:** **if the data is removed from the cache (TTL expiry) before the DB write has happened, data can be lost** (for example TTL 3 h but the DB has been down for 5 h). This is **handled by keeping the cache TTL a little higher, for example 2 days.**
 <!-- /isw:19-6 -->

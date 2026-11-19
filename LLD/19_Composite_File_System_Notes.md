@@ -21,11 +21,11 @@ A file system has `File`s and `Directory`s. A directory holds files and other di
 
 Because a `Directory` is itself a `FileSystemComponent`, directories can contain directories.
 
-**Diagram – File system**
+**File system**
 
 ![Diagram](diagrams/19_Composite_File_System_Notes-01.png)
 
-**Diagram – a sample tree**
+**a sample tree**
 
 ![Diagram](diagrams/19_Composite_File_System_Notes-02.png)
 
@@ -46,7 +46,7 @@ Because a `Directory` is itself a `FileSystemComponent`, directories can contain
 ## Second example: math expressions
 `Number` (leaf) and `Expression` (composite with a left side, a right side and an operation) both implement `ArithmeticExpression.evaluate()`. An expression can contain numbers *or other expressions*, so `(2 + 3) * 4` becomes a tree and one call to `evaluate()` computes it.
 
-**Diagram – Math expression tree**
+**Math expression tree**
 
 ![Diagram](diagrams/19_Composite_File_System_Notes-04.png)
 

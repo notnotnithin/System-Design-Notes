@@ -80,7 +80,7 @@ IMAP normally answers only when asked, so an app would have to keep checking. **
 - **Capabilities.** The greeting lists them: `IMAP4rev1`, `IDLE`, `UIDPLUS`, `MOVE`, `CONDSTORE`, `AUTH=PLAIN`.
 - **Ports.** `993` TLS from the start, `143` with `STARTTLS`. Sending mail still uses SMTP.
 
-## Step-by-step walkthrough (screenshots from the lesson)
+## Step-by-step walkthrough
 
 ### Step 1: CONNECT SECURELY – Port 993, TLS from the start
 

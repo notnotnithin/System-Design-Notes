@@ -1,6 +1,6 @@
 # LLD Notes – Index
 
-Low-level-design notes made from the LLD links in *Unlock LLD & HLD* (original numbering). The explanations are in simple words, the **diagrams are generated from the Java code** in the GitLab repositories (class diagrams) and drawn for the main flows (sequence diagrams, state diagrams, flowcharts). Code snippets are taken from the repositories.
+My LLD notes, in the original numbering of *Unlock LLD & HLD*. Code snippets are taken from the repositories.
 
 | # | Topic | Type | Note |
 |---|---|---|---|
@@ -48,8 +48,5 @@ Low-level-design notes made from the LLD links in *Unlock LLD & HLD* (original n
 | 43 | Object Pool pattern | Design pattern / principle | [43_Object_Pool_Pattern_Notes.md](43_Object_Pool_Pattern_Notes.md) |
 | 44 | Meeting Scheduler | Machine-coding problem | [44_Meeting_Scheduler_Notes.md](44_Meeting_Scheduler_Notes.md) |
 
-**Coverage notes**
+**Good to know**
 - **#22 and #40** are not in your links (numbers skipped in the source).
-- **#32 (Structural patterns, Zoho copy) and #42 (Payment Gateway, Zoho note):** the Zoho pages are JavaScript pages that can't be read automatically. #32 is built from the Drive PDFs and the code; #42 from the GitLab code.
-- **#6, #7, #8, #9, #11, #14** come from typed Drive PDFs (requirements and design) plus the GitLab code. **#12, #17, #18, #21, #24, #29, #35, #42 and the Meeting Scheduler** have no PDF in the list, so they are built from the GitLab code.
-- Where the GitLab code is a simplified demo (for example hard-coded payment results), the note says so.

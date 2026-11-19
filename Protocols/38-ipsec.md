@@ -91,7 +91,7 @@ Four IKE messages agreed on the methods, found the router, proved both identitie
 - **Authentication options.** Certificates, pre-shared keys or EAP (username/password, SIM).
 - **Strengths and weaknesses.** Standard, everywhere and hardware-accelerated; but complex (many options mean misconfiguration) and adds NAT-T overhead. Compare WireGuard, OpenVPN and SSH tunnels.
 
-## Step-by-step walkthrough (screenshots from the lesson)
+## Step-by-step walkthrough
 
 ### Step 1: IKE_SA_INIT – Agree on algorithms, swap keys
 

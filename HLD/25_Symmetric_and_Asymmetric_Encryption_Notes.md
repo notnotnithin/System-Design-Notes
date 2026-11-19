@@ -5,10 +5,10 @@
 <!-- nav -->
 
 Sources:
-- Handwritten PDF (10 pages): https://drive.google.com/file/d/13oOxr-aZu0K3u7FqBS1ONOCNENjoWERm/view?usp=drive_link
-- Typed Zoho note (checked, same content; the encryption example is taken from it): https://notebook.zohopublic.in/public/notes/bietvf603d76e50a04c989bb3522c763be0ee
+- PDF: https://drive.google.com/file/d/13oOxr-aZu0K3u7FqBS1ONOCNENjoWERm/view?usp=drive_link
+- Zoho: https://notebook.zohopublic.in/public/notes/bietvf603d76e50a04c989bb3522c763be0ee
 
-*Context hints in the notes: chat application end-to-end encryption, HTTPS.*
+*Context: chat application end-to-end encryption, HTTPS.*
 
 ---
 
@@ -16,14 +16,14 @@ Sources:
 - **A process of converting readable data into text that is difficult to understand** (the result is the **cipher** text).
 - It uses a **cryptographic key** – *consider it a mathematical value which the encryption method uses to convert readable text into an unreadable format.*
 
-Example (the Zoho page labels it "Key: 2"): `CONCEPT CODING` → *Encryption method (key 2)* → `FRQFHSW FRGLQJ` → *Decryption method (same key)* → `CONCEPT CODING`. (Each letter has moved three places along the alphabet, C→F, O→R and so on, although the page writes the key as 2. The page's point is simply that the same key undoes the encryption.)
+Example (key: 2): `CONCEPT CODING` → *Encryption method (key 2)* → `FRQFHSW FRGLQJ` → *Decryption method (same key)* → `CONCEPT CODING`. (Note: each letter has actually moved three places along the alphabet, C→F, O→R and so on. The point is that the same key undoes the encryption.)
 
 Encryption is of two types: **① Symmetric** and **② Asymmetric.**
 
 <!-- isw:25-0 -->
 **In simple words**
 
-Encryption is **a process of converting readable data into text that is difficult to understand** (the result is the **cipher text**). It uses a **cryptographic key**, which the notes describe as *a mathematical value the encryption method uses to convert readable text into an unreadable format.* The example: `CONCEPT CODING` goes through the encryption method (key 2) and becomes `FRQFHSW FRGLQJ`, and the decryption method with the same key turns it back into `CONCEPT CODING`. Encryption is of two types: **symmetric** and **asymmetric.**
+Encryption is **a process of converting readable data into text that is difficult to understand** (the result is the **cipher text**). It uses a **cryptographic key**, which is *a mathematical value the encryption method uses to convert readable text into an unreadable format.* The example: `CONCEPT CODING` goes through the encryption method (key 2) and becomes `FRQFHSW FRGLQJ`, and the decryption method with the same key turns it back into `CONCEPT CODING`. Encryption is of two types: **symmetric** and **asymmetric.**
 <!-- /isw:25-0 -->
 
 
@@ -32,7 +32,7 @@ Encryption is **a process of converting readable data into text that is difficul
 ## 2. Symmetric encryption
 
 <!-- diagram:25-0 -->
-**Diagram – Symmetric encryption: one shared key**
+**Symmetric encryption: one shared key**
 
 ![Diagram](diagrams/25_Symmetric_and_Asymmetric_Encryption_Notes-01.png)
 <!-- /diagram:25-0 -->
@@ -77,7 +77,7 @@ In symmetric encryption **the same key is used for both encryption and decryptio
 ## 3. Asymmetric encryption
 
 <!-- diagram:25-1 -->
-**Diagram – Asymmetric encryption: public key locks, private key unlocks**
+**Asymmetric encryption: public key locks, private key unlocks**
 
 ![Diagram](diagrams/25_Symmetric_and_Asymmetric_Encryption_Notes-02.png)
 <!-- /diagram:25-1 -->
@@ -97,7 +97,7 @@ In symmetric encryption **the same key is used for both encryption and decryptio
 1. **No security issue with key distribution** – each user has a **secret (private) key which they do not forward.**
 2. Provides **key-exchange protocols** like **Diffie-Hellman, ECDHE** ⭐.
 3. **Digital signature** can be created using asymmetric encryption – helps to **authenticate and provide integrity** too.
-   (Diagram: sender encrypts with the server's **public key**; a hacker in the middle can't decrypt; the receiver/server decrypts with its **private key**.)
+   (The sender encrypts with the server's **public key**; a hacker in the middle can't decrypt; the receiver/server decrypts with its **private key**.)
 
 **Disadvantages**
 1. **Computation-intensive** compared to symmetric encryption.
@@ -109,7 +109,7 @@ In symmetric encryption **the same key is used for both encryption and decryptio
 <!-- isw:25-2 -->
 **In simple words**
 
-Asymmetric encryption uses **two different keys, a public key and a private key:** the **public key is used by the sender to encrypt, and the private key is used by the receiver to decrypt.** (In the sketch the sender encrypts with the server's **public key**; a hacker in the middle cannot decrypt; the server decrypts with its **private key.**)
+Asymmetric encryption uses **two different keys, a public key and a private key:** the **public key is used by the sender to encrypt, and the private key is used by the receiver to decrypt.** (The sender encrypts with the server's **public key**; a hacker in the middle cannot decrypt; the server decrypts with its **private key.**)
 
 **Algorithms:** **RSA** ⭐ (2048-bit key lengths, more secure), **DSA** (Digital Signature Algorithm), **Diffie-Hellman** ⭐⭐, and **ECC / ECDHE** (elliptic-curve).
 
@@ -155,7 +155,7 @@ The original 128-bit key is the words **W0, W1, W2, W3.** The next words are bui
 ### Normal text → cipher text (AES-128 encryption flow)
 
 <!-- diagram:25-2 -->
-**Diagram – AES-128 encryption flow**
+**AES-128 encryption flow**
 
 ![Diagram](diagrams/25_Symmetric_and_Asymmetric_Encryption_Notes-03.png)
 <!-- /diagram:25-2 -->
@@ -213,7 +213,7 @@ Decryption does **the opposite:** the 128-bit cipher block goes through Add Roun
 ## 5. Diffie-Hellman (key-exchange algorithm, asymmetric)
 
 <!-- diagram:25-3 -->
-**Diagram – Diffie-Hellman with the example numbers**
+**Diffie-Hellman with the example numbers**
 
 ![Diagram](diagrams/25_Symmetric_and_Asymmetric_Encryption_Notes-04.png)
 <!-- /diagram:25-3 -->
@@ -242,7 +242,7 @@ Decryption does **the opposite:** the 128-bit cipher block goes through Add Roun
 <!-- isw:25-9 -->
 **In simple words**
 
-**Purpose:** a way to **share a secret key between the SENDER and the RECEIVER over an insecure network.** The steps with the notes' numbers:
+**Purpose:** a way to **share a secret key between the SENDER and the RECEIVER over an insecure network.** The steps, with an example:
 1. **Agree on public values:** **prime P = 7** and **primitive root = 3** (visible to everyone, even a hacker). *How to find the primitive root:* the powers of 3 mod 7 are 3, 2, 6, 4, 5, 1, which gives all the values 1–6, so 3 is a primitive root of 7.
 2. **Each side randomly picks a private key:** sender = **4,** receiver = **5.**
 3. **Calculate the public key = (primitive root ^ private) mod prime:** sender `3^4 mod 7 = 4`; receiver `3^5 mod 7 = 5.`
@@ -258,7 +258,7 @@ Decryption does **the opposite:** the 128-bit cipher block goes through Add Roun
 ## 6. How a Digital Signature works
 
 <!-- diagram:25-4 -->
-**Diagram – Digital signature: sign and verify**
+**Digital signature: sign and verify**
 
 ![Diagram](diagrams/25_Symmetric_and_Asymmetric_Encryption_Notes-05.png)
 <!-- /diagram:25-4 -->

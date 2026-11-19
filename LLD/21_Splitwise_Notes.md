@@ -32,7 +32,7 @@ Design an app where friends share expenses. Someone pays a bill, the app splits 
 
 ## Step 2 – Class diagram
 
-**Diagram – Splitwise**
+**Splitwise**
 
 ![Diagram](diagrams/21_Splitwise_Notes-01.png)
 

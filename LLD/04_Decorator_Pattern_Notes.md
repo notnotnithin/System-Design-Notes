@@ -20,11 +20,11 @@ A pizza shop has many bases and many toppings. If every combination is a subclas
 - **Decorator (abstract)** – `ToppingDecorator` *is a* `BasePizza` and also *has a* `BasePizza` inside.
 - **Concrete decorators** – `ExtraCheeseTopping`, `MushroomTopping`, `PepperoniTopping`, `VeggiesTopping`. Each calls the wrapped pizza and adds its own price.
 
-**Diagram – Pizza and toppings**
+**Pizza and toppings**
 
 ![Diagram](diagrams/04_Decorator_Pattern_Notes-01.png)
 
-**Diagram – how the wrapping works**
+**how the wrapping works**
 
 ![Diagram](diagrams/04_Decorator_Pattern_Notes-02.png)
 

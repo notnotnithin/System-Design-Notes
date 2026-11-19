@@ -4,7 +4,7 @@
 ⬅ [16 Distributed Messaging Queue](16_Distributed_Messaging_Queue_Notes.md) · [Index](00_HLD_Index.md) · [18 Load Balancer and Algorithms](18_Load_Balancer_and_Algorithms_Notes.md) ➡
 <!-- nav -->
 
-Source (handwritten, 6 pages): https://drive.google.com/file/d/18wyJRj2g11NE1Ll1c6GJSiqnhwSao01U/view?usp=drive_link
+Source: https://drive.google.com/file/d/18wyJRj2g11NE1Ll1c6GJSiqnhwSao01U/view?usp=drive_link
 
 **Topics covered:** What is a proxy server · its types (Forward proxy, Reverse proxy) · Proxy vs VPN · Proxy vs Load Balancer · Proxy vs Firewall.
 
@@ -20,7 +20,7 @@ Source (handwritten, 6 pages): https://drive.google.com/file/d/18wyJRj2g11NE1Ll1
 <!-- isw:17-0 -->
 **In simple words**
 
-The notes use an analogy: a child wants chocolate from the **shop**, but instead of going directly the **mom (the proxy)** goes to the shop on the child's behalf and brings it back. Technically: `Client 1 / Client 2 ⇄ Proxy server ⇄ Server`. **A proxy server sits between client and server and acts as an intermediary.** The requests **pass through the proxy and there is no direct interaction** between the client and the server.
+An analogy: a child wants chocolate from the **shop**, but instead of going directly the **mom (the proxy)** goes to the shop on the child's behalf and brings it back. Technically: `Client 1 / Client 2 ⇄ Proxy server ⇄ Server`. **A proxy server sits between client and server and acts as an intermediary.** The requests **pass through the proxy and there is no direct interaction** between the client and the server.
 <!-- /isw:17-0 -->
 
 
@@ -32,7 +32,7 @@ They **differ in the direction of communication**: **Forward** and **Reverse**.
 ### ① Forward proxy (the "simple proxy")
 
 <!-- diagram:17-0 -->
-**Diagram – Forward proxy: hides the clients**
+**Forward proxy: hides the clients**
 
 ![Diagram](diagrams/17_Proxy_vs_Reverse_Proxy_Notes-01.png)
 <!-- /diagram:17-0 -->
@@ -47,7 +47,7 @@ They **differ in the direction of communication**: **Forward** and **Reverse**.
 2. **Grouping of requests** – a proxy can take care of multiple client requests. If several clients make the same `google.com` request, the proxy can **club/group them and send a single request** outside.
 3. **Access restricted data or content** – if your country blocks certain content/websites (e.g. in India), with the help of a proxy you can **bypass** it: the request appears to come from a user in e.g. **UK / US**, so country-wise location restrictions don't apply.
 4. **Brings security.**
-5. **Caching** – the proxy can cache responses (the diagram shows a *Cache* attached to the proxy).
+5. **Caching** – the proxy can cache responses (a *Cache* sits next to the proxy).
 
 **Disadvantage:** it **works at the application level.**
 
@@ -56,14 +56,14 @@ They **differ in the direction of communication**: **Forward** and **Reverse**.
 
 A forward proxy sits in front of **a group of clients in a closed network** (clients C1 `172.1.01`, C2 `172.2.01`, C3 `172.3.01`) and connects them to the Internet. **What it does: it hides the client networks**, so the outside server **does not know the internal client.** **How:** say client 1 (IP `172.1.01`) requests `google.com`. The proxy forwards the request using **its own IP address** (for example `192.30.1`), as if "the proxy is making a request on behalf of C1", so the server sees only the proxy's IP.
 
-**Advantages:** (1) **anonymity for the internal network:** the clients' IP address and location are hidden from the outside world; (2) **grouping of requests:** if many clients make the same `google.com` request, the proxy can **club them and send a single request** outside; (3) **access restricted content:** if a country blocks some websites (the notes mention India), a proxy lets you **bypass** it, since the request appears to come from a user in, say, the UK or US; (4) **it brings security;** (5) **caching:** the proxy can cache responses (a cache is drawn next to it). **Disadvantage:** it **works at the application level.**
+**Advantages:** (1) **anonymity for the internal network:** the clients' IP address and location are hidden from the outside world; (2) **grouping of requests:** if many clients make the same `google.com` request, the proxy can **club them and send a single request** outside; (3) **access restricted content:** if a country blocks some websites (for example India), a proxy lets you **bypass** it, since the request appears to come from a user in, say, the UK or US; (4) **it brings security;** (5) **caching:** the proxy can cache responses (a cache is drawn next to it). **Disadvantage:** it **works at the application level.**
 <!-- /isw:17-2 -->
 
 
 ### ② Reverse proxy
 
 <!-- diagram:17-1 -->
-**Diagram – Reverse proxy: hides the servers**
+**Reverse proxy: hides the servers**
 
 ![Diagram](diagrams/17_Proxy_vs_Reverse_Proxy_Notes-02.png)
 <!-- /diagram:17-1 -->
@@ -92,7 +92,7 @@ The two types **differ in the direction of communication:** **forward** and **re
 <!-- isw:17-3 -->
 **In simple words**
 
-The picture is `Internet → [Reverse proxy] → Server 1 / Server 2 / … / Server n`. A reverse proxy is **like a security guard for your backend servers:** users talk to the **reverse proxy, which then forwards the request to the right server.** The notes' example is a restaurant: customers do not go directly to the **kitchen (backend servers)**; they order through the **waiter (reverse proxy)**, who talks to the kitchen and brings the food.
+The setup is `Internet → [Reverse proxy] → Server 1 / Server 2 / … / Server n`. A reverse proxy is **like a security guard for your backend servers:** users talk to the **reverse proxy, which then forwards the request to the right server.** Example: a restaurant: customers do not go directly to the **kitchen (backend servers)**; they order through the **waiter (reverse proxy)**, who talks to the kitchen and brings the food.
 
 **Advantages:** **security** (the outside world does not know the servers' IP addresses, only the reverse proxy's); **in a DDoS attack the attacker can only attack the reverse-proxy server;** a **CDN is a reverse proxy** (local clients in Paris, US and India go to their **local CDN** (CDN-Paris, CDN-US, CDN-India), which fetches from the origin server, for example in Singapore, so an attacker can attack only a CDN, not the origin); it can do **caching;** it gives a **latency** benefit; and it has **load-balancer capability** (it can distribute requests across servers).
 <!-- /isw:17-3 -->
@@ -106,7 +106,7 @@ The picture is `Internet → [Reverse proxy] → Server 1 / Server 2 / … / Ser
 ## 3. Proxy vs VPN
 
 <!-- diagram:17-2 -->
-**Diagram – Proxy versus VPN path**
+**Proxy versus VPN path**
 
 ![Diagram](diagrams/17_Proxy_vs_Reverse_Proxy_Notes-03.png)
 <!-- /diagram:17-2 -->
@@ -133,7 +133,7 @@ With a **proxy** the path is `Client → Proxy → Server`, and it gives **anony
 <!-- isw:17-5 -->
 **In simple words**
 
-**A reverse proxy offers IP anonymity, caching and logging, and it can also act as a load balancer.** The notes say **a load balancer cannot be a proxy**, because it only distributes the traffic across Server 1 … Server n.
+**A reverse proxy offers IP anonymity, caching and logging, and it can also act as a load balancer.** **A load balancer cannot be a proxy**, because it only distributes the traffic across Server 1 … Server n.
 <!-- /isw:17-5 -->
 
 
@@ -142,7 +142,7 @@ With a **proxy** the path is `Client → Proxy → Server`, and it gives **anony
 ## 5. Proxy vs Firewall
 
 <!-- diagram:17-3 -->
-**Diagram – Firewall filters packets by rules**
+**Firewall filters packets by rules**
 
 ![Diagram](diagrams/17_Proxy_vs_Reverse_Proxy_Notes-04.png)
 <!-- /diagram:17-3 -->

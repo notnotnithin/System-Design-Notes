@@ -92,7 +92,7 @@ Then it answers **`250 Ok: queued as 7B3E9F01A2`**. Bob's mail is stored, and he
 - **Anti-spoofing trio.** **SPF** lists the IP addresses allowed to send for a domain. **DKIM** adds a signature over selected headers and the body, verified with a public key in DNS. **DMARC** tells receivers what to do when SPF/DKIM fail and where to send reports.
 - **Store and forward.** Each server queues the message (it gets a queue ID) and retries for days. Mail is not instant or guaranteed.
 
-## Step-by-step walkthrough (screenshots from the lesson)
+## Step-by-step walkthrough
 
 ### Step 1: CONNECT SECURELY – Port 465, TLS from the start
 

@@ -89,7 +89,7 @@ Each action was a **tiny request with a short answer.** **No message contained a
 - **No security.** No authentication, authorisation, encryption, integrity check or replay protection. Anyone who can reach port 502 can read values and write setpoints.
 - **Protecting it.** Isolate industrial networks, put firewalls and a DMZ between office and plant, allow only expected function codes (deep-packet inspection), use VPNs for remote access, **never expose port 502 to the internet**, and watch for unexpected writes.
 
-## Step-by-step walkthrough (screenshots from the lesson)
+## Step-by-step walkthrough
 
 ### Step 1: PORT 502 – A TCP connection to the PLC
 

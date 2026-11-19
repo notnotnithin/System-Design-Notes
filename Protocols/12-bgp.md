@@ -85,7 +85,7 @@ Later the hosting company takes the prefix away (a link failed, or maintenance).
 - **Scale and security.** The global IPv4 table holds about a million prefixes. BGP trusts what neighbours announce, so mistakes or attacks (*route leaks* and *prefix hijacks*) can redirect traffic. **RPKI** with route-origin validation checks that an AS is allowed to originate a prefix.
 - **Famous failure.** In October 2021 Facebook withdrew the routes to its DNS servers and vanished from the internet for roughly six hours.
 
-## Step-by-step walkthrough (screenshots from the lesson)
+## Step-by-step walkthrough
 
 ### Step 1: MANY NETWORKS – Each with its own number
 

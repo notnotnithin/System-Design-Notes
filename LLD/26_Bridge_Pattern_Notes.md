@@ -22,11 +22,11 @@ Living things all `breathe()`, but in different ways: dogs and whales use lungs,
 
 A `Dog` is created with `LungBreathing`, a `Fish` with `GillBreathing`. A new animal reuses an existing way of breathing, and a new way of breathing works with every animal.
 
-**Diagram – Living things and breathing processes**
+**Living things and breathing processes**
 
 ![Diagram](diagrams/26_Bridge_Pattern_Notes-01.png)
 
-**Diagram – the two hierarchies and the bridge**
+**the two hierarchies and the bridge**
 
 ![Diagram](diagrams/26_Bridge_Pattern_Notes-02.png)
 

@@ -30,7 +30,7 @@ Instead of a big `if (couponA) ... if (couponB) ...` in the cart, each coupon **
 
 ## Step 3 – Class diagram
 
-**Diagram – Coupon application**
+**Coupon application**
 
 ![Diagram](diagrams/35_Coupon_Shopping_Cart_Notes-01.png)
 

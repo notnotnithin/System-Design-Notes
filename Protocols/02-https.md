@@ -104,7 +104,7 @@ The browser unscrambles the page, draws it and shows the **padlock**: "the line 
 - **HSTS.** `Strict-Transport-Security: max-age=31536000` tells the browser to use only HTTPS for this site for a year, blocking downgrade attacks.
 - **Still visible.** IP addresses, the DNS query, the SNI name, packet sizes and timing. Encrypted Client Hello (ECH) and DNS over HTTPS reduce this.
 
-## Step-by-step walkthrough (screenshots from the lesson)
+## Step-by-step walkthrough
 
 ### Step 1: SECURE REQUEST – Browser asks for https://
 

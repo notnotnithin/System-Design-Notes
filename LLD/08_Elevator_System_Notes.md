@@ -30,7 +30,7 @@ A building has **several elevators and several floors**. People press Up or Down
 
 ## Step 2 – Class diagram
 
-**Diagram – Elevator system**
+**Elevator system**
 
 ![Diagram](diagrams/08_Elevator_System_Notes-01.png)
 

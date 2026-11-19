@@ -31,7 +31,7 @@ Two patterns do the heavy lifting: **State** (what the ATM allows right now) and
 
 ## Step 2 – Class diagram
 
-**Diagram – ATM**
+**ATM**
 
 ![Diagram](diagrams/17_ATM_Notes-01.png)
 

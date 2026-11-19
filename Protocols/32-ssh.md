@@ -85,7 +85,7 @@ SSH carries many **channels** over the single encrypted connection: a shell, a c
 - **Keystrokes.** Each key press is a separate small `CHANNEL_DATA` packet and the server echoes it. OpenSSH 9.5 sends keystrokes on a 20 ms beat with decoy packets to hide typing rhythm.
 - **Hardening.** Disable password and root login, use `ed25519` keys with a passphrase or agent, keep OpenSSH updated, limit exposure of port 22 (fail2ban, firewall).
 
-## Step-by-step walkthrough (screenshots from the lesson)
+## Step-by-step walkthrough
 
 ### Step 1: SAY HELLO – Versions, in plain text
 

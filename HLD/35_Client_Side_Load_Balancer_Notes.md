@@ -13,7 +13,7 @@ Source: https://drive.google.com/file/d/1uERH11qv6xWBvwHc0BoOJlnn89IzWt95/view?u
 ## 1. Load Balancer basics
 
 <!-- diagram:35-0 -->
-**Diagram – Server-side versus client-side load balancer**
+**Server-side versus client-side load balancer**
 
 ![Diagram](diagrams/35_Client_Side_Load_Balancer_Notes-01.png)
 <!-- /diagram:35-0 -->
@@ -84,7 +84,7 @@ After service discovery is set up, with RestTemplate we get the list of instance
 ## 3. With Spring Cloud LoadBalancer
 
 <!-- diagram:35-1 -->
-**Diagram – What @LoadBalanced does on a call**
+**What @LoadBalanced does on a call**
 
 ![Diagram](diagrams/35_Client_Side_Load_Balancer_Notes-02.png)
 <!-- /diagram:35-1 -->
@@ -197,7 +197,7 @@ public class LoadBalancerProductClientConfig {
 <!-- isw:35-5 -->
 **In simple words**
 
-To use Random for product-service: add **`@LoadBalancerClient(name = "product-service", configuration = LoadBalancerProductClientConfig.class)`** on the application class. The notes remark: *a normal config class is generally invoked only at application startup, but this `@LoadBalancerClient` config is invoked at runtime too,* when `http://product-service/xyz` is used. The config class returns `new RandomLoadBalancer(factory.getLazyProvider("product-service", ServiceInstanceListSupplier.class), "product-service")`. The **`ServiceInstanceListSupplier` is the one that invokes service discovery and asks for the instances** of `"product-service"`, and the serviceId is passed because the algorithm is mapped to **that service ID only.**
+To use Random for product-service: add **`@LoadBalancerClient(name = "product-service", configuration = LoadBalancerProductClientConfig.class)`** on the application class. Note: *a normal config class is generally invoked only at application startup, but this `@LoadBalancerClient` config is invoked at runtime too,* when `http://product-service/xyz` is used. The config class returns `new RandomLoadBalancer(factory.getLazyProvider("product-service", ServiceInstanceListSupplier.class), "product-service")`. The **`ServiceInstanceListSupplier` is the one that invokes service discovery and asks for the instances** of `"product-service"`, and the serviceId is passed because the algorithm is mapped to **that service ID only.**
 <!-- /isw:35-5 -->
 
 
@@ -206,7 +206,7 @@ To use Random for product-service: add **`@LoadBalancerClient(name = "product-se
 ## 6. Algorithm A for product-service, Algorithm B for all others
 
 <!-- diagram:35-2 -->
-**Diagram – Per-service algorithm and a default**
+**Per-service algorithm and a default**
 
 ![Diagram](diagrams/35_Client_Side_Load_Balancer_Notes-03.png)
 <!-- /diagram:35-2 -->
@@ -375,8 +375,6 @@ Load balancing with Feign is already automatic (seen in the Service Discovery no
 - Per-service algorithm: `@LoadBalancerClient(name, configuration)`; global default + overrides: `@LoadBalancerClients(defaultConfiguration, value)` with `@ConditionalOnMissingBean` on the global config.
 - Weighted / least-connection → custom `ReactorServiceInstanceLoadBalancer` or Istio.
 - FeignClient needs no code change.
-
-> Note: diagrams from the original PDF are not reproduced; all text and code is.
 
 ---
 

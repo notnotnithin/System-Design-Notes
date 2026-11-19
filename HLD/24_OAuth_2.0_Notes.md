@@ -5,8 +5,8 @@
 <!-- nav -->
 
 Sources:
-- Handwritten PDF (4 pages): https://drive.google.com/file/d/1DTuw_AyH2ByBV8tldT4kha87MXLplXdi/view?usp=drive_link
-- Typed Zoho note (read; the extra parts are in section 7): https://notebook.zohopublic.in/public/notes/bietv949cfd82a5804e0ea1d18400d3ff6fa3
+- PDF: https://drive.google.com/file/d/1DTuw_AyH2ByBV8tldT4kha87MXLplXdi/view?usp=drive_link
+- Zoho: https://notebook.zohopublic.in/public/notes/bietv949cfd82a5804e0ea1d18400d3ff6fa3
 
 ---
 
@@ -22,7 +22,7 @@ Sources:
 
 **OAuth stands for Open Authorization.** It is an **authorization framework** that **enables secure third-party access to user-protected data.**
 
-The notes' example is **"Sign in with Gmail":** a user on the *XYZ website* clicks **"I want to login" → "Sign in Gmail"** (or "Sign in FB"). XYZ talks to the user's **Gmail account** (the user is **already logged in** to Gmail), and afterwards XYZ shows *"Welcome user"*.
+Example: **"Sign in with Gmail":** a user on the *XYZ website* clicks **"I want to login" → "Sign in Gmail"** (or "Sign in FB"). XYZ talks to the user's **Gmail account** (the user is **already logged in** to Gmail), and afterwards XYZ shows *"Welcome user"*.
 <!-- /isw:24-0 -->
 
 
@@ -31,13 +31,13 @@ The notes' example is **"Sign in with Gmail":** a user on the *XYZ website* clic
 ## 2. 4 important roles / actors
 
 <!-- diagram:24-0 -->
-**Diagram – The four roles in "Sign in with Gmail"**
+**The four roles in "Sign in with Gmail"**
 
 ![Diagram](diagrams/24_OAuth_2.0_Notes-01.png)
 <!-- /diagram:24-0 -->
 
 
-| Role | Example in the notes |
+| Role | Example |
 |---|---|
 | **Resource Owner** | the user (e.g. *Himanshu*) who owns the data |
 | **Client** | the app that wants access (e.g. *Facebook / Instagram* – "Sign in with Gmail") |
@@ -64,7 +64,7 @@ There are four roles. The **Resource Owner** is the user who owns the data (for 
 <!-- isw:24-2 -->
 **In simple words**
 
-A grant type is the **mechanism a client uses to get an Access Token.** The notes list five: **1. Authorization Code Grant** (⭐⭐ the most important part), **2. Implicit Grant, 3. Resource Owner Password Credentials Grant, 4. Client Credentials Grant, 5. Refresh Token Grant** (⭐ important).
+A grant type is the **mechanism a client uses to get an Access Token.** There are five: **1. Authorization Code Grant** (⭐⭐ the most important part), **2. Implicit Grant, 3. Resource Owner Password Credentials Grant, 4. Client Credentials Grant, 5. Refresh Token Grant** (⭐ important).
 <!-- /isw:24-2 -->
 
 
@@ -73,13 +73,13 @@ A grant type is the **mechanism a client uses to get an Access Token.** The note
 ## 4. End-to-end flow using Authorization Code Grant
 
 <!-- diagram:24-1 -->
-**Diagram – Authorization code flow**
+**Authorization code flow**
 
 ![Diagram](diagrams/24_OAuth_2.0_Notes-02.png)
 <!-- /diagram:24-1 -->
 
 
-Actors in the diagram: **Resource Owner** (user), **Client** (e.g. Instagram – "Sign in using Gmail"), **Gmail Authorization Server**, **Gmail Resource Server** (user is already logged in to Gmail).
+Actors: **Resource Owner** (user), **Client** (e.g. Instagram – "Sign in using Gmail"), **Gmail Authorization Server**, **Gmail Resource Server** (user is already logged in to Gmail).
 
 1. **Registration** – client registers itself with the Authorization Server.
 2. Authorization Server returns **Client ID & Secret**.
@@ -88,14 +88,12 @@ Actors in the diagram: **Resource Owner** (user), **Client** (e.g. Instagram –
 5. **Owner authenticates and provides consent** (at the Authorization Server).
 6. Authorization Server **provides an Authorization Code** (to the client, via the redirect URI).
 7. Client **requests a token using the Authorization Code**.
-8. *(page edge cut off in the scan)* Authorization Server returns the **access token** (and refresh token) to the client.
-9. *(page edge cut off in the scan)* Client calls the **Resource Server** with the access token to get the owner's data.
+8. Authorization Server returns the **access token** (and refresh token) to the client.
+9. Client calls the **Resource Server** with the access token to get the owner's data.
 10. Resource Server **validates the token** (with the Authorization Server).
 11. Result: **valid or invalid**.
 12. **If the token is valid → provides the details, else a 400 error is thrown.**
 13. Client shows **sign-in successful or failure**.
-
-> ⚠️ Steps 8–9 sit at the page boundary of the scan and are not fully visible; they are reconstructed from the standard flow (and consistent with steps 7 and 10).
 
 <!-- isw:24-3 -->
 **In simple words**
@@ -115,7 +113,6 @@ The actors are the **resource owner (user), the client (for example Instagram, "
 12. **If the token is valid it provides the details, otherwise a 400 error is thrown.**
 13. The client shows **sign-in successful or failure.**
 
-*(Transcription caveat: steps 8 and 9 are at the cut edge of the scan, so they are reconstructed from the standard flow.)*
 <!-- /isw:24-3 -->
 
 
@@ -187,9 +184,9 @@ The client asks for the code with **`GET /authorize?response_type=code & client_
 
 ---
 
-## 7. More from the Zoho note
+## 7. Detailed API calls
 
-The page says: *please follow the official documentation for exact API names and more details about request and response.*
+*Follow the official documentation for exact API names and more details about requests and responses.*
 
 ### Query parameters of `GET /authorize`
 | Parameter | Required? | Meaning |

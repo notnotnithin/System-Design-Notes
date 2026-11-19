@@ -94,7 +94,7 @@ The side that closes first waits a while (**TIME-WAIT**, typically 60 seconds) s
 - **Costs.** One round trip for the handshake and *head-of-line blocking*: one lost segment delays everything after it. QUIC avoids this by using independent streams.
 - **Security notes.** `SYN` floods are countered with SYN cookies; sequence-number guessing is why initial numbers are random.
 
-## Step-by-step walkthrough (screenshots from the lesson)
+## Step-by-step walkthrough
 
 ### Step 1: OPEN CONNECTION – Three-way handshake
 

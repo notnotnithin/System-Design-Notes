@@ -31,7 +31,7 @@ Design a two-player chess game: an 8×8 board, six kinds of pieces with differen
 
 ## Step 2 – Class diagram
 
-**Diagram – Chess**
+**Chess**
 
 ![Diagram](diagrams/18_Chess_Notes-01.png)
 

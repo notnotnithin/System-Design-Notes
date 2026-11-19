@@ -4,7 +4,7 @@
 [Index](00_HLD_Index.md) · [02 CAP Theorem](02_CAP_Theorem_Notes.md) ➡
 <!-- nav -->
 
-Source (handwritten, pages 1–4 of the 36-page PDF): https://drive.google.com/file/d/1iegvlzgcLJtcGvbjJbPqF4hZaB5u_nrh/view?usp=drive_link
+Source: https://drive.google.com/file/d/1iegvlzgcLJtcGvbjJbPqF4hZaB5u_nrh/view?usp=drive_link
 
 ---
 
@@ -21,16 +21,16 @@ Source (handwritten, pages 1–4 of the 36-page PDF): https://drive.google.com/f
 <!-- isw:01-0 -->
 **In simple words**
 
-A network protocol is **a set of rules for how devices on a network talk to each other.** The rules say how data is **encoded, sent and received**, so that two devices can understand each other's messages, like a common language between two computers. Well-known examples in the notes are **TCP/IP and HTTP.**
+A network protocol is **a set of rules for how devices on a network talk to each other.** The rules say how data is **encoded, sent and received**, so that two devices can understand each other's messages, like a common language between two computers. Well-known examples are **TCP/IP and HTTP.**
 
-The notes list five things a good protocol gives you: **interoperability** (a way for different systems to share information), **reliability** (it does not change over time), **efficiency** (less delay and less packet loss), **scalability** (it helps the system to grow) and **security** (SSL/TLS encrypt the data while it travels).
+A good protocol gives you five things: **interoperability** (a way for different systems to share information), **reliability** (it does not change over time), **efficiency** (less delay and less packet loss), **scalability** (it helps the system to grow) and **security** (SSL/TLS encrypt the data while it travels).
 <!-- /isw:01-0 -->
 
 
 ## OSI layers
 
 <!-- diagram:01-0 -->
-**Diagram – OSI layers and where the protocols live**
+**OSI layers and where the protocols live**
 
 ![Diagram](diagrams/01_Network_Protocols_Notes-01.png)
 <!-- /diagram:01-0 -->
@@ -52,7 +52,7 @@ At the transport layer there are two choices. **TCP** is **connection-oriented a
 ### Application layer – communication models
 
 <!-- diagram:01-1 -->
-**Diagram – Three communication models**
+**Three communication models**
 
 ![Diagram](diagrams/01_Network_Protocols_Notes-02.png)
 <!-- /diagram:01-1 -->
@@ -66,13 +66,13 @@ At the transport layer there are two choices. **TCP** is **connection-oriented a
 <!-- isw:01-1 -->
 **In simple words**
 
-The notes list the seven OSI layers: Application, Presentation, Session, Transport, Network, Data Link and Physical. Only two matter for this lecture: the **Application layer (L7)** and the **Transport layer (L4)**.
+The seven OSI layers are: Application, Presentation, Session, Transport, Network, Data Link and Physical. Only two matter for this lecture: the **Application layer (L7)** and the **Transport layer (L4)**.
 <!-- /isw:01-1 -->
 
 <!-- isw:01-3 -->
 **In simple words**
 
-At the application layer the notes show two models:
+At the application layer there are two models:
 1. **Client–server (connection-oriented):** **HTTP, FTP, SMTP** and, for receiving mail, **IMAP and POP**. For SMTP, sending mail uses **two connections: a control connection and a temporary data connection.** A web browser and a web server exchange a request and a response over HTTP / FTP / SMTP.
 2. **Peer-to-peer:** **WebRTC**, where the clients communicate directly with each other.
 
@@ -86,7 +86,7 @@ At the application layer the notes show two models:
 ## 1. TCP – Transmission Control Protocol
 
 <!-- diagram:01-2 -->
-**Diagram – TCP three-way handshake**
+**TCP three-way handshake**
 
 ![Diagram](diagrams/01_Network_Protocols_Notes-03.png)
 <!-- /diagram:01-2 -->
@@ -152,7 +152,7 @@ UDP belongs to the same family as TCP but is **not reliable and connectionless.*
 ## 6. Proxy servers
 
 <!-- diagram:01-3 -->
-**Diagram – A proxy sits between clients and servers**
+**A proxy sits between clients and servers**
 
 ![Diagram](diagrams/01_Network_Protocols_Notes-04.png)
 <!-- /diagram:01-3 -->
@@ -168,7 +168,7 @@ A **proxy server acts as an intermediary between client devices and servers.**
 <!-- isw:01-9 -->
 **In simple words**
 
-A **proxy server sits between client devices and servers.** The notes list its **purposes** (content filtering, privacy / anonymity, security and access protocol, load balancing, caching), its **types** (forward, reverse, web proxy, public proxy), its **advantages** (enhanced security, improved performance, content control, load balancing) and its **disadvantages** (latency, configuration complexity). The details are in the [Proxy vs Reverse Proxy](17_Proxy_vs_Reverse_Proxy_Notes.md) note.
+A **proxy server sits between client devices and servers.** Its **purposes** are content filtering, privacy / anonymity, security and access protocol, load balancing and caching. Its **types** are forward, reverse, web proxy and public proxy. Its **advantages** are enhanced security, improved performance, content control and load balancing, and its **disadvantages** are latency and configuration complexity. The details are in the [Proxy vs Reverse Proxy](17_Proxy_vs_Reverse_Proxy_Notes.md) note.
 <!-- /isw:01-9 -->
 
 

@@ -20,11 +20,11 @@ An e-commerce app wants a **"Notify me when back in stock"** feature. Without th
 - **Observer interface** – `StockNotificationObserver` with a single `update()` method.
 - **Concrete observers** – `EmailNotificationObserver`, `PushNotificationObserver`. A new channel is just a new class.
 
-**Diagram – Notify-me (back in stock) example**
+**Notify-me (back in stock) example**
 
 ![Diagram](diagrams/03_Observer_Pattern_Notes-01.png)
 
-**Diagram – what happens on restock**
+**what happens on restock**
 
 ![Diagram](diagrams/03_Observer_Pattern_Notes-02.png)
 
@@ -50,7 +50,7 @@ public boolean purchase(int quantity) {
 ## Second example: weather station
 `WeatherStation` (observable) holds temperature, humidity and pressure. `CurrentConditionsDisplay` and `ForecastDisplay` (observers) are updated whenever the readings change.
 
-**Diagram – Weather station example**
+**Weather station example**
 
 ![Diagram](diagrams/03_Observer_Pattern_Notes-03.png)
 

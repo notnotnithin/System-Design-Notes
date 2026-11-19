@@ -20,11 +20,11 @@ A `Student` has many fields, and some are optional (`mobileNo`, `emailId`, `subj
 - **Concrete builders** – `EngineeringStudentBuilder` and `MBAStudentBuilder` differ in how they fill things such as `subjects`.
 - **Director** (optional) – `StudentRegistrationDirector` knows the *recipe* (which steps, in which order) for a standard student.
 
-**Diagram – Student builders**
+**Student builders**
 
 ![Diagram](diagrams/23_Builder_Pattern_Notes-01.png)
 
-**Diagram – building an engineering student**
+**building an engineering student**
 
 ![Diagram](diagrams/23_Builder_Pattern_Notes-02.png)
 

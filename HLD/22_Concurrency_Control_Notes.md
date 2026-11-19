@@ -35,15 +35,15 @@ synchronized ()
 }
 ```
 
-The page asks: **"Will this solution work for a distributed system?"**
+The question: **"Will this solution work for a distributed system?"**
 
-**In simple words:** `synchronized` allows one thread at a time, but only inside one application instance. In a distributed system there are many instances, so the question is whether it still protects the row. The page moves on to a second solution.
+**In simple words:** `synchronized` allows one thread at a time, but only inside one application instance. In a distributed system there are many instances, so the question is whether it still protects the row. So a second solution is needed.
 
 ## 3. Solution 2 – Distributed concurrency control
 
 ![Diagram](diagrams/22_Concurrency_Control_Notes-02.png)
 
-Before learning this, the page says we **MUST** know three important things first:
+Before learning this, we **MUST** know three important things first:
 1. What is the usage of **Transaction**?
 2. What is **DB locking**?
 3. What are the **isolation levels** present?
@@ -86,7 +86,7 @@ DB locking helps us make sure that **no other transaction updates the locked row
 | Repeatable Read | No | No | Yes |
 | Serializable | No | No | No |
 
-The page marks an arrow along this table: **Consistency high at the Serializable end, consistency low at the Read Uncommitted end.** (The arrow in the picture is drawn next to the table, with "Consistency High" at the top and "Consistency Low" at the bottom.)
+The stricter the level (towards Serializable), the more consistent the data and the lower the concurrency.
 
 **In simple words:** the further down the table, the more problems are prevented.
 
@@ -101,8 +101,6 @@ If Transaction A reads data that is being written by Transaction B and is **not 
 | T3 | | Read Row ID:1 (got status as Booked) | ID 1, Booked (not committed yet) |
 | T4 | Some issue faced here | Some computation | ID 1, Booked (not committed yet) |
 | T5 | Rollback | Commit | ID 1, Status Free |
-
-(The page's table is written with A doing the update and B doing the read, while its sentence above uses the roles the other way round. The idea is the same: one transaction reads another's uncommitted change, and that change is rolled back.)
 
 #### Non-repeatable read
 
@@ -127,8 +125,6 @@ Transaction A **executes the same query several times and there is a chance that
 | T3 | | another transaction inserted row ID 2 and committed: ID 1, ID 2, ID 3 |
 | T4 | Read rows where ID>0 and ID<5 (reads 3 rows: ID 1, ID 2 and ID 3) | ID 1, ID 2, ID 3 |
 | T5 | COMMIT | |
-
-(The page writes "23rows" at T4, which is clearly a typo for 3 rows.)
 
 **In simple words:**
 - **Dirty read:** you read something that someone else has not committed.
@@ -158,7 +154,7 @@ BEGIN_TRANSACTION;
 END_TRANSACTION
 ```
 
-The page then says: "Let's come back to the main solution of the problem *how to resolve the concurrency issue*".
+Now back to the main problem: **how to resolve the concurrency issue.**
 
 ## 4. OCC vs PCC
 
@@ -189,10 +185,9 @@ Flow of OCC:
 
 ### 4.2 Pessimistic Concurrency Control
 
-The page for PCC is a **handwritten whiteboard sketch** that is hard to read. What it shows:
-- A heading "Pessimistic Concurrency Control (PCC)" and a note about **Serializable** (T1 then T2, or T2 then T1).
-- A **use case** with two transactions: **T1: Read A, Update B** and **T2: Read B, Update A**, on a DB holding rows A and B, drawn with shared locks and exclusive locks.
-- The word **"Deadlock"** circled: T1 holds a shared lock on A and wants to write B, while T2 holds a shared lock on B and wants to write A. Each is waiting for the other to release a shared lock, so one of them gets **aborted**.
+Pessimistic Concurrency Control (PCC) works with **Repeatable Read** and **Serializable** (T1 then T2, or T2 then T1). Take this **use case** with two transactions: **T1: Read A, Update B** and **T2: Read B, Update A**, on a DB holding rows A and B, using shared locks and exclusive locks.
+
+**Deadlock:** T1 holds a shared lock on A and wants to write B, while T2 holds a shared lock on B and wants to write A. Each is waiting for the other to release a shared lock, so one of them gets **aborted**.
 
 ![Diagram](diagrams/22_Concurrency_Control_Notes-04.png)
 

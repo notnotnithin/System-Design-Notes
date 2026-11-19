@@ -4,12 +4,12 @@
 ⬅ [07 URL Shortener](07_URL_Shortener_Notes.md) · [Index](00_HLD_Index.md) · [09 Key Value DB](09_Key_Value_DB_Notes.md) ➡
 <!-- nav -->
 
-Source (handwritten, 6 pages): https://drive.google.com/file/d/1AH37a-iSXNquC01PUIi14yDO8jscnaA6/view?usp=drive_link
+Source: https://drive.google.com/file/d/1AH37a-iSXNquC01PUIi14yDO8jscnaA6/view?usp=drive_link
 
 ---
 
 ## 1. What is back-of-the-envelope estimation? (p1)
-Rough capacity estimation used to **drive design decisions** for a system. Typical questions the diagram raises:
+Rough capacity estimation used to **drive design decisions** for a system. Typical questions:
 - **How many servers do we need?**
 - **Capacity** of the database? **Storage size?**
 - How big should the **cache** be? Do we need a **CDN**? What load does the **load balancer** see?
@@ -46,7 +46,7 @@ Three rules: do a **rough ("T-shirt size") estimation**, **do not spend much tim
 | 12 | Trillion | **TB** |
 | 15 | Quadrillion | **PB** (Peta Byte) |
 
-**Data sizes to remember (as written in the notes)**
+**Data sizes to remember**
 - `char` → **2 bytes** (ASCII = 1 byte, Unicode = 2 bytes)
 - `long` / `double` → **8 bytes**
 - `Integer` → **16 bytes** *(object size as noted; a primitive int is 4 bytes)*
@@ -62,7 +62,7 @@ Example: `5 million users × 2 KB ⇒ 5 × 2 = 10`, zeros `6 + 3 = 9` ⇒ **10 G
 
 Everything goes in steps of **three zeros**: 3 zeros is **thousand (KB)**, 6 zeros **million (MB)**, 9 zeros **billion (GB)**, 12 zeros **trillion (TB)**, 15 zeros **quadrillion (PB)**.
 
-The notes also list **data sizes to remember:** a `char` is 2 bytes (ASCII 1 byte, Unicode 2 bytes), a `long` or `double` is 8 bytes, an `Integer` is 16 bytes (as noted; the note remarks that a primitive int is 4 bytes), and an **average image is 300 KB**.
+**Data sizes to remember:** a `char` is 2 bytes (ASCII 1 byte, Unicode 2 bytes), a `long` or `double` is 8 bytes, an `Integer` object is 16 bytes (a primitive int is 4 bytes), and an **average image is 300 KB**.
 
 After you come up with the data, you estimate the **number of servers, the RAM and the storage capacity**, and then discuss the trade-offs (CAP).
 
@@ -75,7 +75,7 @@ After you come up with the data, you estimate the **number of servers, the RAM a
 ## 3. Worked example – estimating Facebook (p3–p5)
 
 <!-- diagram:08-0 -->
-**Diagram – Estimation flow for the Facebook example**
+**Estimation flow for the Facebook example**
 
 ![Diagram](diagrams/08_Back_of_the_Envelope_Estimation_Notes-01.png)
 <!-- /diagram:08-0 -->
@@ -151,12 +151,12 @@ The latency target is **95 % of requests within 500 ms**, so one request takes a
 ---
 
 ## 4. CAP theorem trade-off (p6)
-The last page only sketches the CAP Venn diagram (**CA, CP, AP**) and a broken link between two nodes, with the remark: *"This topic is not fully clear – any one-time practice."* (See the CAP notes: [02_CAP_Theorem_Notes.md](02_CAP_Theorem_Notes.md).)
+CAP is covered in the [CAP note](02_CAP_Theorem_Notes.md); it needs one more round of practice to get fully clear.
 
 <!-- isw:08-7 -->
 **In simple words**
 
-The last page only sketches the CAP Venn diagram (CA, CP, AP) and a broken link between two nodes. The notes themselves remark: *"This topic is not fully clear, any one-time practice."* See the [CAP note](02_CAP_Theorem_Notes.md).
+CAP is covered in the [CAP note](02_CAP_Theorem_Notes.md); it needs one more round of practice to get fully clear.
 <!-- /isw:08-7 -->
 
 
@@ -172,7 +172,7 @@ The last page only sketches the CAP Venn diagram (CA, CP, AP) and a broken link 
 
 ---
 
-## Extra from the 36-page handwritten compendium (pages 24–26)
+## More points
 These pages are in the same PDF as notes #1, #7, #9 and #11 (https://drive.google.com/file/d/1iegvlzgcLJtcGvbjJbPqF4hZaB5u_nrh/view?usp=drive_link); kept here because they belong to this topic.
 
 - Traffic: 1 B users, DAU 25 % = 250 M; 5 reads + 2 writes = 7 queries → `250 M × 7 / ~100,000 s` ≈ **~10 K QPS** (≈18 K in the other note).

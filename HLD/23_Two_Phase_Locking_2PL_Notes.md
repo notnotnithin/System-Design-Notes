@@ -6,7 +6,7 @@
 
 Source: Typed Zoho note – https://notebook.zohopublic.in/public/notes/74tdoc7e4be4e091e4005916a9721b69ee7b3
 
-The page starts with: *before this video, check out the previous "Distributed Concurrency" video in this HLD playlist* (see [22 Concurrency Control](22_Concurrency_Control_Notes.md)).
+Read [22 Concurrency Control](22_Concurrency_Control_Notes.md) before this note.
 
 ## 1. Basic Two Phase Locking
 
@@ -18,7 +18,7 @@ The page starts with: *before this video, check out the previous "Distributed Co
 - The transaction **cannot acquire any new locks.**
 - The transaction is **only allowed to release the locks taken previously.**
 
-The graph on the page plots **number of locks (y) against time (x)**: the line **rises** during the growing phase to a peak, then **falls** during the shrinking phase.
+If you plot the **number of locks (y) against time (x)**, the line **rises** during the growing phase to a peak, then **falls** during the shrinking phase.
 
 **In simple words:** a transaction first only collects locks, then, after it releases its first lock, it may only let go of locks. It can never go back to collecting. That one rule is what the name "two-phase" means.
 
@@ -71,7 +71,7 @@ The graph on the page plots **number of locks (y) against time (x)**: the line *
 - The scheduler **looks for a cycle in the WFG** to identify a deadlock.
 
 ![Diagram](diagrams/23_Two_Phase_Locking_2PL_Notes-01.png)
-(The page's example: T1 → T2 → T3 → T4 → T5 → back to T1 is a **deadlock**.)
+(Example: T1 → T2 → T3 → T4 → T5 → back to T1 is a **deadlock**.)
 
 - When a deadlock is identified, a transaction is **chosen from the cycle in the WFG to be ABORTED (such transactions are called the victim).**
 - The scheduler checks these things to pick the victim:
@@ -100,7 +100,7 @@ The graph: the lock count **jumps straight to its maximum at the start** (green 
 | **Wait-Die** | The **old transaction waits for the new one.** If ts(T1) < ts(T2), T1 waits for T2 to complete, otherwise the transaction gets aborted. |
 | **Wound-Wait** | The **old transaction "wounds" the new one and makes it abort.** If ts(T1) < ts(T2), T2 aborts and releases its lock, otherwise the transaction waits. |
 
-Examples on the page (ts(T1) < ts(T2), so **T1 has higher priority than T2**):
+Examples (ts(T1) < ts(T2), so **T1 has higher priority than T2**):
 
 | Case | Wait-Die | Wound-Wait |
 |---|---|---|

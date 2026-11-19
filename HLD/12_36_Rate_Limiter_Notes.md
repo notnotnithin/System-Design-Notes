@@ -4,7 +4,7 @@
 ⬅ [11 Design WhatsApp Chat App](11_Design_WhatsApp_Chat_App_Notes.md) · [Index](00_HLD_Index.md) · [14 Idempotent POST API](14_Idempotent_POST_API_Notes.md) ➡
 <!-- nav -->
 
-Source (same PDF for both entries): https://drive.google.com/file/d/1EwfhhSiBNJw87tqvoaseW5ZKUKB-YJDx/view?usp=drive_link
+Source: https://drive.google.com/file/d/1EwfhhSiBNJw87tqvoaseW5ZKUKB-YJDx/view?usp=drive_link
 
 ---
 
@@ -15,7 +15,7 @@ A service that **continues to work even when a downstream system fails**. Instea
 ### Why is it required?
 
 <!-- diagram:12_36-0 -->
-**Diagram – Cascading failure: one slow service blocks the others**
+**Cascading failure: one slow service blocks the others**
 
 ![Diagram](diagrams/12_36_Rate_Limiter_Notes-01.png)
 <!-- /diagram:12_36-0 -->
@@ -35,7 +35,7 @@ To avoid it we build **fault-tolerant microservices**.
 <!-- isw:12_36-1 -->
 **In simple words**
 
-The notes explain with a scenario: because of buggy code or an infrastructure problem the **Product** service becomes very slow (**60 seconds per response**).
+Scenario: because of buggy code or an infrastructure problem the **Product** service becomes very slow (**60 seconds per response**).
 - Without fault tolerance, a call from Order to Product **hangs for 60 s and blocks a thread.**
 - A sudden **burst** of calls from Order to Product **blocks all the threads**, all waiting for a response.
 - Because of this, **the clients of the Order service get blocked too.**
@@ -48,7 +48,7 @@ This is a **cascading failure**: the problem is only in the Product service, but
 ### Recommended logical ordering of patterns
 
 <!-- diagram:12_36-1 -->
-**Diagram – Recommended order of the patterns**
+**Recommended order of the patterns**
 
 ![Diagram](diagrams/12_36_Rate_Limiter_Notes-02.png)
 <!-- /diagram:12_36-1 -->
@@ -84,7 +84,7 @@ Controls **the number of requests allowed to a microservice in a given time wind
 ### Algorithm 1 – Fixed Window Counter
 
 <!-- diagram:12_36-2 -->
-**Diagram – Fixed window: the edge-of-window spike**
+**Fixed window: the edge-of-window spike**
 
 ![Diagram](diagrams/12_36_Rate_Limiter_Notes-03.png)
 <!-- /diagram:12_36-2 -->
@@ -104,7 +104,7 @@ The requests are counted in a **fixed window**; when the count crosses the limit
 ### Algorithm 2 – Sliding Log
 
 <!-- diagram:12_36-3 -->
-**Diagram – Sliding log: count timestamps inside the window**
+**Sliding log: count timestamps inside the window**
 
 ![Diagram](diagrams/12_36_Rate_Limiter_Notes-04.png)
 <!-- /diagram:12_36-3 -->
@@ -130,7 +130,7 @@ For every **accepted** request, the **exact timestamp** is stored. For each new 
 ### Algorithm 3 – Sliding Window Counter (with Sub-Windows)
 
 <!-- diagram:12_36-4 -->
-**Diagram – Sliding window with sub-windows (10 s window, 2 s slices)**
+**Sliding window with sub-windows (10 s window, 2 s slices)**
 
 ![Diagram](diagrams/12_36_Rate_Limiter_Notes-05.png)
 <!-- /diagram:12_36-4 -->
@@ -153,7 +153,7 @@ The main window is divided into **equal sub-windows**, and the number of request
 ### Algorithm 4 – Sliding Window Counter (Weighted Window)
 
 <!-- diagram:12_36-5 -->
-**Diagram – Weighted sliding window**
+**Weighted sliding window**
 
 ![Diagram](diagrams/12_36_Rate_Limiter_Notes-06.png)
 <!-- /diagram:12_36-5 -->
@@ -182,7 +182,7 @@ This simplifies the previous one by **removing the sub-windows and using an appr
 ### Algorithm 5 – Token Bucket
 
 <!-- diagram:12_36-6 -->
-**Diagram – Token bucket**
+**Token bucket**
 
 ![Diagram](diagrams/12_36_Rate_Limiter_Notes-07.png)
 <!-- /diagram:12_36-6 -->
@@ -202,7 +202,7 @@ A bucket holds a limited number of **tokens.** **Each request uses one token**, 
 ### Algorithm 6 – Leaky Bucket
 
 <!-- diagram:12_36-7 -->
-**Diagram – Leaky bucket**
+**Leaky bucket**
 
 ![Diagram](diagrams/12_36_Rate_Limiter_Notes-08.png)
 <!-- /diagram:12_36-7 -->
@@ -223,7 +223,7 @@ A bucket holds a limited number of **tokens.** **Each request uses one token**, 
 <!-- isw:12_36-3 -->
 **In simple words**
 
-A rate limiter **controls how many requests a microservice accepts in a given time window.** It protects the system from **sudden traffic spikes, for example a DDoS attack.** The notes then describe six algorithms for doing this.
+A rate limiter **controls how many requests a microservice accepts in a given time window.** It protects the system from **sudden traffic spikes, for example a DDoS attack.** There are six algorithms for doing this.
 <!-- /isw:12_36-3 -->
 
 <!-- isw:12_36-9 -->
@@ -317,7 +317,7 @@ resilience4j.ratelimiter.instances.productRateLimiter.timeoutDuration=1s
 <!-- isw:12_36-10 -->
 **In simple words**
 
-The notes say **Resilience4j applies the Token Bucket algorithm by default.** The pieces are: the `resilience4j-spring-boot3` dependency, a controller that calls `orderService.invokeProductAPI(id)`, a Feign client for the product service, and the service method annotated with `@RateLimiter(name = "productRateLimiter", fallbackMethod = "rateLimitedFallback")`.
+**Resilience4j applies the Token Bucket algorithm by default.** The pieces are: the `resilience4j-spring-boot3` dependency, a controller that calls `orderService.invokeProductAPI(id)`, a Feign client for the product service, and the service method annotated with `@RateLimiter(name = "productRateLimiter", fallbackMethod = "rateLimitedFallback")`.
 
 Two points from the code comments: the annotation works through **AOP, so the method must be public and the class must be a Spring-managed bean.** The **fallback method** must have the **same return type and parameters, plus a `Throwable`**; otherwise the framework's default fallback is invoked.
 
@@ -372,8 +372,6 @@ You can write your own limiter: a custom annotation `@CustomRateLimiter(limit, w
 - 6 algorithms: Fixed Window, Sliding Log, Sliding Window (sub-window), Sliding Window (weighted), Token Bucket, Leaky Bucket.
 - Resilience4j default = Token Bucket: `limitForPeriod`, `limitRefreshPeriod`, `timeoutDuration`; `@RateLimiter(name, fallbackMethod)` on a public Spring-bean method.
 - Custom limiter → AOP `@Around` + custom annotation.
-
-> Note: the diagrams of each algorithm in the original PDF are not reproduced; all text, examples and code are.
 
 ---
 

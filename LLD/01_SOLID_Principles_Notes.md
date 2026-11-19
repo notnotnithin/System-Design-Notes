@@ -26,7 +26,7 @@ SOLID is a set of five habits that keep object-oriented code easy to change. Wit
 
 **Fix.** One class per job: `Invoice` (data and total), `InvoiceDao` (saving), `InvoicePrinter` (printing).
 
-**Diagram – before and after**
+**before and after**
 
 ![Diagram](diagrams/01_SOLID_Principles_Notes-01.png)
 
@@ -43,7 +43,7 @@ SOLID is a set of five habits that keep object-oriented code easy to change. Wit
 
 **Fix.** Make an interface `InvoiceDao { save() }` and one class per way of saving. A new storage type is a new class.
 
-**Diagram – extension without modification**
+**extension without modification**
 
 ![Diagram](diagrams/01_SOLID_Principles_Notes-02.png)
 
@@ -79,7 +79,7 @@ public class DatabaseInvoiceDao implements InvoiceDao {
 
 **Fix.** Split by capability: `Vehicle` holds what *all* vehicles share. `EngineVehicle` (with `hasEngine`) is a child for the vehicles that really have one. `Bicycle` extends only `Vehicle`.
 
-**Diagram – before and after**
+**before and after**
 
 ![Diagram](diagrams/01_SOLID_Principles_Notes-03.png)
 
@@ -94,7 +94,7 @@ public class DatabaseInvoiceDao implements InvoiceDao {
 
 **Fix.** Split into small interfaces: `ChefTasks`, `WaiterTasks`, `MaintenanceTasks`. Each class implements only what it does.
 
-**Diagram – small interfaces**
+**small interfaces**
 
 ![Diagram](diagrams/01_SOLID_Principles_Notes-04.png)
 
@@ -109,7 +109,7 @@ public class DatabaseInvoiceDao implements InvoiceDao {
 
 **Fix.** Define `Keyboard` and `Mouse` interfaces. `MacBook` depends on those. `WiredKeyboard`, `BluetoothKeyboard` and the mouse classes implement them and are *passed in* (dependency injection).
 
-**Diagram – depend on interfaces**
+**depend on interfaces**
 
 ![Diagram](diagrams/01_SOLID_Principles_Notes-05.png)
 

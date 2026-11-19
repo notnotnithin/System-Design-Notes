@@ -5,8 +5,8 @@
 <!-- nav -->
 
 Sources:
-- Handwritten PDF (11 pages): https://drive.google.com/file/d/1jURIUs6grcQBkXl_mnx3nvZDlpHAqof8/view?usp=drive_link
-- Typed Zoho note (checked, same content; sample values taken from it): https://notebook.zohopublic.in/public/notes/bietvcd2cffdd8c7d449c839c007fecf8d562
+- PDF: https://drive.google.com/file/d/1jURIUs6grcQBkXl_mnx3nvZDlpHAqof8/view?usp=drive_link
+- Zoho: https://notebook.zohopublic.in/public/notes/bietvcd2cffdd8c7d449c839c007fecf8d562
 
 ---
 
@@ -49,7 +49,7 @@ JWT gives **a secure way of transmitting information between parties as a JSON o
 ### Stateless flow
 
 <!-- diagram:26-0 -->
-**Diagram – JWT login and request flow**
+**JWT login and request flow**
 
 ![Diagram](diagrams/26_JWT_Explained_Notes-01.png)
 <!-- /diagram:26-0 -->
@@ -84,7 +84,7 @@ Three uses: **(1) authenticating** (confirming the user's identity), **(2) autho
 ## 3. What was used before JWT? – Session ID (JSESSIONID)
 
 <!-- diagram:26-1 -->
-**Diagram – Session ID flow (stateful)**
+**Session ID flow (stateful)**
 
 ![Diagram](diagrams/26_JWT_Explained_Notes-02.png)
 <!-- /diagram:26-1 -->
@@ -121,7 +121,7 @@ Before JWT there was the **session ID (JSESSIONID):** the authorization server g
 ## 4. JWT structure  *(JWT / JWS / JWE)*
 
 <!-- diagram:26-2 -->
-**Diagram – JWT = header . payload . signature**
+**JWT = header . payload . signature**
 
 ![Diagram](diagrams/26_JWT_Explained_Notes-03.png)
 <!-- /diagram:26-2 -->
@@ -194,11 +194,11 @@ The steps: (1) **Base64-encode the header and the payload separately.** (2) **Jo
 <!-- /isw:26-8 -->
 
 
-### Dummy JWT sample (from the Zoho page)
+### Dummy JWT sample
 ```
 eyJhbGciOiJIUzI1NiIsInR5cCI6I.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6Ikpva.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV
 ```
-The three dot-separated parts are the Base64 header, payload and signature (the page colours them differently).
+The three dot-separated parts are the Base64 header, payload and signature.
 
 ### Sample API request
 ```
@@ -227,7 +227,7 @@ The client sends the token in the header: `Authorization: Bearer <JWT>` (the sam
 ## 5. SSO (Single Sign-On) with JWT
 
 <!-- diagram:26-3 -->
-**Diagram – Single sign-on**
+**Single sign-on**
 
 ![Diagram](diagrams/26_JWT_Explained_Notes-04.png)
 <!-- /diagram:26-3 -->
@@ -262,7 +262,7 @@ The user logs in **once** at the **authentication server,** gets a **JWT,** and 
 <!-- isw:26-11 -->
 **In simple words**
 
-Because JWT is stateless, the notes list these challenges:
+Because JWT is stateless, there are these challenges:
 1. **Token invalidation:** if one user is blacklisted, how do we invalidate their token **before it expires?** Options: (a) the server keeps a **list of blacklisted tokens** (DB / cache) and checks it while validating; (b) **change the secret key**, but that **invalidates the JWT of all users;** (c) tokens should be **very short-lived** ⭐; (d) tokens should be **used only once** ⭐.
 2. **JWT is encoded, not encrypted,** so anyone can base64-decode the payload. Solution: **JWE (JSON Web Encryption),** that is **encrypt the payload part.**
 3. **Unsecured JWT with `"alg": "none"`:** such tokens **should be rejected** (the header says no signature is needed).

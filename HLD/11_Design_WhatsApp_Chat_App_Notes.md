@@ -4,7 +4,7 @@
 ⬅ [10 SQL vs NoSQL](10_SQL_vs_NoSQL_Notes.md) · [Index](00_HLD_Index.md) · [12 & 36 Rate Limiter](12_36_Rate_Limiter_Notes.md) ➡
 <!-- nav -->
 
-Source (handwritten, pages 33–36 of the 36-page PDF): https://drive.google.com/file/d/1iegvlzgcLJtcGvbjJbPqF4hZaB5u_nrh/view?usp=drive_link
+Source: https://drive.google.com/file/d/1iegvlzgcLJtcGvbjJbPqF4hZaB5u_nrh/view?usp=drive_link
 
 ---
 
@@ -34,7 +34,7 @@ The numbers: **2 billion total users**, **DAU = 50 million**, and one user sends
 ### 2. Why not direct peer-to-peer?
 
 <!-- diagram:11-0 -->
-**Diagram – Peer-to-peer versus a chat server**
+**Peer-to-peer versus a chat server**
 
 ![Diagram](diagrams/11_Design_WhatsApp_Chat_App_Notes-01.png)
 <!-- /diagram:11-0 -->
@@ -45,14 +45,14 @@ User A and User B (each with an IP address) could talk directly peer-to-peer, **
 <!-- isw:11-2 -->
 **In simple words**
 
-User A and User B each have an IP address, so they could talk directly. But the notes list what goes wrong: **no chat history, not scalable, no groups, not fully available.** So a **common place, a chat server,** is needed to hold the details and take care of everything.
+User A and User B each have an IP address, so they could talk directly. But this goes wrong: **no chat history, not scalable, no groups, not fully available.** So a **common place, a chat server,** is needed to hold the details and take care of everything.
 <!-- /isw:11-2 -->
 
 
 ### 3. Protocol – HTTP fails for receiving
 
 <!-- diagram:11-1 -->
-**Diagram – Polling versus WebSocket**
+**Polling versus WebSocket**
 
 ![Diagram](diagrams/11_Design_WhatsApp_Chat_App_Notes-02.png)
 <!-- /diagram:11-1 -->
@@ -66,7 +66,7 @@ Normally HTTP = send a request, get a response, terminate. User A → Chat Serve
 <!-- isw:11-3 -->
 **In simple words**
 
-With normal HTTP the client sends a request, gets a response and the connection ends. With User A → Chat server → User B, **receiving is not possible without asking (sending a request).** The notes list three better ways to **receive** messages:
+With normal HTTP the client sends a request, gets a response and the connection ends. With User A → Chat server → User B, **receiving is not possible without asking (sending a request).** There are three better ways to **receive** messages:
 1. **Polling** – the client keeps sending requests (for example every second); most answers are "no", which is wasteful.
 2. **Long polling / pushing** – the request stays open until the server has data, then the client asks again; REST-based and fewer wasted calls.
 3. **WebSocket (bi-directional)** – **connection-oriented** (SYN/ACK handshake), then a **persistent two-way connection.** This is the one used for chat.
@@ -76,7 +76,7 @@ With normal HTTP the client sends a request, gets a response and the connection 
 ### 4. Architecture
 
 <!-- diagram:11-2 -->
-**Diagram – Chat architecture**
+**Chat architecture**
 
 ![Diagram](diagrams/11_Design_WhatsApp_Chat_App_Notes-03.png)
 <!-- /diagram:11-2 -->

@@ -5,7 +5,7 @@
 <!-- nav -->
 
 Sources:
-- Handwritten PDF (8 pages): https://drive.google.com/file/d/14wwKmtzMEgvctlQhiSrLU0gw9fhmMAGn/view?usp=drive_link
+- PDF: https://drive.google.com/file/d/14wwKmtzMEgvctlQhiSrLU0gw9fhmMAGn/view?usp=drive_link
 - OneNote (not readable automatically): https://1drv.ms/o/c/6b364628c29feb52/EpHzxZpvUj9ChPoZKABB6hYB3ThLz9J66-3csHIWs_G_ZA
 
 ---
@@ -13,7 +13,7 @@ Sources:
 ## 1. The Dual Write Problem
 
 <!-- diagram:33-0 -->
-**Diagram – Two ways the dual write goes wrong**
+**Two ways the dual write goes wrong**
 
 ![Diagram](diagrams/33_Dual_Write_Problem_Notes-01.png)
 <!-- /diagram:33-0 -->
@@ -58,7 +58,7 @@ The first idea is **2PC (Two-Phase Commit):** a **coordinator** sends a **Prepar
 <!-- isw:33-2 -->
 **In simple words**
 
-The notes say 2PC is **not a viable solution** here because: dual-write scenarios involve **different kinds of systems (a DB and a message queue), and some message queues / brokers do not support 2PC;** in a distributed system **2PC is slow (high latency)** because it gives strong consistency by waiting for all participants to commit; and **if the 2PC coordinator crashes, the participants may be stuck in an uncertain state until it recovers.**
+2PC is **not a viable solution** here because: dual-write scenarios involve **different kinds of systems (a DB and a message queue), and some message queues / brokers do not support 2PC;** in a distributed system **2PC is slow (high latency)** because it gives strong consistency by waiting for all participants to commit; and **if the 2PC coordinator crashes, the participants may be stuck in an uncertain state until it recovers.**
 <!-- /isw:33-2 -->
 
 
@@ -70,12 +70,12 @@ The notes say 2PC is **not a viable solution** here because: dual-write scenario
 ## 3. Answer: Event-Driven Architecture patterns
 1. **Transactional Outbox Pattern**
 2. **Listen-to-Yourself Pattern**
-3. **Transactional Log Tailing Pattern** *(named in the notes; the PDF doesn't detail it)*
+3. **Transactional Log Tailing Pattern** *(not detailed here)*
 
 ### ① Transactional Outbox Pattern
 
 <!-- diagram:33-1 -->
-**Diagram – Transactional outbox**
+**Transactional outbox**
 
 ![Diagram](diagrams/33_Dual_Write_Problem_Notes-02.png)
 <!-- /diagram:33-1 -->
@@ -137,7 +137,7 @@ Instead of writing to the DB **and** publishing an event, **write the event into
 ### ② Listen-to-Yourself Pattern
 
 <!-- diagram:33-2 -->
-**Diagram – Listen-to-yourself**
+**Listen-to-yourself**
 
 ![Diagram](diagrams/33_Dual_Write_Problem_Notes-03.png)
 <!-- /diagram:33-2 -->
@@ -162,18 +162,18 @@ This is **a variation of the Transactional Outbox pattern.** The **application w
 
 
 ### ③ Transactional Log Tailing
-Listed as the third pattern (read the DB's transaction log instead of polling a table); the PDF doesn't go into details.
+Listed as the third pattern (read the DB's transaction log instead of polling a table).
 
 <!-- isw:33-3 -->
 **In simple words**
 
-The answer is one of three patterns: **1. Transactional Outbox, 2. Listen-to-Yourself, 3. Transactional Log Tailing** (named in the notes; the PDF does not give details on the third).
+The answer is one of three patterns: **1. Transactional Outbox, 2. Listen-to-Yourself, 3. Transactional Log Tailing** (the third is not detailed here).
 <!-- /isw:33-3 -->
 
 <!-- isw:33-6 -->
 **In simple words**
 
-It is listed as the third pattern (read the DB's transaction log instead of polling a table); the PDF does not go into details.
+It is listed as the third pattern (read the DB's transaction log instead of polling a table).
 <!-- /isw:33-6 -->
 
 

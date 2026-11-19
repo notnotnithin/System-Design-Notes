@@ -11,7 +11,7 @@ Source: https://drive.google.com/file/d/1ApUVMYBXzsEiW_tCL_ZpfX0IGKZQ2IZe/view?u
 ## 1. What & why
 
 <!-- diagram:39-0 -->
-**Diagram – Without and with a circuit breaker**
+**Without and with a circuit breaker**
 
 ![Diagram](diagrams/39_Circuit_Breaker_Notes-01.png)
 <!-- /diagram:39-0 -->
@@ -25,14 +25,14 @@ Without it (e.g. Order → Product while Product is failing):
 
 Question: *how does Order service know when to stop calling Product and when to restart?* → **Circuit Breaker**.
 
-Flow in the diagram: calls to Product fail → **failure threshold reached → stop future calls to Product** → calls are **blocked for some time and fail immediately** → afterwards **check if Product is healthy and allow further calls only if it is**.
+Flow: calls to Product fail → **failure threshold reached → stop future calls to Product** → calls are **blocked for some time and fail immediately** → afterwards **check if Product is healthy and allow further calls only if it is**.
 
 <!-- isw:39-0 -->
 **In simple words**
 
 A circuit breaker **prevents an application from making repeated calls to a downstream service that is likely to fail.** Without it (for example Order → Product while Product is failing): it **unnecessarily adds load** to the Product service, so Product may take **longer to recover;** and the Order service **wastes its own resources** (latency and thread blocking) on calls that are likely to fail. The question: *how does the Order service know when to stop calling Product and when to restart?* The answer is the circuit breaker.
 
-The flow in the picture: calls to Product fail → the **failure threshold is reached → future calls to Product are stopped** → calls are **blocked for some time and fail immediately** → afterwards it **checks whether Product is healthy and allows further calls only if it is.**
+The flow: calls to Product fail → the **failure threshold is reached → future calls to Product are stopped** → calls are **blocked for some time and fail immediately** → afterwards it **checks whether Product is healthy and allows further calls only if it is.**
 <!-- /isw:39-0 -->
 
 
@@ -41,7 +41,7 @@ The flow in the picture: calls to Product fail → the **failure threshold is re
 ## 2. States of Circuit Breaker
 
 <!-- diagram:39-1 -->
-**Diagram – Circuit breaker states**
+**Circuit breaker states**
 
 ![Diagram](diagrams/39_Circuit_Breaker_Notes-02.png)
 <!-- /diagram:39-1 -->
@@ -179,7 +179,7 @@ resilience4j.circuitbreaker.instances.productService.ignore-exceptions=java.lang
 <!-- isw:39-2 -->
 **In simple words**
 
-The service method has **`@CircuitBreaker(name = "productService", fallbackMethod = "fallback")`,** and the notes say the **fallback method is invoked for each failed attempt.** The properties used are `sliding-window-type=COUNT_BASED`, `sliding-window-size=10`, `minimum-number-of-calls=5`, `failure-rate-threshold=50`, `wait-duration-in-open-state=10s`, `permitted-number-of-calls-in-half-open-state=3` and `automatic-transition-from-open-to-half-open-enabled=true`.
+The service method has **`@CircuitBreaker(name = "productService", fallbackMethod = "fallback")`,** and the **fallback method is invoked for each failed attempt.** The properties used are `sliding-window-type=COUNT_BASED`, `sliding-window-size=10`, `minimum-number-of-calls=5`, `failure-rate-threshold=50`, `wait-duration-in-open-state=10s`, `permitted-number-of-calls-in-half-open-state=3` and `automatic-transition-from-open-to-half-open-enabled=true`.
 
 **Output observed:** once the maximum trial-call limit is reached in HALF_OPEN and the success is not 100 %, the status changed **HALF_OPEN → OPEN.**
 <!-- /isw:39-2 -->
@@ -197,7 +197,7 @@ By default the circuit breaker records **all `RuntimeException`s and `Error`s as
 ## 4. How it works internally
 
 <!-- diagram:39-2 -->
-**Diagram – Inside the framework**
+**Inside the framework**
 
 ![Diagram](diagrams/39_Circuit_Breaker_Notes-03.png)
 <!-- /diagram:39-2 -->
@@ -250,7 +250,7 @@ OpenState(final int attempts, final long waitDurationInMillis,
 
 **AOP intercepts the call and passes it to `CircuitBreakerStateMachine.java`,** which has the complete logic for changing from one state to another whenever there is a failure. In its method `checkIfThresholdsExceeded`, after every error it checks whether the state must change: **if the threshold limit is reached and the state is CLOSED, it moves to OPEN;** a similar method exists for the other states.
 
-*The question in the notes: after moving to OPEN, how does it automatically go to HALF_OPEN after, say, 10 s?* **The answer: it uses a `ScheduledThreadPoolExecutor`.** In the `OpenState`, if automatic transition is enabled, it **schedules the task `toHalfOpenState` with the wait duration as the delay.** Internally the `ScheduledThreadPoolExecutor` uses a **DelayedQueue:** each available worker thread looks at the **head** of the queue; if the task's delay has not expired, the thread **waits (blocks)** for the remaining delay, and once the delay is over the OS wakes the thread; one thread picks the task from the head and executes it, while the other threads move to the next task in the queue and wait again if it is not ready.
+*Question: after moving to OPEN, how does it automatically go to HALF_OPEN after, say, 10 s?* **The answer: it uses a `ScheduledThreadPoolExecutor`.** In the `OpenState`, if automatic transition is enabled, it **schedules the task `toHalfOpenState` with the wait duration as the delay.** Internally the `ScheduledThreadPoolExecutor` uses a **DelayedQueue:** each available worker thread looks at the **head** of the queue; if the task's delay has not expired, the thread **waits (blocks)** for the remaining delay, and once the delay is over the OS wakes the thread; one thread picks the task from the head and executes it, while the other threads move to the next task in the queue and wait again if it is not ready.
 <!-- /isw:39-5 -->
 
 

@@ -89,7 +89,7 @@ Because the connection is identified by its **connection ID**, if your laptop mo
 - **Discovery.** A server announces HTTP/3 with the `Alt-Svc` header or a DNS `HTTPS` record. If UDP is blocked, browsers fall back to HTTP/2 over TCP.
 - **Standards.** RFC 9000 (QUIC), 9001 (TLS in QUIC), 9002 (loss recovery and congestion control), 9114 (HTTP/3).
 
-## Step-by-step walkthrough (screenshots from the lesson)
+## Step-by-step walkthrough
 
 ### Step 1: CHOOSING HTTP/3 – An earlier visit said it can
 

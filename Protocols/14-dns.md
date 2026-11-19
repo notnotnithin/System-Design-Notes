@@ -83,7 +83,7 @@ The resolver sends the final answer back to the laptop (repeating the original t
 - **Transport.** UDP port 53; TCP port 53 for large or truncated answers and for zone transfers.
 - **Weaknesses.** Plain DNS is neither encrypted nor authenticated. DNS over HTTPS/TLS adds privacy; DNSSEC adds authenticity.
 
-## Step-by-step walkthrough (screenshots from the lesson)
+## Step-by-step walkthrough
 
 ### Step 1: ASK THE RESOLVER – The laptop hands the question off
 

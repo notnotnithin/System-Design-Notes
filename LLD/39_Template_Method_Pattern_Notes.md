@@ -22,11 +22,11 @@ Sending money always follows the same flow: **validate → debit → calculate f
   - a **common step** `logTransaction()` shared by everyone.
 - **Concrete classes** – `BankTransfer` and `MerchantPayment` implement the steps (the merchant one also overrides the hook to require an OTP).
 
-**Diagram – Payment flow**
+**Payment flow**
 
 ![Diagram](diagrams/39_Template_Method_Pattern_Notes-01.png)
 
-**Diagram – the template in action**
+**the template in action**
 
 ![Diagram](diagrams/39_Template_Method_Pattern_Notes-02.png)
 

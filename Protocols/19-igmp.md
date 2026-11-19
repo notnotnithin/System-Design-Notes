@@ -83,7 +83,7 @@ The laptop closes VLC and sends **Leave Group**. Others might still be watching,
 - **Between networks.** Routers use **PIM** to build multicast distribution trees; IGMP only handles the last hop to hosts.
 - **Payload.** IPTV commonly sends MPEG transport stream packets, 188 bytes each, seven to a UDP datagram (1,316 bytes) so the datagram fits in an Ethernet frame.
 
-## Step-by-step walkthrough (screenshots from the lesson)
+## Step-by-step walkthrough
 
 ### Step 1: PICK A CHANNEL – The TV box joins a group
 

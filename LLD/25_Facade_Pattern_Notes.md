@@ -17,11 +17,11 @@ To place an order, an e-commerce app has to call four services in the right orde
 ## The solution
 `OrderFacade` holds the four services and offers one method, `placeOrder(productId, paymentMethod)`, that runs the whole workflow. The client only knows the facade.
 
-**Diagram – Order facade**
+**Order facade**
 
 ![Diagram](diagrams/25_Facade_Pattern_Notes-01.png)
 
-**Diagram – one call, four services**
+**one call, four services**
 
 ![Diagram](diagrams/25_Facade_Pattern_Notes-02.png)
 

@@ -19,11 +19,11 @@ A `PaymentProcessor` decides what to do with `if (type == "CARD") ... else if (t
 - **Concrete strategies** – `CreditCardPayment`, `UPIPayment`, `PayPalPayment`: each holds its own details and logic.
 - **Context** – `ShoppingCart` holds *a* `PaymentStrategy` and just calls `pay()`. It doesn't know which one it has.
 
-**Diagram – Payment example**
+**Payment example**
 
 ![Diagram](diagrams/02_Strategy_Pattern_Notes-01.png)
 
-**Diagram – what happens at checkout**
+**what happens at checkout**
 
 ![Diagram](diagrams/02_Strategy_Pattern_Notes-02.png)
 
@@ -47,7 +47,7 @@ public class ShoppingCart {
 ## Second example: vehicle drive modes
 `Vehicle` has a `DriveStrategy` (`NormalDrive`, `SportsDrive`, `EVDrive`). A `SportsVehicle` and an `OffRoadVehicle` just pass a different strategy. Before the pattern, each subclass repeated its own `drive()` code, and two subclasses with the same behaviour duplicated it.
 
-**Diagram – Drive mode example**
+**Drive mode example**
 
 ![Diagram](diagrams/02_Strategy_Pattern_Notes-03.png)
 

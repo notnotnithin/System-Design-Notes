@@ -22,11 +22,11 @@ If one class both stores the data, prints it and handles user commands, changing
 - `BlogView` (view) only knows how to display a `Blog` or a list of blogs. It has no logic.
 - `BlogController` keeps the list of blogs and a view. Its methods `addBlog`, `updateBlog`, `deleteBlog`, `showBlog` and `showAllBlogs` change the model and then ask the view to display.
 
-**Diagram – Blog application**
+**Blog application**
 
 ![Diagram](diagrams/37_MVC_Notes-01.png)
 
-**Diagram – adding and showing a blog**
+**adding and showing a blog**
 
 ![Diagram](diagrams/37_MVC_Notes-02.png)
 

@@ -11,7 +11,7 @@ Source: https://drive.google.com/file/d/1F4e2EwjCfi11-q7RdujOqiPgt7oCbO7B/view?u
 ## 1. Why Retry?
 
 <!-- diagram:38-0 -->
-**Diagram – Retry only the failed downstream call**
+**Retry only the failed downstream call**
 
 ![Diagram](diagrams/38_Retry_Pattern_Notes-01.png)
 <!-- /diagram:38-0 -->
@@ -48,7 +48,7 @@ In a distributed system a call to a downstream service can fail because of **tra
 ### Retry decision table
 
 <!-- diagram:38-1 -->
-**Diagram – Should I retry?**
+**Should I retry?**
 
 ![Diagram](diagrams/38_Retry_Pattern_Notes-02.png)
 <!-- /diagram:38-1 -->
@@ -61,7 +61,7 @@ In a distributed system a call to a downstream service can fail because of **tra
 | 401 Unauthorized | Authentication needed | No |
 | 403 Forbidden | Access denied | No |
 | 404 Not Found | Resource not found | No |
-| 409 Conflict | (listed as "Resource not found" in the notes – really a state conflict) | No |
+| 409 Conflict | (a state conflict) | No |
 | 429 Too Many Requests | Rate limiting | **Yes (with delay)** |
 | 500 Internal Server Error | Server issue | **Yes** |
 | 502 Bad Gateway | Downstream service failure | **Yes** |
@@ -80,7 +80,7 @@ In a distributed system a call to a downstream service can fail because of **tra
 <!-- isw:38-2 -->
 **In simple words**
 
-The table: **200** success → no; **400** client error → no; **401** authentication needed → no; **403** access denied → no; **404** resource not found → no; **409** (listed in the notes as "resource not found"; it is really a state conflict) → no; **429** rate limiting → **yes, with a delay;** **500** server issue → **yes;** **502** downstream service failure → **yes;** **503** service down or overloaded → **yes;** **network error** (connection failure, timeout) → **yes, but only if idempotent.**
+The table: **200** success → no; **400** client error → no; **401** authentication needed → no; **403** access denied → no; **404** resource not found → no; **409** state conflict → no; **429** rate limiting → **yes, with a delay;** **500** server issue → **yes;** **502** downstream service failure → **yes;** **503** service down or overloaded → **yes;** **network error** (connection failure, timeout) → **yes, but only if idempotent.**
 <!-- /isw:38-2 -->
 
 
@@ -92,7 +92,7 @@ The table: **200** success → no; **400** client error → no; **401** authenti
 ### 3.1 Fixed Interval
 
 <!-- diagram:38-2 -->
-**Diagram – Fixed interval: 2 s every time**
+**Fixed interval: 2 s every time**
 
 ![Diagram](diagrams/38_Retry_Pattern_Notes-03.png)
 <!-- /diagram:38-2 -->
@@ -179,7 +179,7 @@ Retry after a **constant delay.** Example: total attempts = 4 (the original + 3 
 ### 3.2 Exponential Backoff
 
 <!-- diagram:38-3 -->
-**Diagram – Exponential backoff: base x 2^n**
+**Exponential backoff: base x 2^n**
 
 ![Diagram](diagrams/38_Retry_Pattern_Notes-04.png)
 <!-- /diagram:38-3 -->
@@ -230,7 +230,7 @@ The code is the same, only the config changes: `maxAttempts=4`, `waitDuration=1s
 ### 3.3 Exponential Backoff + Jitter
 
 <!-- diagram:38-4 -->
-**Diagram – Backoff with jitter: random wait up to the limit**
+**Backoff with jitter: random wait up to the limit**
 
 ![Diagram](diagrams/38_Retry_Pattern_Notes-05.png)
 <!-- /diagram:38-4 -->
@@ -333,13 +333,13 @@ public class OrderService {
 <!-- isw:38-3 -->
 **In simple words**
 
-The notes describe four ways to decide the wait between retries: fixed interval, exponential backoff, exponential backoff with jitter and a custom strategy.
+There are four ways to decide the wait between retries: fixed interval, exponential backoff, exponential backoff with jitter and a custom strategy.
 <!-- /isw:38-3 -->
 
 <!-- isw:38-7 -->
 **In simple words**
 
-You define **your own retry delay strategy.** **Advantage:** full control and flexibility. **Disadvantage:** harder to maintain. In the code a `Retry` bean is created from a `RetryConfig` with your own `IntervalFunction` (the example just returns 2000 ms) and you call `customRetry.executeSupplier(...)`. The notes explain that you must **manually wrap the call within Retry,** because the **`@Retry` annotation works only for the retry types whose configuration can be given in `application.properties`.**
+You define **your own retry delay strategy.** **Advantage:** full control and flexibility. **Disadvantage:** harder to maintain. In the code a `Retry` bean is created from a `RetryConfig` with your own `IntervalFunction` (the example just returns 2000 ms) and you call `customRetry.executeSupplier(...)`. Note that you must **manually wrap the call within Retry,** because the **`@Retry` annotation works only for the retry types whose configuration can be given in `application.properties`.**
 
 The summary table: **fixed interval** (constant delay; simple and easy to debug; retry storm), **exponential backoff** (Base × 2^n; less load on the downstream; slow for short outages and some herd risk), **exponential backoff + jitter** (random between 0 and min(max, Base × 2^n); best for distributed systems; harder to debug) and **custom** (your own function; full control; harder to maintain).
 <!-- /isw:38-7 -->

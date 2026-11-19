@@ -31,7 +31,7 @@ Creational patterns are about **how objects get created** so the rest of the cod
 - A **concrete class** (`Student`) implements it and returns a copy of itself.
 - The client copies an existing object and changes only what differs.
 
-**Diagram – Student prototype**
+**Student prototype**
 
 ![Diagram](diagrams/27_Prototype_and_Creational_Overview_Notes-02.png)
 

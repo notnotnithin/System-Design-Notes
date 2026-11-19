@@ -82,7 +82,7 @@ The proxy **re-encrypts** the answer inside its secure session with the laptop a
 - **Compared with a forward proxy.** A forward proxy is configured on the client side and hides clients. A reverse proxy is on the server side and hides servers.
 - **Related roles.** Layer-7 load balancer, API gateway, ingress controller, WAF, edge cache. See the HLD notes on proxy vs reverse proxy, load balancers and API gateways.
 
-## Step-by-step walkthrough (screenshots from the lesson)
+## Step-by-step walkthrough
 
 ### Step 1: THE FRONT DOOR – The proxy holds the certificate
 

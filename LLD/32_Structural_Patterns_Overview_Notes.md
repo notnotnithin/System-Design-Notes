@@ -6,9 +6,9 @@
 
 Sources: [All Structural PDFs (Drive folder)](https://drive.google.com/drive/folders/13hg1N0piFmP4uBEH3jd9fvjIoA4SK4Dt?usp=drive_link) · [Zoho note](https://notebook.zohopublic.in/public/notes/74tdo33c5b7060d544b1c986e519dd3ba4d1b) (typed Zoho note, now read from its rendered images) · [Code on GitLab](https://gitlab.com/shrayansh8/lld-lowleveldesign/-/tree/main/src/main/java/com/conceptcoding/structuralpatterns?ref_type=heads)
 
-## From the Zoho note
+## The seven patterns with examples
 
-The Zoho page says: a **structural design pattern is a way to combine or arrange different classes and objects to form a complex or bigger structure to solve a particular requirement.** It lists seven types: Decorator, Proxy, Composite, Adapter, Bridge, Facade, Flyweight. Each one has a small example.
+A **structural design pattern is a way to combine or arrange different classes and objects to form a complex or bigger structure to solve a particular requirement.** The seven types are Decorator, Proxy, Composite, Adapter, Bridge, Facade and Flyweight. Each one has a small example below.
 
 ### 1. Decorator – add more functionality to an existing object without changing its structure
 
@@ -27,7 +27,7 @@ The Zoho page says: a **structural design pattern is a way to combine or arrange
 **In simple words:** the proxy looks exactly like the real DAO but checks permission first: only an ADMIN gets through to the real `create()`.
 
 ### 3. Composite – object inside object (tree-like structure)
-Examples on the page: **Delivery Box** (contains items and more delivery boxes) and **File System** (contains files and directories, which contain more files and directories).
+Examples: **Delivery Box** (contains items and more delivery boxes) and **File System** (contains files and directories, which contain more files and directories).
 
 ![Diagram](diagrams/32_Structural_Patterns_Overview_Notes-03.png)
 
@@ -46,7 +46,7 @@ parentDir.add(childDir);
 **In simple words:** a directory and a file both answer `ls()`, so you can call `ls()` on the top directory and it walks the whole tree.
 
 ### 4. Adapter – a bridge between two incompatible interfaces
-Drawn as a plug (Client), a travel adapter (Adaptor) and a wall socket (Adaptee).
+Think of a plug (Client), a travel adapter (Adaptor) and a wall socket (Adaptee).
 
 ![Diagram](diagrams/32_Structural_Patterns_Overview_Notes-04.png)
 
@@ -55,7 +55,7 @@ Drawn as a plug (Client), a travel adapter (Adaptor) and a wall socket (Adaptee)
 **In simple words:** the client wants kilograms, the machine only gives pounds. The adapter holds the machine, asks it for pounds and multiplies by 0.45.
 
 ### 5. Bridge – decouple an abstraction from its implementation so the two can vary independently
-First the problem: `abstract LivingThings { abstract void breatheProcess(); }` with `Dog` (nose, inhale oxygen, exhale carbon dioxide), `Fish` (gills, absorb oxygen, release carbon dioxide) and `Tree` (leaves, absorb carbon dioxide, release oxygen). The page asks: **how to add a new breathing process without adding any class of LivingThings?**
+First the problem: `abstract LivingThings { abstract void breatheProcess(); }` with `Dog` (nose, inhale oxygen, exhale carbon dioxide), `Fish` (gills, absorb oxygen, release carbon dioxide) and `Tree` (leaves, absorb carbon dioxide, release oxygen). The question: **how to add a new breathing process without adding any class of LivingThings?**
 
 Solution:
 

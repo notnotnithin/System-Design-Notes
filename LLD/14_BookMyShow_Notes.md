@@ -31,7 +31,7 @@ Note the **Controller → Service** layering: controllers are the entry points; 
 
 ## Step 2 – Class diagram
 
-**Diagram – BookMyShow**
+**BookMyShow**
 
 ![Diagram](diagrams/14_BookMyShow_Notes-01.png)
 

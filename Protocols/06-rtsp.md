@@ -93,7 +93,7 @@ When you close the stream, VLC sends **`TEARDOWN`** with the session ID. The cam
 - **Session timeout.** Typically 60 seconds without a request (or a `GET_PARAMETER`) ends the session.
 - **Security.** `rtsps://` runs RTSP over TLS. Many cameras ship with weak default passwords, so change them.
 
-## Step-by-step walkthrough (screenshots from the lesson)
+## Step-by-step walkthrough
 
 ### Step 1: WHAT CAN YOU DO? – OPTIONS over a TCP connection
 

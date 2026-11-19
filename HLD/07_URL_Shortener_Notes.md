@@ -4,7 +4,7 @@
 ⬅ [06 Consistent Hashing](06_Consistent_Hashing_Notes.md) · [Index](00_HLD_Index.md) · [08 Back of the Envelope Estimation](08_Back_of_the_Envelope_Estimation_Notes.md) ➡
 <!-- nav -->
 
-Source (handwritten, pages 20–23 of the 36-page PDF): https://drive.google.com/file/d/1iegvlzgcLJtcGvbjJbPqF4hZaB5u_nrh/view?usp=drive_link
+Source: https://drive.google.com/file/d/1iegvlzgcLJtcGvbjJbPqF4hZaB5u_nrh/view?usp=drive_link
 
 ---
 
@@ -33,9 +33,9 @@ The first rough design has two flows. **Creating:** the client sends a `POST` wi
 <!-- isw:07-2 -->
 **In simple words**
 
-The notes decide the size from the traffic. **How short? As short as possible.** The assumption is **10 million URLs per day = 3650 million per year**, and **each link must live for 100 years = 365,000 million = 365 × 10⁹ URLs.**
+The size is decided from the traffic. **How short? As short as possible.** The assumption is **10 million URLs per day = 3650 million per year**, and **each link must live for 100 years = 365,000 million = 365 × 10⁹ URLs.**
 
-For the characters, the notes use **0–9, a–z and A–Z = 10 + 26 + 26 = 62 characters.** With 6 characters `62⁶` is about 56 billion, which is too few. With **7 characters `62⁷` is about 3.5 trillion**, which is enough, so **the length is fixed at 7 characters.**
+For the characters we use **0–9, a–z and A–Z = 10 + 26 + 26 = 62 characters.** With 6 characters `62⁶` is about 56 billion, which is too few. With **7 characters `62⁷` is about 3.5 trillion**, which is enough, so **the length is fixed at 7 characters.**
 <!-- /isw:07-2 -->
 
 
@@ -49,7 +49,7 @@ For the characters, the notes use **0–9, a–z and A–Z = 10 + 26 + 26 = 62 c
 <!-- isw:07-3 -->
 **In simple words**
 
-First idea: use a hash function. **MD5 gives 128 bits = 16 bytes**; in hex each byte is 2 characters, so 16 × 2 = **32 characters, which is too long** (SHA-1 uses 160 bits, even longer). So the notes choose **Base-62**.
+First idea: use a hash function. **MD5 gives 128 bits = 16 bytes**; in hex each byte is 2 characters, so 16 × 2 = **32 characters, which is too long** (SHA-1 uses 160 bits, even longer). So we choose **Base-62**.
 
 Base-62 needs a **number (an ID) to convert**, so we need an **ID generator.** The problem is that **all IDs cannot come from a single DB.** Three options are listed:
 1. **Ticket server** – its disadvantage is that a single server is a **single point of failure.**
@@ -68,7 +68,7 @@ The flow is: the **user** reaches a **load balancer**, which sends the request t
 
 
 <!-- diagram:07-0 -->
-**Diagram – URL shortener architecture**
+**URL shortener architecture**
 
 ![Diagram](diagrams/07_URL_Shortener_Notes-01.png)
 <!-- /diagram:07-0 -->

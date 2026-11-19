@@ -20,11 +20,11 @@ A hotel has `StandardRoom`, `DeluxeRoom` and `SuiteRoom`. We need operations suc
 - **Visitor interface** – `IRoomVisitor` with one method per room type: `visitStandardRoom`, `visitDeluxeRoom`, `visitSuiteRoom`.
 - **Concrete visitors** – `HousekeepingVisitor`, `RoomServiceVisitor`, `PricingVisitor`: each class is one whole operation applied to every room type.
 
-**Diagram – Hotel rooms and visitors**
+**Hotel rooms and visitors**
 
 ![Diagram](diagrams/36_Visitor_Pattern_Notes-01.png)
 
-**Diagram – a visit (double dispatch)**
+**a visit (double dispatch)**
 
 ![Diagram](diagrams/36_Visitor_Pattern_Notes-02.png)
 

@@ -20,11 +20,11 @@ A `Library` stores `Book`s in a list. If the client loops over the internal list
 - **Aggregate interface** – `BookCollection` with `createIterator()` and `createReverseIterator()`.
 - **Concrete aggregate** – `Library` stores the books and creates the iterators.
 
-**Diagram – Library and iterators**
+**Library and iterators**
 
 ![Diagram](diagrams/33_Iterator_Pattern_Notes-01.png)
 
-**Diagram – walking the library**
+**walking the library**
 
 ![Diagram](diagrams/33_Iterator_Pattern_Notes-02.png)
 

@@ -87,7 +87,7 @@ After about 30 minutes, OBS sends `FCUnpublish` and `deleteStream`. The server c
 - **Timestamps.** Each audio/video message has a timestamp in milliseconds, so the player can align audio and video even though they are interleaved.
 - **Latency and loss.** RTMP runs over TCP, so loss causes retransmission and delay spikes. Modern ingest alternatives: SRT, WebRTC (WHIP), RIST. The secure form is **RTMPS** (RTMP inside TLS) because the stream key is otherwise visible.
 
-## Step-by-step walkthrough (screenshots from the lesson)
+## Step-by-step walkthrough
 
 ### Step 1: HANDSHAKE – TCP, then RTMP’s own
 

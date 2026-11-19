@@ -83,7 +83,7 @@ The resolver returns `203.0.113.10` to the laptop with an **AD ("Authenticated D
 - **Bigger packets.** Signatures and keys enlarge DNS responses, which is why EDNS(0) and TCP fallback matter.
 - **Limits.** DNSSEC gives authenticity and integrity, not confidentiality. Only signed zones with a DS record in their parent are protected. The last step (resolver to laptop) is unprotected unless you also use DoH or DoT.
 
-## Step-by-step walkthrough (screenshots from the lesson)
+## Step-by-step walkthrough
 
 ### Step 1: ASK AS USUAL – The laptop’s question doesn’t change
 

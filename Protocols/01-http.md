@@ -116,7 +116,7 @@ Connection: keep-alive
 - `Content-Length: 12500` → "The page is 12,500 bytes long," so the browser knows when it has everything.
 - Then the page itself.
 
-*Why does the lesson say "9 segments"?* One network packet can carry at most about **1,460 bytes** of your data. The page is 12,500 bytes, so TCP cuts it into **9 pieces** and sends them one after another. The lesson draws them as one big box to keep the picture simple. The laptop puts the pieces back together in order.
+*Why "9 segments"?* One network packet can carry at most about **1,460 bytes** of your data. The page is 12,500 bytes, so TCP cuts it into **9 pieces** and sends them one after another. In the diagram they are drawn as one big box to keep it simple. The laptop puts the pieces back together in order.
 
 ---
 
@@ -154,7 +154,7 @@ The browser reads the HTML and paints the page on screen. The page will usually 
 - **Newer versions.** HTTP/2 keeps the same meaning but sends binary frames and *multiplexes* many requests over one TCP connection. HTTP/3 does the same over QUIC (UDP), which removes TCP's head-of-line blocking.
 - **Security.** Everything here is readable by anyone on the path (URL, cookies, content). HTTPS wraps the same messages in TLS.
 
-## Step-by-step walkthrough (screenshots from the lesson)
+## Step-by-step walkthrough
 
 ### Step 1: CLIENT REQUEST – Browser prepares the request
 

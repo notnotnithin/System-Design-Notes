@@ -19,11 +19,11 @@ An application has settings (`theme`, `fontSize`, `notificationsEnabled`, `langu
 - **Memento** – `ConfigurationMemento`: an immutable snapshot of the fields.
 - **Caretaker** – `ConfigurationManager`: keeps a **stack** of mementos (the history) but never looks inside them. `saveState()` pushes one, `undo()` pops the latest and restores the one before it.
 
-**Diagram – Application configuration with undo**
+**Application configuration with undo**
 
 ![Diagram](diagrams/38_Memento_Pattern_Notes-01.png)
 
-**Diagram – save, change, undo**
+**save, change, undo**
 
 ![Diagram](diagrams/38_Memento_Pattern_Notes-02.png)
 

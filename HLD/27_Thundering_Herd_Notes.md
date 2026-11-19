@@ -4,14 +4,14 @@
 ⬅ [26 JWT Explained](26_JWT_Explained_Notes.md) · [Index](00_HLD_Index.md) · [28 API Gateway Concepts](28_API_Gateway_Concepts_Notes.md) ➡
 <!-- nav -->
 
-Source (handwritten, 2 pages): https://drive.google.com/file/d/1s_rhkuSserKURoOTwolrnMGifGHd9oKI/view?usp=drive_link
+Source: https://drive.google.com/file/d/1s_rhkuSserKURoOTwolrnMGifGHd9oKI/view?usp=drive_link
 
 ---
 
 ## 1. Problem: "Why does a ticket-booking app go down during peak traffic?"
 
 <!-- diagram:27-0 -->
-**Diagram – Thundering herd at the 12:00 PM sale**
+**Thundering herd at the 12:00 PM sale**
 
 ![Diagram](diagrams/27_Thundering_Herd_Notes-01.png)
 <!-- /diagram:27-0 -->
@@ -19,7 +19,6 @@ Source (handwritten, 2 pages): https://drive.google.com/file/d/1s_rhkuSserKURoOT
 
 **Scenario:** the **12:00 PM sale has started** on a ticket-booking app.
 
-Diagram in notes:
 ```
  new requests  + retried requests
           \   |   /
@@ -50,7 +49,7 @@ So the load balancer is hit by *new requests **plus** retried requests,* all at 
 ### ① Exponential Backoff
 
 <!-- diagram:27-1 -->
-**Diagram – Backoff spreads the retries over time**
+**Backoff spreads the retries over time**
 
 ![Diagram](diagrams/27_Thundering_Herd_Notes-02.png)
 <!-- /diagram:27-1 -->
@@ -81,14 +80,14 @@ This **spreads the retries over time** so the herd doesn't arrive together.
 <!-- isw:27-2 -->
 **In simple words**
 
-Exponential backoff alone still makes **all the clients retry at the same moments, because they all use the same formula.** So the notes **bring in some randomness:** `delay = min(MaxWaitTime, Random(0, Base × 2ⁿ))`. This **spreads the retries over time,** so the herd does not arrive together.
+Exponential backoff alone still makes **all the clients retry at the same moments, because they all use the same formula.** So we **bring in some randomness:** `delay = min(MaxWaitTime, Random(0, Base × 2ⁿ))`. This **spreads the retries over time,** so the herd does not arrive together.
 <!-- /isw:27-2 -->
 
 
 ### ③ Protect the entry with a Rate Limiter (Application / API Gateway)
 
 <!-- diagram:27-2 -->
-**Diagram – Rate limiter at the gateway**
+**Rate limiter at the gateway**
 
 ![Diagram](diagrams/27_Thundering_Herd_Notes-03.png)
 <!-- /diagram:27-2 -->

@@ -8,13 +8,13 @@ Source: Typed Zoho note – https://notebook.zohopublic.in/public/notes/9wn9od9a
 
 ## 1. The question: how do 2 microservices communicate with each other?
 
-In the previous topic (API Gateway) the picture is: **Client → DNS** (like AWS Route 53, Azure Traffic Manager) → one **API Gateway per region**. Each region has availability zones (AZ1, AZ2); in each AZ every microservice (Microservice1, Microservice2) has its own **load balancer** in front of several instances. The API Gateway asks **Service Discovery** where to send the request.
+In the previous topic (API Gateway) the setup is: **Client → DNS** (like AWS Route 53, Azure Traffic Manager) → one **API Gateway per region**. Each region has availability zones (AZ1, AZ2); in each AZ every microservice (Microservice1, Microservice2) has its own **load balancer** in front of several instances. The API Gateway asks **Service Discovery** where to send the request.
 
-In simple form the page redraws it as:
+In simple form:
 
 ![Diagram](diagrams/29_Service_Mesh_Notes-01.png)
 
-**In simple words:** the gateway handles traffic coming **from the client**. The follow-up question is the traffic **between services**: Microservice A wants to call Microservice B. What does A need for that? The page lists seven capabilities.
+**In simple words:** the gateway handles traffic coming **from the client**. The follow-up question is the traffic **between services**: Microservice A wants to call Microservice B. What does A need for that? There are seven capabilities.
 
 ## 2. Capability 1 – Service Discovery
 
@@ -37,7 +37,7 @@ In simple form the page redraws it as:
 
 ![Diagram](diagrams/29_Service_Mesh_Notes-04.png)
 
-**Scenario 2:** A got **B's application load balancer address** and now needs to invoke that. Config looks like `microserviceB.url={application-load-balancer-url}:{port-no}`. **An extra network call is required, which might cause a latency issue** (the "extra hop" in the diagram).
+**Scenario 2:** A got **B's application load balancer address** and now needs to invoke that. Config looks like `microserviceB.url={application-load-balancer-url}:{port-no}`. **An extra network call is required, which might cause a latency issue** (the "extra hop").
 
 ![Diagram](diagrams/29_Service_Mesh_Notes-05.png)
 
@@ -59,7 +59,7 @@ Microservice1 also needs a **circuit breaker (Hystrix)** next to the client-side
 
 ## 6. Capability 5 – Retry
 
-Microservice1 also gets a **Retry** capability (the green circular arrow in the diagram), sitting together with the circuit breaker.
+Microservice1 also gets a **Retry** capability, sitting together with the circuit breaker.
 
 **In simple words:** if a call fails, it can be tried again. (See [38 Retry Pattern](38_Retry_Pattern_Notes.md).)
 
@@ -78,7 +78,7 @@ Microservice1 also gets a **Retry** capability (the green circular arrow in the 
 - Telemetry capability on Microservice2: **latency, error rate, traffic, etc.**
 - This data **helps in monitoring as well as debugging.**
 
-**Everything on one picture:** Microservice1 now carries client-side load balancing + deployment-strategy support, circuit breaker (Hystrix) and retry; Microservice2 carries telemetry and authorization; plus the Service Discovery lookup.
+**All together:** Microservice1 now carries client-side load balancing + deployment-strategy support, circuit breaker (Hystrix) and retry; Microservice2 carries telemetry and authorization; plus the Service Discovery lookup.
 
 ![Diagram](diagrams/29_Service_Mesh_Notes-08.png)
 

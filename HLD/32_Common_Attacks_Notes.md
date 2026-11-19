@@ -58,14 +58,14 @@ In the CSRF demo authentication is mandatory for all endpoints and the app uses 
 ### Attack steps
 
 <!-- diagram:32-1 -->
-**Diagram – XSS attack and cookie theft**
+**XSS attack and cookie theft**
 
 ![Diagram](diagrams/32_Common_Attacks_Notes-01.png)
 <!-- /diagram:32-1 -->
 
 
 <!-- diagram:32-0 -->
-**Diagram – CSRF attack**
+**CSRF attack**
 
 ![Diagram](diagrams/32_Common_Attacks_Notes-02.png)
 <!-- /diagram:32-0 -->
@@ -221,7 +221,7 @@ XSS lets an attacker **inject a malicious script into a web page viewed by other
 ## 3. CORS – Cross-Origin Resource Sharing
 
 <!-- diagram:32-2 -->
-**Diagram – CORS: same origin versus different origin**
+**CORS: same origin versus different origin**
 
 ![Diagram](diagrams/32_Common_Attacks_Notes-03.png)
 <!-- /diagram:32-2 -->
@@ -268,7 +268,7 @@ public class SecurityConfig {
 
 CORS is **not an attack;** it is a **security feature** that restricts web pages from making requests to a **different origin** unless the server allows it. **An origin = protocol + domain + port.** Examples of *different* origins: `https://localhost:8080` vs `http://localhost:8080` (different **protocol**), `https://localhost:9090` vs `https://localhost:8080` (different **port**), `https://sub.localhost:9090` vs `https://localhost:9090` (different **domain / sub-domain**).
 
-By default, a client calling a server on a different origin is **blocked by CORS.** The **server has to allow** the request (for example from a given frontend) by setting **`Access-Control-Allow-Origin`** and other headers. The `SecurityConfig` shown in the notes does this with `.cors(...)`, setting the allowed origins, methods, headers and credentials.
+By default, a client calling a server on a different origin is **blocked by CORS.** The **server has to allow** the request (for example from a given frontend) by setting **`Access-Control-Allow-Origin`** and other headers. A `SecurityConfig` does this with `.cors(...)`, setting the allowed origins, methods, headers and credentials.
 <!-- /isw:32-8 -->
 
 
@@ -277,7 +277,7 @@ By default, a client calling a server on a different origin is **blocked by CORS
 ## 4. SQL Injection
 
 <!-- diagram:32-3 -->
-**Diagram – SQL injection**
+**SQL injection**
 
 ![Diagram](diagrams/32_Common_Attacks_Notes-04.png)
 <!-- /diagram:32-3 -->

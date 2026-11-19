@@ -19,15 +19,15 @@ If `VendingMachine` handles every action with `if / else` on a `state` flag (ins
 - **State (abstract / interface)** – `State` declares all the actions: `clickOnInsertCoinButton`, `insertCoin`, `clickOnStartProductSelectionButton`, `chooseProduct`, `dispenseProduct`, `refundFullMoney`, `updateInventory`. By default an action in the wrong state is **not allowed** (it throws).
 - **Concrete states** – `IdleState`, `HasMoneyState`, `SelectionState`, `DispenseState`. Each implements only the actions that make sense for it and **sets the next state**.
 
-**Diagram – Vending machine with states**
+**Vending machine with states**
 
 ![Diagram](diagrams/16_Vending_Machine_State_Pattern_Notes-01.png)
 
-**Diagram – the state machine**
+**the state machine**
 
 ![Diagram](diagrams/16_Vending_Machine_State_Pattern_Notes-02.png)
 
-**Diagram – buying a drink**
+**buying a drink**
 
 ![Diagram](diagrams/16_Vending_Machine_State_Pattern_Notes-03.png)
 

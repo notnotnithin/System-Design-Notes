@@ -28,7 +28,7 @@ Design the core of a cricket scoring application: teams, players, a match with i
 
 ## Step 2 – Class diagram
 
-**Diagram – Cricbuzz**
+**Cricbuzz**
 
 ![Diagram](diagrams/24_Cricbuzz_Notes-01.png)
 

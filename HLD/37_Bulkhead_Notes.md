@@ -13,7 +13,7 @@ Resilience4j provides these mechanisms to build fault-tolerant microservices: **
 ## 1. Rate Limiter vs Bulkhead
 
 <!-- diagram:37-0 -->
-**Diagram – Rate limiter protects from clients, bulkhead from downstream**
+**Rate limiter protects from clients, bulkhead from downstream**
 
 ![Diagram](diagrams/37_Bulkhead_Notes-01.png)
 <!-- /diagram:37-0 -->
@@ -48,7 +48,7 @@ Examples: **rate limiter** (app = Order): the limit is 4 requests in 5 s; reques
 ## 2. Semaphore Bulkhead
 
 <!-- diagram:37-1 -->
-**Diagram – Semaphore bulkhead: maxConcurrentCalls = 2**
+**Semaphore bulkhead: maxConcurrentCalls = 2**
 
 ![Diagram](diagrams/37_Bulkhead_Notes-02.png)
 <!-- /diagram:37-1 -->
@@ -142,7 +142,7 @@ It limits the **number of concurrent calls using a counter** (a Semaphore lock).
 ## 3. Thread Pool Bulkhead
 
 <!-- diagram:37-2 -->
-**Diagram – Thread-pool bulkhead: 3 threads + queue of 2**
+**Thread-pool bulkhead: 3 threads + queue of 2**
 
 ![Diagram](diagrams/37_Bulkhead_Notes-03.png)
 <!-- /diagram:37-2 -->
@@ -211,11 +211,11 @@ A thread pool for `productService` is created with these settings.
 <!-- isw:37-2 -->
 **In simple words**
 
-Here you **assign a dedicated thread pool for each downstream service,** and **only that pool** is used to call the downstream. The method returns a `CompletableFuture`; the comments in the notes explain that the AOP proxy **submits the method to the bulkhead's thread pool** and returns a `CompletableFuture` to the caller, and that `CompletableFuture.completedFuture(...)` inside only wraps the result and does not itself run anything in a pool. The fallback must also handle the exception (else the client gets a 500 with `BulkheadFullException`).
+Here you **assign a dedicated thread pool for each downstream service,** and **only that pool** is used to call the downstream. The method returns a `CompletableFuture`; the comments explain that the AOP proxy **submits the method to the bulkhead's thread pool** and returns a `CompletableFuture` to the caller, and that `CompletableFuture.completedFuture(...)` inside only wraps the result and does not itself run anything in a pool. The fallback must also handle the exception (else the client gets a 500 with `BulkheadFullException`).
 
 The properties: **`coreThreadPoolSize=3`, `maxThreadPoolSize=3`, `queueCapacity=2`:** a maximum of 3 threads; **if all 3 are busy, a maximum of 2 more requests are put into the queue;** **from the 6th request onwards it starts rejecting.** In the test, invoking the API 6 times accepts the first 5 (3 running + 2 queued) and the 6th is rejected, so the fallback runs.
 
-The notes' comparison: the semaphore uses a **counter** on the **caller's thread** with normal return types and the `resilience4j.bulkhead` properties; the thread pool uses a **dedicated pool (+ queue)** per downstream with **`CompletableFuture<T>`** and the `resilience4j.thread-pool-bulkhead` properties. The semaphore **solves** "a downstream can only handle N concurrent requests"; the thread pool solves "a slow downstream hogging all our threads".
+Comparison: the semaphore uses a **counter** on the **caller's thread** with normal return types and the `resilience4j.bulkhead` properties; the thread pool uses a **dedicated pool (+ queue)** per downstream with **`CompletableFuture<T>`** and the `resilience4j.thread-pool-bulkhead` properties. The semaphore **solves** "a downstream can only handle N concurrent requests"; the thread pool solves "a slow downstream hogging all our threads".
 <!-- /isw:37-2 -->
 
 

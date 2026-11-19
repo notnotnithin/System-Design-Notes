@@ -28,7 +28,7 @@ Design the Snake and Ladder board game. Players take turns, roll a dice and move
 
 ## Step 2 – Class diagram
 
-**Diagram – Snake and Ladder**
+**Snake and Ladder**
 
 ![Diagram](diagrams/11_Snake_and_Ladder_Notes-01.png)
 

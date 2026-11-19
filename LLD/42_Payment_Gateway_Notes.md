@@ -16,12 +16,12 @@ Design a payment gateway like a simplified UPI or wallet system: users register 
 - A **processor** moves the money. Each transaction has a status (`SUCCESS`, `DENIED`, `PENDING`) and is stored in the user's history.
 - New instrument types must be easy to add.
 
-## From the Zoho note
+## Understanding the flow
 
 ### What is a payment gateway?
 A payment gateway **acts as a mediator between the user and the financial institution and helps to transfer money.**
 
-Two kinds are named: **peer to peer** and **peer to merchant** (peer to merchant adds things like **refund** and **multi-tenancy**). The page says **"let's focus on" peer to peer.**
+Two kinds: **peer to peer** and **peer to merchant** (peer to merchant adds things like **refund** and **multi-tenancy**). We **focus on** peer to peer.
 
 ### 1. Clarify the requirements / understand the flow
 From the **App**, the following should be possible:
@@ -46,7 +46,7 @@ From the **App**, the following should be possible:
 **In simple words:** first the two users and their banks are created. Then, to pay, the app looks up the receiver, lists the sender's instruments to pick the debit one, and calls `/makePayment`. The transaction service fetches both instruments, hands the work to the processor, notifies, and returns a transaction id.
 
 ### Follow-up question that can come
-**Payment processing can take up to 3-5 days.** Answer on the page: use an **async operation**:
+**Payment processing can take up to 3-5 days.** Answer: use an **async operation**:
 1. Invoke the **processor to validate**: (a) if U1 has sufficient money to fund this transaction, (b) if the U2 instrument is valid.
 2. Then **save the transaction in PENDING.**
    - Invoke the processing **in async** and complete the transaction while it is in PENDING state.
@@ -54,10 +54,10 @@ From the **App**, the following should be possible:
 
 ![Diagram](diagrams/42_Payment_Gateway_Notes-02.png)
 
-(The class diagram on the page lists the status enum as `SUCCESS, PENDING, DENIED`.)
+(The status enum has `SUCCESS, PENDING, DENIED`.)
 
-### 4. Class diagram (as drawn on the page)
-The page's class diagram has the same shape as the diagram in Step 2 below:
+### 4. Class diagram – overview
+This class diagram has the same shape as the one in Step 2 below:
 - `PaymentGateway` holds `UserController`, `InstrumentController`, `TxnController`.
 - `UserController → UserService (static List<User>) → User` (`userId, name, email`); `UserDO` is the data object (`id, firstName, mail`).
 - `TxnController → TxnService` (holds `InstrumentController`, `Map<UserID, List<Transaction>>`, `Processor`), methods `makePayment(transactionDO)` and `getTxnHistory(userId)`; `Processor.processPayment(Transaction)`.
@@ -65,8 +65,8 @@ The page's class diagram has the same shape as the diagram in Step 2 below:
 - `InstrumentController → InstrumentServiceFactory.getInstrumentService(InstrumentType) → InstrumentService` (abstract class, `static Map<UserID, List<Instrument>>`, `addInstrument`, `getInstrument`) with `BankService` and `CardService`.
 - `Instrument` (abstract: `instrumentID, userID, type`) with `BankInstrument (bankAccountNo, ifscCode)` and `CardInstrument (cardNumber, cvvNumber)`; `InstrumentType` enum = `BANK, CARD`.
 
-### 5. Code on the page
-The remaining pages of the Zoho note are screenshots of the code: `UserService` (keeps a static list of users and creates a user with a random id), `InstrumentServiceFactory` (returns `BankService` or `CardService` by `InstrumentType`), and the driver, which makes a payment of 10 from user 1's bank instrument to user 2's card instrument, then prints each user's instruments and transaction history. These match the code sections below.
+### 5. Code
+The code covers: `UserService` (keeps a static list of users and creates a user with a random id), `InstrumentServiceFactory` (returns `BankService` or `CardService` by `InstrumentType`), and the driver, which makes a payment of 10 from user 1's bank instrument to user 2's card instrument, then prints each user's instruments and transaction history. These match the code sections below.
 
 ## Step 1 – Objects
 The code follows a layered pattern: **Controller → Service → entity**, and uses a `*DO` (data object) class to pass data between layers.
@@ -80,7 +80,7 @@ The code follows a layered pattern: **Controller → Service → entity**, and u
 
 ## Step 2 – Class diagram
 
-**Diagram – Payment gateway**
+**Payment gateway**
 
 ![Diagram](diagrams/42_Payment_Gateway_Notes-03.png)
 

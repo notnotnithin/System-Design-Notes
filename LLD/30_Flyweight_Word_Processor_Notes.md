@@ -22,11 +22,11 @@ A word processor shows a million characters. If each `Character` object stores i
 - **Flyweight factory** – `LetterFactory.crateLetter(char)`: keeps a map of letters already created. If the letter exists it returns the same object; otherwise it creates and stores one.
 - The client keeps only positions and asks the factory for the shared letter.
 
-**Diagram – Word processor flyweights**
+**Word processor flyweights**
 
 ![Diagram](diagrams/30_Flyweight_Word_Processor_Notes-01.png)
 
-**Diagram – sharing letters**
+**sharing letters**
 
 ![Diagram](diagrams/30_Flyweight_Word_Processor_Notes-02.png)
 
@@ -52,7 +52,7 @@ public static int getTotalCharacters() {
 ## Second example: robotic game
 Many robots of the same type share one heavy `Sprites` object (the image data). Each robot stores only its position. `RoboticFactory.createRobot(type)` returns a cached `HumanoidRobot` or `RoboticDog`.
 
-**Diagram – Robot flyweights**
+**Robot flyweights**
 
 ![Diagram](diagrams/30_Flyweight_Word_Processor_Notes-03.png)
 
